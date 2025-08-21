@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRIS Quran Program</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="loginSection" class="login-container">
+        <div class="login-card">
+                                            <h2>MRIS Quran Program</h2>
+                                <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                            Enter your unique code to access the MRIS Quran program
+                        </p>
+        <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="userCode" placeholder="Enter your unique code" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="dashboard-container" style="display: none;">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="user-info">
+                <span id="userName">Student Name</span>
+                <span id="userClass">Class</span>
+                <span id="userTeacher">Teacher</span>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Row: Two Cards Side by Side -->
+            <div class="top-cards">
+                <!-- Next Session's Hifz Card -->
+                <div class="content-card hifz-card">
+                    <h3>Next Session's Hifz</h3>
+                    <div class="content-items" id="hifzContent">
+                        <!-- Content items will be added here -->
+                    </div>
+                    <button class="add-content-btn" id="addHifzBtn" style="display: none;">+</button>
+                </div>
+
+                <!-- Next Session's Revision Card -->
+                <div class="content-card revision-card">
+                    <h3>Next Session's Revision</h3>
+                    <div class="content-items" id="revisionContent">
+                        <!-- Content items will be added here -->
+                    </div>
+                    <button class="add-content-btn" id="addRevisionBtn" style="display: none;">+</button>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Large Past Sessions Card -->
+            <div class="past-sessions-card">
+                <h3>Past Sessions</h3>
+                <div class="sessions-list" id="sessionsList">
+                    <!-- Session items will be added here -->
+                </div>
+                <button class="add-content-btn" id="addSessionBtn" style="display: none;">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Hifz Modal -->
+    <div id="addHifzModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Add Hifz Content</h3>
+            <form id="addHifzForm">
+                <div class="form-group">
+                    <label>Surah Name:</label>
+                    <select id="hifzSurah" required>
+                        <option value="">Select Surah</option>
+                        <option value="Al Fatiha">Al Fatiha</option>
+                        <option value="Al Baqarah">Al Baqarah</option>
+                        <option value="Al Imran">Al Imran</option>
+                        <option value="An Nisa">An Nisa</option>
+                        <option value="Al Ma'idah">Al Ma'idah</option>
+                        <option value="Al An'am">Al An'am</option>
+                        <option value="Al A'raf">Al A'raf</option>
+                        <option value="Al Anfal">Al Anfal</option>
+                        <option value="At Tawbah">At Tawbah</option>
+                        <option value="Yunus">Yunus</option>
+                        <option value="Hud">Hud</option>
+                        <option value="Yusuf">Yusuf</option>
+                        <option value="Ar Ra'd">Ar Ra'd</option>
+                        <option value="Ibrahim">Ibrahim</option>
+                        <option value="Al Hijr">Al Hijr</option>
+                        <option value="An Nahl">An Nahl</option>
+                        <option value="Al Isra">Al Isra</option>
+                        <option value="Al Kahf">Al Kahf</option>
+                        <option value="Maryam">Maryam</option>
+                        <option value="Ta Ha">Ta Ha</option>
+                        <option value="Al Anbiya">Al Anbiya</option>
+                        <option value="Al Hajj">Al Hajj</option>
+                        <option value="Al Mu'minun">Al Mu'minun</option>
+                        <option value="An Nur">An Nur</option>
+                        <option value="Al Furqan">Al Furqan</option>
+                        <option value="Ash Shu'ara">Ash Shu'ara</option>
+                        <option value="An Naml">An Naml</option>
+                        <option value="Al Qasas">Al Qasas</option>
+                        <option value="Al 'Ankabut">Al 'Ankabut</option>
+                        <option value="Ar Rum">Ar Rum</option>
+                        <option value="Luqman">Luqman</option>
+                        <option value="As Sajdah">As Sajdah</option>
+                        <option value="Al Ahzab">Al Ahzab</option>
+                        <option value="Saba">Saba</option>
+                        <option value="Fatir">Fatir</option>
+                        <option value="Ya Sin">Ya Sin</option>
+                        <option value="As Saffat">As Saffat</option>
+                        <option value="Sad">Sad</option>
+                        <option value="Az Zumar">Az Zumar</option>
+                        <option value="Ghafir">Ghafir</option>
+                        <option value="Fussilat">Fussilat</option>
+                        <option value="Ash Shura">Ash Shura</option>
+                        <option value="Az Zukhruf">Az Zukhruf</option>
+                        <option value="Ad Dukhan">Ad Dukhan</option>
+                        <option value="Al Jathiyah">Al Jathiyah</option>
+                        <option value="Al Ahqaf">Al Ahqaf</option>
+                        <option value="Muhammad">Muhammad</option>
+                        <option value="Al Fath">Al Fath</option>
+                        <option value="Al Hujurat">Al Hujurat</option>
+                        <option value="Qaf">Qaf</option>
+                        <option value="Adh Dhariyat">Adh Dhariyat</option>
+                        <option value="At Tur">At Tur</option>
+                        <option value="An Najm">An Najm</option>
+                        <option value="Al Qamar">Al Qamar</option>
+                        <option value="Ar Rahman">Ar Rahman</option>
+                        <option value="Al Waqi'ah">Al Waqi'ah</option>
+                        <option value="Al Hadid">Al Hadid</option>
+                        <option value="Al Mujadilah">Al Mujadilah</option>
+                        <option value="Al Hashr">Al Hashr</option>
+                        <option value="Al Mumtahanah">Al Mumtahanah</option>
+                        <option value="As Saff">As Saff</option>
+                        <option value="Al Jumu'ah">Al Jumu'ah</option>
+                        <option value="Al Munafiqun">Al Munafiqun</option>
+                        <option value="At Taghabun">At Taghabun</option>
+                        <option value="At Talaq">At Talaq</option>
+                        <option value="At Tahrim">At Tahrim</option>
+                        <option value="Al Mulk">Al Mulk</option>
+                        <option value="Al Qalam">Al Qalam</option>
+                        <option value="Al Haqqah">Al Haqqah</option>
+                        <option value="Al Ma'arij">Al Ma'arij</option>
+                        <option value="Nuh">Nuh</option>
+                        <option value="Al Jinn">Al Jinn</option>
+                        <option value="Al Muzzammil">Al Muzzammil</option>
+                        <option value="Al Muddathir">Al Muddathir</option>
+                        <option value="Al Qiyamah">Al Qiyamah</option>
+                        <option value="Al Insan">Al Insan</option>
+                        <option value="Al Mursalat">Al Mursalat</option>
+                        <option value="An Naba">An Naba</option>
+                        <option value="An Nazi'at">An Nazi'at</option>
+                        <option value="Abasa">Abasa</option>
+                        <option value="At Takwir">At Takwir</option>
+                        <option value="Al Infitar">Al Infitar</option>
+                        <option value="Al Mutaffifin">Al Mutaffifin</option>
+                        <option value="Al Inshiqaq">Al Inshiqaq</option>
+                        <option value="Al Buruj">Al Buruj</option>
+                        <option value="At Tariq">At Tariq</option>
+                        <option value="Al A'la">Al A'la</option>
+                        <option value="Al Ghashiyah">Al Ghashiyah</option>
+                        <option value="Al Fajr">Al Fajr</option>
+                        <option value="Al Balad">Al Balad</option>
+                        <option value="Ash Shams">Ash Shams</option>
+                        <option value="Al Lail">Al Lail</option>
+                        <option value="Ad Duha">Ad Duha</option>
+                        <option value="Ash Sharh">Ash Sharh</option>
+                        <option value="At Tin">At Tin</option>
+                        <option value="Al 'Alaq">Al 'Alaq</option>
+                        <option value="Al Qadr">Al Qadr</option>
+                        <option value="Al Bayyinah">Al Bayyinah</option>
+                        <option value="Az Zalzalah">Az Zalzalah</option>
+                        <option value="Al 'Adiyat">Al 'Adiyat</option>
+                        <option value="Al Qari'ah">Al Qari'ah</option>
+                        <option value="At Takathur">At Takathur</option>
+                        <option value="Al 'Asr">Al 'Asr</option>
+                        <option value="Al Humazah">Al Humazah</option>
+                        <option value="Al Fil">Al Fil</option>
+                        <option value="Quraish">Quraish</option>
+                        <option value="Al Ma'un">Al Ma'un</option>
+                        <option value="Al Kawthar">Al Kawthar</option>
+                        <option value="Al Kafirun">Al Kafirun</option>
+                        <option value="An Nasr">An Nasr</option>
+                        <option value="Al Masad">Al Masad</option>
+                        <option value="Al Ikhlas">Al Ikhlas</option>
+                        <option value="Al Falaq">Al Falaq</option>
+                        <option value="An Nas">An Nas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ayah Range:</label>
+                    <input type="text" id="hifzAyahRange" placeholder="e.g., 1 - 25" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addHifzModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Revision Modal -->
+    <div id="addRevisionModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Add Revision Content</h3>
+            <form id="addRevisionForm">
+                <div class="form-group">
+                    <label>Surah Name:</label>
+                    <select id="revisionSurah" required>
+                        <option value="">Select Surah</option>
+                        <option value="Al Fatiha">Al Fatiha</option>
+                        <option value="Al Baqarah">Al Baqarah</option>
+                        <option value="Al Imran">Al Imran</option>
+                        <option value="An Nisa">An Nisa</option>
+                        <option value="Al Ma'idah">Al Ma'idah</option>
+                        <option value="Al An'am">Al An'am</option>
+                        <option value="Al A'raf">Al A'raf</option>
+                        <option value="Al Anfal">Al Anfal</option>
+                        <option value="At Tawbah">At Tawbah</option>
+                        <option value="Yunus">Yunus</option>
+                        <option value="Hud">Hud</option>
+                        <option value="Yusuf">Yusuf</option>
+                        <option value="Ar Ra'd">Ar Ra'd</option>
+                        <option value="Ibrahim">Ibrahim</option>
+                        <option value="Al Hijr">Al Hijr</option>
+                        <option value="An Nahl">An Nahl</option>
+                        <option value="Al Isra">Al Isra</option>
+                        <option value="Al Kahf">Al Kahf</option>
+                        <option value="Maryam">Maryam</option>
+                        <option value="Ta Ha">Ta Ha</option>
+                        <option value="Al Anbiya">Al Anbiya</option>
+                        <option value="Al Hajj">Al Hajj</option>
+                        <option value="Al Mu'minun">Al Mu'minun</option>
+                        <option value="An Nur">An Nur</option>
+                        <option value="Al Furqan">Al Furqan</option>
+                        <option value="Ash Shu'ara">Ash Shu'ara</option>
+                        <option value="An Naml">An Naml</option>
+                        <option value="Al Qasas">Al Qasas</option>
+                        <option value="Al 'Ankabut">Al 'Ankabut</option>
+                        <option value="Ar Rum">Ar Rum</option>
+                        <option value="Luqman">Luqman</option>
+                        <option value="As Sajdah">As Sajdah</option>
+                        <option value="Al Ahzab">Al Ahzab</option>
+                        <option value="Saba">Saba</option>
+                        <option value="Fatir">Fatir</option>
+                        <option value="Ya Sin">Ya Sin</option>
+                        <option value="As Saffat">As Saffat</option>
+                        <option value="Sad">Sad</option>
+                        <option value="Az Zumar">Az Zumar</option>
+                        <option value="Ghafir">Ghafir</option>
+                        <option value="Fussilat">Fussilat</option>
+                        <option value="Ash Shura">Ash Shura</option>
+                        <option value="Az Zukhruf">Az Zukhruf</option>
+                        <option value="Ad Dukhan">Ad Dukhan</option>
+                        <option value="Al Jathiyah">Al Jathiyah</option>
+                        <option value="Al Ahqaf">Al Ahqaf</option>
+                        <option value="Muhammad">Muhammad</option>
+                        <option value="Al Fath">Al Fath</option>
+                        <option value="Al Hujurat">Al Hujurat</option>
+                        <option value="Qaf">Qaf</option>
+                        <option value="Adh Dhariyat">Adh Dhariyat</option>
+                        <option value="At Tur">At Tur</option>
+                        <option value="An Najm">An Najm</option>
+                        <option value="Al Qamar">Al Qamar</option>
+                        <option value="Ar Rahman">Ar Rahman</option>
+                        <option value="Al Waqi'ah">Al Waqi'ah</option>
+                        <option value="Al Hadid">Al Hadid</option>
+                        <option value="Al Mujadilah">Al Mujadilah</option>
+                        <option value="Al Hashr">Al Hashr</option>
+                        <option value="Al Mumtahanah">Al Mumtahanah</option>
+                        <option value="As Saff">As Saff</option>
+                        <option value="Al Jumu'ah">Al Jumu'ah</option>
+                        <option value="Al Munafiqun">Al Munafiqun</option>
+                        <option value="At Taghabun">At Taghabun</option>
+                        <option value="At Talaq">At Talaq</option>
+                        <option value="At Tahrim">At Tahrim</option>
+                        <option value="Al Mulk">Al Mulk</option>
+                        <option value="Al Qalam">Al Qalam</option>
+                        <option value="Al Haqqah">Al Haqqah</option>
+                        <option value="Al Ma'arij">Al Ma'arij</option>
+                        <option value="Nuh">Nuh</option>
+                        <option value="Al Jinn">Al Jinn</option>
+                        <option value="Al Muzzammil">Al Muzzammil</option>
+                        <option value="Al Muddathir">Al Muddathir</option>
+                        <option value="Al Qiyamah">Al Qiyamah</option>
+                        <option value="Al Insan">Al Insan</option>
+                        <option value="Al Mursalat">Al Mursalat</option>
+                        <option value="An Naba">An Naba</option>
+                        <option value="An Nazi'at">An Nazi'at</option>
+                        <option value="Abasa">Abasa</option>
+                        <option value="At Takwir">At Takwir</option>
+                        <option value="Al Infitar">Al Infitar</option>
+                        <option value="Al Mutaffifin">Al Mutaffifin</option>
+                        <option value="Al Inshiqaq">Al Inshiqaq</option>
+                        <option value="Al Buruj">Al Buruj</option>
+                        <option value="At Tariq">At Tariq</option>
+                        <option value="Al A'la">Al A'la</option>
+                        <option value="Al Ghashiyah">Al Ghashiyah</option>
+                        <option value="Al Fajr">Al Fajr</option>
+                        <option value="Al Balad">Al Balad</option>
+                        <option value="Ash Shams">Ash Shams</option>
+                        <option value="Al Lail">Al Lail</option>
+                        <option value="Ad Duha">Ad Duha</option>
+                        <option value="Ash Sharh">Ash Sharh</option>
+                        <option value="At Tin">At Tin</option>
+                        <option value="Al 'Alaq">Al 'Alaq</option>
+                        <option value="Al Qadr">Al Qadr</option>
+                        <option value="Al Bayyinah">Al Bayyinah</option>
+                        <option value="Az Zalzalah">Az Zalzalah</option>
+                        <option value="Al 'Adiyat">Al 'Adiyat</option>
+                        <option value="Al Qari'ah">Al Qari'ah</option>
+                        <option value="At Takathur">At Takathur</option>
+                        <option value="Al 'Asr">Al 'Asr</option>
+                        <option value="Al Humazah">Al Humazah</option>
+                        <option value="Al Fil">Al Fil</option>
+                        <option value="Quraish">Quraish</option>
+                        <option value="Al Ma'un">Al Ma'un</option>
+                        <option value="Al Kawthar">Al Kawthar</option>
+                        <option value="Al Kafirun">Al Kafirun</option>
+                        <option value="An Nasr">An Nasr</option>
+                        <option value="Al Masad">Al Masad</option>
+                        <option value="Al Ikhlas">Al Ikhlas</option>
+                        <option value="Al Falaq">Al Falaq</option>
+                        <option value="An Nas">An Nas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ayah Range:</label>
+                    <input type="text" id="revisionAyahRange" placeholder="e.g., 1 - 25" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addRevisionModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Session Modal -->
+    <div id="addSessionModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Add Session</h3>
+            <form id="addSessionForm">
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="sessionDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Hifz Surah(s) & Ayah Numbers:</label>
+                    <input type="text" id="sessionHifz" placeholder="e.g., Al Naba 1-25, Al Mursalat 1-15" required>
+                </div>
+                <div class="form-group">
+                    <label>Revision Surah(s) & Ayah Numbers:</label>
+                    <input type="text" id="sessionRevision" placeholder="e.g., Al Naba 1-25" required>
+                </div>
+                <div class="form-group">
+                    <label>Grade:</label>
+                    <select id="sessionGrade" required>
+                        <option value="">Select Grade</option>
+                        <option value="10">10</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addSessionModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Selection Modal (for teachers) -->
+    <div id="studentSelectionModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Select Student</h3>
+            <div class="students-list" id="studentsList">
+                <!-- Students will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Account Modal (for admin) -->
+    <div id="createAccountModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('createAccountModal')">&times;</span>
+            <h3>Create New Account</h3>
+            <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
+                <div class="form-group">
+                    <label for="accountType">Account Type</label>
+                    <select id="accountType" required>
+                        <option value="">Select Account Type</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="className">Class</label>
+                    <select id="className" required>
+                        <option value="">Select Class</option>
+                        <option value="9AM1">9AM1</option>
+                        <option value="9AM2">9AM2</option>
+                        <option value="9AM3">9AM3</option>
+                        <option value="9AM4">9AM4</option>
+                        <option value="9AM5">9AM5</option>
+                        <option value="9BR1">9BR1</option>
+                        <option value="9BR2">9BR2</option>
+                        <option value="9BR3">9BR3</option>
+                        <option value="9BR4">9BR4</option>
+                    </select>
+                </div>
+                <div class="form-group" id="teacherNameGroup" style="display: none;">
+                    <label for="teacherName">Teacher Name (Optional)</label>
+                    <select id="teacherName">
+                        <option value="">Leave unassigned</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createAccountModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+                    <!-- Assign Students Modal (for admin) -->
+                <div id="assignStudentsModal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeModal('assignStudentsModal')">&times;</span>
+                        <h3>Assign Students to Teachers</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 25px;">
+                            Select a teacher and then choose an unassigned student to create an assignment.
+                        </p>
+                        <div class="assignment-section">
+                            <div class="form-group">
+                                <label for="assignTeacher">Select Teacher:</label>
+                                <select id="assignTeacher" onchange="loadUnassignedStudents()">
+                                    <option value="">Choose a teacher...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignStudent">Select Student:</label>
+                                <select id="assignStudent">
+                                    <option value="">Choose a teacher first...</option>
+                                </select>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-primary" onclick="assignStudentToTeacher()">Assign Student</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('assignStudentsModal')">Cancel</button>
+                            </div>
+                        </div>
+                        <div class="current-assignments">
+                            <h4>Current Assignments</h4>
+                            <div id="currentAssignmentsList">
+                                <!-- Current assignments will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Confirmation Modal -->
+                <div id="logoutConfirmModal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeModal('logoutConfirmModal')">&times;</span>
+                        <h3>Confirm Logout</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                            Are you sure you want to log out?<br>
+                            <span style="color: var(--warning-color); font-weight: bold;">This will end your current session.</span>
+                        </p>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-danger" onclick="confirmLogout()">Yes, Logout</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmModal')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSOZYCUMqO9KEr9a93GaanxuIelJIIIGM",
+            authDomain: "quran-tracker-6a536.firebaseapp.com",
+            projectId: "quran-tracker-6a536",
+            storageBucket: "quran-tracker-6a536.firebasestorage.app",
+            messagingSenderId: "988749694504",
+            appId: "1:988749694504:web:91af1972179d797409171d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.db = db;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
