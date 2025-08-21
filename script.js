@@ -743,7 +743,7 @@ function handleAddSession(event) {
 // Handle logout
 function handleLogout() {
     // Show custom confirmation modal
-    showModal('logoutConfirmModal');
+    showModal('logoutConfirmationModal');
 }
 
 // Confirm logout after user confirms
