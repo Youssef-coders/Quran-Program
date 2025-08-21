@@ -465,6 +465,34 @@ body {
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
 }
 
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+    .add-content-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 32px;
+        bottom: 20px;
+        right: 20px;
+        /* Better touch target size */
+        min-height: 44px; /* iOS recommended minimum */
+        min-width: 44px;
+    }
+    
+    .add-content-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Prevent text selection on mobile */
+    .add-content-btn {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
 /* Ensure teacher buttons are always visible */
 .teacher-mode .add-content-btn {
     display: block !important;

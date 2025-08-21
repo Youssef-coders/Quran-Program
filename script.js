@@ -66,34 +66,62 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
     // Logout button
     logoutBtn.addEventListener('click', handleLogout);
     
-    // Add content buttons
+    // Add content buttons with mobile touch support
     if (addHifzBtn) {
+        // Desktop click event
         addHifzBtn.addEventListener('click', () => {
             console.log('Add Hifz button clicked!');
             console.log('Modal element:', document.getElementById('addHifzModal'));
             showModal('addHifzModal');
         });
-        console.log('Add Hifz button event listener added');
+        
+        // Mobile touch event
+        addHifzBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Hifz button touched!');
+            console.log('Modal element:', document.getElementById('addHifzModal'));
+            showModal('addHifzModal');
+        });
+        
+        console.log('Add Hifz button event listeners added (click + touch)');
     } else {
         console.error('Add Hifz button not found!');
     }
     
     if (addRevisionBtn) {
+        // Desktop click event
         addRevisionBtn.addEventListener('click', () => {
             console.log('Add Revision button clicked!');
             showModal('addRevisionModal');
         });
-        console.log('Add Revision button event listener added');
+        
+        // Mobile touch event
+        addRevisionBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Revision button touched!');
+            showModal('addRevisionModal');
+        });
+        
+        console.log('Add Revision button event listeners added (click + touch)');
     } else {
         console.error('Add Revision button not found!');
     }
     
     if (addSessionBtn) {
+        // Desktop click event
         addSessionBtn.addEventListener('click', () => {
             console.log('Add Session button clicked!');
             showModal('addSessionModal');
         });
-        console.log('Add Session button event listener added');
+        
+        // Mobile touch event
+        addSessionBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Session button touched!');
+            showModal('addSessionModal');
+        });
+        
+        console.log('Add Session button event listeners added (click + touch)');
     } else {
         console.error('Add Session button not found!');
     }
