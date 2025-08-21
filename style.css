@@ -1196,6 +1196,25 @@ body {
     text-align: center;
 }
 
+.admin-section h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.admin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.admin-actions:last-child {
+    grid-template-columns: 1fr;
+    justify-items: center;
+}
+
 /* Assignment Modal Styles */
 .assignment-section {
     border-bottom: 2px solid var(--border-color);
@@ -1439,11 +1458,31 @@ body {
         padding: 5px;
     }
     
-    .modal-content {
-        margin: 5% auto;
-        padding: 30px 25px;
-        width: 95%;
+    /* Admin Dashboard Mobile */
+    .admin-actions {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
+    
+    .admin-dashboard {
+        padding: 20px;
+    }
+    
+    .admin-btn {
+        min-height: 100px;
+        padding: 20px;
+        font-size: 16px;
+    }
+    
+    .admin-btn .icon {
+        font-size: 32px;
+    }
+}
+
+.modal-content {
+    margin: 5% auto;
+    padding: 30px 25px;
+    width: 95%;
 }
 
 @media (max-width: 480px) {
