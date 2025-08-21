@@ -1159,6 +1159,13 @@ function showAdminDashboard() {
                     <span class="icon">👤🗑️</span>
                     Delete Individual Student
                 </button>
+                <button class="admin-btn" onclick="showDeleteTeacherModal()" style="background: #fff3e0; border-color: #ff9800; color: #e65100;">
+                    <span class="icon">👨‍🏫🗑️</span>
+                    Delete Individual Teacher
+                </button>
+            </div>
+            
+            <div class="admin-actions" style="margin-top: 20px;">
                 <button class="admin-btn" onclick="deleteAllTeachers()" style="background: #ffebee; border-color: #f44336; color: #d32f2f;">
                     <span class="icon">🗑️</span>
                     Delete All Teachers
@@ -1168,12 +1175,14 @@ function showAdminDashboard() {
                     Delete All Students
                 </button>
             </div>
-
-            <div style="margin-top: 30px;">
+            
+            <div class="admin-actions" style="margin-top: 20px; text-align: center;">
                 <button class="btn btn-secondary" onclick="logout()">
                     ← Back to Login
                 </button>
             </div>
+
+
         </div>
     `;
     
@@ -1309,6 +1318,127 @@ function confirmDeleteStudent() {
         showAdminDashboard();
         
         showNotification(`Student ${student.name} deleted successfully!`, 'success');
+    });
+}
+
+// Show delete teacher modal
+function showDeleteTeacherModal() {
+    const modal = document.getElementById('deleteTeacherModal');
+    modal.style.display = 'block';
+    
+    // Populate teacher dropdown
+    populateDeleteTeacherDropdown();
+    
+    // Reset preview
+    document.getElementById('teacherPreview').style.display = 'none';
+    document.getElementById('confirmDeleteTeacherBtn').disabled = true;
+}
+
+// Populate delete teacher dropdown
+function populateDeleteTeacherDropdown() {
+    const teacherSelect = document.getElementById('deleteTeacherSelect');
+    teacherSelect.innerHTML = '<option value="">Choose a teacher...</option>';
+    
+    Object.keys(sampleData.teachers).forEach(teacherId => {
+        const teacher = sampleData.teachers[teacherId];
+        const option = document.createElement('option');
+        option.value = teacherId;
+        option.textContent = `${teacher.name} (${teacherId})`;
+        teacherSelect.appendChild(option);
+    });
+    
+    // Add change event listener
+    teacherSelect.onchange = function() {
+        const selectedTeacherId = this.value;
+        if (selectedTeacherId) {
+            showTeacherPreview(selectedTeacherId);
+        } else {
+            document.getElementById('teacherPreview').style.display = 'none';
+            document.getElementById('confirmDeleteTeacherBtn').disabled = true;
+        }
+    };
+}
+
+// Show teacher preview before deletion
+function showTeacherPreview(teacherId) {
+    const teacher = sampleData.teachers[teacherId];
+    const students = teacher.students || [];
+    
+    // Update preview fields
+    document.getElementById('previewTeacherName').textContent = teacher.name;
+    document.getElementById('previewTeacherStudents').textContent = 
+        students.length === 0 ? 'No students assigned' : 
+        students.length === 1 ? '1 student assigned' : 
+        `${students.length} students assigned`;
+    
+    // Calculate impact
+    let impact = 'No impact on students';
+    if (students.length > 0) {
+        const studentNames = students.map(id => sampleData.students[id]?.name || 'Unknown').join(', ');
+        impact = `Will affect: ${studentNames}`;
+    }
+    document.getElementById('previewTeacherImpact').textContent = impact;
+    
+    // Show preview and enable delete button
+    document.getElementById('teacherPreview').style.display = 'block';
+    document.getElementById('confirmDeleteTeacherBtn').disabled = false;
+}
+
+// Confirm delete teacher
+function confirmDeleteTeacher() {
+    const teacherId = document.getElementById('deleteTeacherSelect').value;
+    if (!teacherId) return;
+    
+    const teacher = sampleData.teachers[teacherId];
+    const students = teacher.students || [];
+    
+    // Show confirmation modal
+    const confirmContent = `
+        <div class="delete-confirmation-container">
+            <div class="warning-icon">⚠️</div>
+            <h4>Delete Teacher</h4>
+            <p class="warning-message">
+                This action will <strong>permanently delete</strong> the teacher account!
+            </p>
+            <div class="consequences">
+                <h5>What will happen:</h5>
+                <ul>
+                    <li>Teacher account will be completely removed</li>
+                    <li>${students.length === 0 ? 'No students will be affected' : 
+                        students.length === 1 ? '1 student will become unassigned' : 
+                        `${students.length} students will become unassigned`}</li>
+                    <li>All teacher-student relationships will be lost</li>
+                    <li>This action <strong>cannot be undone</strong></li>
+                </ul>
+            </div>
+            <p class="final-warning">
+                <strong>Are you sure you want to delete ${teacher.name}?</strong>
+            </p>
+        </div>
+    `;
+    
+    showConfirmationModal('Delete Teacher', confirmContent, () => {
+        // Remove teacher from data
+        delete sampleData.teachers[teacherId];
+        
+        // Update all students assigned to this teacher
+        students.forEach(studentId => {
+            if (sampleData.students[studentId]) {
+                sampleData.students[studentId].teacher = 'Unassigned';
+            }
+        });
+        
+        // Save changes
+        saveAllDataToStorage();
+        
+        // Close modals
+        closeModal('deleteTeacherModal');
+        closeModal('confirmationModal');
+        
+        // Refresh admin dashboard
+        showAdminDashboard();
+        
+        showNotification(`Teacher ${teacher.name} deleted successfully!`, 'success');
     });
 }
 

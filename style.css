@@ -1035,6 +1035,41 @@ body {
     display: inline-block;
 }
 
+/* Delete Teacher Modal Styles */
+.delete-teacher-content {
+    margin: 20px 0;
+}
+
+.teacher-preview {
+    background: rgba(76, 175, 80, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid var(--accent-color);
+}
+
+.teacher-preview h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.teacher-details p {
+    margin: 8px 0;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.teacher-details p:last-child {
+    border-bottom: none;
+}
+
+.teacher-details strong {
+    color: var(--text-color);
+    min-width: 120px;
+    display: inline-block;
+}
+
 /* Delete Confirmation Styles */
 .delete-confirmation-container {
     text-align: center;
