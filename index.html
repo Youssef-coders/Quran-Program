@@ -486,10 +486,42 @@
                     </div>
                 </div>
 
-                <!-- Logout Confirmation Modal -->
-                <div id="logoutConfirmModal" class="modal">
+                <!-- Delete Student Modal -->
+                <div id="deleteStudentModal" class="modal">
                     <div class="modal-content">
-                        <span class="modal-close" onclick="closeModal('logoutConfirmModal')">&times;</span>
+                        <span class="modal-close" onclick="closeModal('deleteStudentModal')">&times;</span>
+                        <h3>Delete Student</h3>
+                        <div class="delete-student-content">
+                            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                                Select a student to delete from the system.
+                            </p>
+                            <div class="form-group">
+                                <label for="deleteStudentSelect">Select Student:</label>
+                                <select id="deleteStudentSelect">
+                                    <option value="">Choose a student...</option>
+                                </select>
+                            </div>
+                            <div class="student-preview" id="studentPreview" style="display: none;">
+                                <h4>Student Information</h4>
+                                <div class="student-details">
+                                    <p><strong>Name:</strong> <span id="previewStudentName"></span></p>
+                                    <p><strong>Class:</strong> <span id="previewStudentClass"></span></p>
+                                    <p><strong>Teacher:</strong> <span id="previewStudentTeacher"></span></p>
+                                    <p><strong>Content Items:</strong> <span id="previewStudentContent"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent()" id="confirmDeleteBtn" disabled>Delete Student</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteStudentModal')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout Confirmation Modal -->
+                <div id="logoutConfirmationModal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeModal('logoutConfirmationModal')">&times;</span>
                         <h3>Confirm Logout</h3>
                         <p style="text-align: center; color: #666; margin-bottom: 30px;">
                             Are you sure you want to log out?<br>
@@ -497,7 +529,7 @@
                         </p>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-danger" onclick="confirmLogout()">Yes, Logout</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmModal')">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmationModal')">Cancel</button>
                         </div>
                     </div>
                 </div>

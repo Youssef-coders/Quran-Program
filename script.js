@@ -1155,6 +1155,10 @@ function showAdminDashboard() {
             </div>
             
             <div class="admin-actions" style="margin-top: 20px;">
+                <button class="admin-btn" onclick="showDeleteStudentModal()" style="background: #fff3e0; border-color: #ff9800; color: #e65100;">
+                    <span class="icon">👤🗑️</span>
+                    Delete Individual Student
+                </button>
                 <button class="admin-btn" onclick="deleteAllTeachers()" style="background: #ffebee; border-color: #f44336; color: #d32f2f;">
                     <span class="icon">🗑️</span>
                     Delete All Teachers
@@ -1194,6 +1198,118 @@ function showAssignStudentsModal() {
     
     // Load current assignments
     loadCurrentAssignments();
+}
+
+// Show delete student modal
+function showDeleteStudentModal() {
+    const modal = document.getElementById('deleteStudentModal');
+    modal.style.display = 'block';
+    
+    // Populate student dropdown
+    populateDeleteStudentDropdown();
+    
+    // Reset preview
+    document.getElementById('studentPreview').style.display = 'none';
+    document.getElementById('confirmDeleteBtn').disabled = true;
+}
+
+// Populate delete student dropdown
+function populateDeleteStudentDropdown() {
+    const studentSelect = document.getElementById('deleteStudentSelect');
+    studentSelect.innerHTML = '<option value="">Choose a student...</option>';
+    
+    Object.keys(sampleData.students).forEach(studentId => {
+        const student = sampleData.students[studentId];
+        const option = document.createElement('option');
+        option.value = studentId;
+        option.textContent = `${student.name} (${studentId}) - ${student.class}`;
+        studentSelect.appendChild(option);
+    });
+    
+    // Add change event listener
+    studentSelect.onchange = function() {
+        const selectedStudentId = this.value;
+        if (selectedStudentId) {
+            showStudentPreview(selectedStudentId);
+        } else {
+            document.getElementById('studentPreview').style.display = 'none';
+            document.getElementById('confirmDeleteBtn').disabled = true;
+        }
+    };
+}
+
+// Show student preview before deletion
+function showStudentPreview(studentId) {
+    const student = sampleData.students[studentId];
+    const content = sampleData.content[studentId] || { hifz: [], revision: [], sessions: [] };
+    
+    // Update preview fields
+    document.getElementById('previewStudentName').textContent = student.name;
+    document.getElementById('previewStudentClass').textContent = student.class;
+    document.getElementById('previewStudentTeacher').textContent = student.teacher || 'Unassigned';
+    document.getElementById('previewStudentContent').textContent = 
+        `${content.hifz.length} hifz + ${content.revision.length} revision + ${content.sessions.length} sessions`;
+    
+    // Show preview and enable delete button
+    document.getElementById('studentPreview').style.display = 'block';
+    document.getElementById('confirmDeleteBtn').disabled = false;
+}
+
+// Confirm delete student
+function confirmDeleteStudent() {
+    const studentId = document.getElementById('deleteStudentSelect').value;
+    if (!studentId) return;
+    
+    const student = sampleData.students[studentId];
+    
+    // Show confirmation modal
+    const confirmContent = `
+        <div class="delete-confirmation-container">
+            <div class="warning-icon">⚠️</div>
+            <h4>Delete Student</h4>
+            <p class="warning-message">
+                This action will <strong>permanently delete</strong> the student account!
+            </p>
+            <div class="consequences">
+                <h5>What will happen:</h5>
+                <ul>
+                    <li>Student account will be completely removed</li>
+                    <li>All student content (hifz, revision, sessions) will be lost</li>
+                    <li>Student will be removed from teacher assignments</li>
+                    <li>This action <strong>cannot be undone</strong></li>
+                </ul>
+            </div>
+            <p class="final-warning">
+                <strong>Are you sure you want to delete ${student.name}?</strong>
+            </p>
+        </div>
+    `;
+    
+    showConfirmationModal('Delete Student', confirmContent, () => {
+        // Remove student from data
+        delete sampleData.students[studentId];
+        delete sampleData.content[studentId];
+        
+        // Remove from teacher assignments
+        Object.keys(sampleData.teachers).forEach(teacherId => {
+            const teacher = sampleData.teachers[teacherId];
+            if (teacher.students) {
+                teacher.students = teacher.students.filter(id => id !== studentId);
+            }
+        });
+        
+        // Save changes
+        saveAllDataToStorage();
+        
+        // Close modals
+        closeModal('deleteStudentModal');
+        closeModal('confirmationModal');
+        
+        // Refresh admin dashboard
+        showAdminDashboard();
+        
+        showNotification(`Student ${student.name} deleted successfully!`, 'success');
+    });
 }
 
 // Handle create account
