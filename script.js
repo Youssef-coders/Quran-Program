@@ -1110,14 +1110,7 @@ function showAdminDashboard() {
     adminContent.innerHTML = `
         <div class="admin-section">
             <h2>System Administration</h2>
-            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 10px; border-left: 4px solid #ff9800;">
-                <h4 style="margin: 0 0 10px 0; color: #f57c00;">⚠️ Multi-Device Sync Required</h4>
-                <p style="margin: 0; font-size: 14px; color: #666;">
-                    <strong>Current Limitation:</strong> Data is only stored locally in each browser.<br>
-                    <strong>Solution:</strong> A server with database is needed to sync data across all devices.<br>
-                    <strong>Contact:</strong> Speak with your developer about implementing server-side storage.
-                </p>
-            </div>
+            
             <div class="admin-actions">
                 <button class="admin-btn" onclick="showCreateAccountModal()">
                     <span class="icon">👤</span>
@@ -1132,6 +1125,7 @@ function showAdminDashboard() {
                     System Statistics
                 </button>
             </div>
+            
             <div class="admin-actions" style="margin-top: 20px;">
                 <button class="admin-btn" onclick="deleteAllTeachers()" style="background: #ffebee; border-color: #f44336; color: #d32f2f;">
                     <span class="icon">🗑️</span>
@@ -1147,17 +1141,6 @@ function showAdminDashboard() {
                 <button class="btn btn-secondary" onclick="logout()">
                     ← Back to Login
                 </button>
-            </div>
-            <div style="margin-top: 20px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 10px; border-left: 4px solid #4caf50;">
-                <h4 style="margin: 0 0 10px 0; color: #2e7d32;">💾 Data Persistence</h4>
-                <p style="margin: 0; font-size: 14px; color: #666;">
-                    <strong>Current:</strong> Data is stored locally in your browser.<br>
-                    <strong>Multi-Device:</strong> To sync data across devices, a server setup is required.<br>
-                    <strong>Local Storage:</strong> All changes are automatically saved to your browser's local storage.
-                </p>
-                <p style="margin: 10px 0 0 0; font-size: 12px; color: #999;">
-                    <strong>Last Saved:</strong> ${sampleData.lastSaved ? new Date(sampleData.lastSaved).toLocaleString() : 'Never'}
-                </p>
             </div>
         </div>
     `;
