@@ -1216,9 +1216,23 @@ function handleCreateAccount(event) {
     if (accountType === 'student') {
         const firstLetter = firstName.charAt(0).toUpperCase();
         const lastLetter = lastName.charAt(0).toUpperCase();
-        const grade = className.charAt(0);
-        const section = className.includes('AM') ? 'CF' : 'HK';
-        const classNum = className.slice(-1);
+        
+        // Extract grade and section from className
+        let grade, section, classNum;
+        
+        if (className.includes('AM') || className.includes('BR')) {
+            // Format: 9AM1, 10BR2, etc.
+            grade = className.match(/^(\d+)/)[1];
+            section = className.includes('AM') ? 'CF' : 'HK';
+            classNum = className.match(/(\d+)$/)[1];
+        } else {
+            // Format: 7-1, 8-3, etc.
+            const parts = className.split('-');
+            grade = parts[0];
+            classNum = parts[1];
+            section = 'CF'; // Default section for grades 7-8
+        }
+        
         newId = `S${firstLetter}${lastLetter}${grade}${section}${classNum}`;
         
         // Add student
@@ -1255,9 +1269,23 @@ function handleCreateAccount(event) {
     } else if (accountType === 'teacher') {
         const firstLetter = firstName.charAt(0).toUpperCase();
         const lastLetter = lastName.charAt(0).toUpperCase();
-        const grade = className.charAt(0);
-        const section = className.includes('AM') ? 'CF' : 'HK';
-        const classNum = className.slice(-1);
+        
+        // Extract grade and section from className
+        let grade, section, classNum;
+        
+        if (className.includes('AM') || className.includes('BR')) {
+            // Format: 9AM1, 10BR2, etc.
+            grade = className.match(/^(\d+)/)[1];
+            section = className.includes('AM') ? 'CF' : 'HK';
+            classNum = className.match(/(\d+)$/)[1];
+        } else {
+            // Format: 7-1, 8-3, etc.
+            const parts = className.split('-');
+            grade = parts[0];
+            classNum = parts[1];
+            section = 'CF'; // Default section for grades 7-8
+        }
+        
         newId = `T${firstLetter}${lastLetter}${grade}${section}${classNum}`;
         
         // Add teacher
@@ -1316,6 +1344,40 @@ function handleCreateAccount(event) {
     
     // Refresh admin dashboard
     showAdminDashboard();
+}
+
+// Update class options based on selected grade
+function updateClassOptions() {
+    const gradeSelect = document.getElementById('grade');
+    const classSelect = document.getElementById('className');
+    const selectedGrade = gradeSelect.value;
+    
+    // Clear current options
+    classSelect.innerHTML = '<option value="">Select Class</option>';
+    
+    if (!selectedGrade) {
+        classSelect.innerHTML = '<option value="">Select Grade First</option>';
+        return;
+    }
+    
+    // Define class options for each grade
+    const gradeClasses = {
+        '7': ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8'],
+        '8': ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9'],
+        '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4'],
+        '10': ['10AM1', '10AM2', '10AM3', '10AM4', '10AM5', '10BR1', '10BR2', '10BR3']
+    };
+    
+    // Add class options for selected grade
+    const classes = gradeClasses[selectedGrade] || [];
+    classes.forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        classSelect.appendChild(option);
+    });
+    
+    console.log(`Updated class options for Grade ${selectedGrade}:`, classes);
 }
 
 // Populate teacher dropdown
@@ -1632,4 +1694,5 @@ window.showSystemStats = showSystemStats;
 window.logout = handleLogout;
 window.skipToDashboard = skipToDashboard;
 window.confirmLogout = confirmLogout;
+window.updateClassOptions = updateClassOptions;
 
