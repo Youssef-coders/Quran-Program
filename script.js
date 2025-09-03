@@ -42,6 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Add buttons found:', { addHifzBtn: window.addHifzBtn, addRevisionBtn: window.addRevisionBtn, addSessionBtn: window.addSessionBtn });
     
+    // Verify buttons exist before setting up event listeners
+    if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
+        console.error('One or more add buttons not found in DOM!');
+        console.error('addHifzBtn:', window.addHifzBtn);
+        console.error('addRevisionBtn:', window.addRevisionBtn);
+        console.error('addSessionBtn:', window.addSessionBtn);
+    }
+    
     // Load data first, then check for existing session
     loadDataFromStorage().then(() => {
         console.log('Data loaded, now checking for existing session');
@@ -525,9 +533,9 @@ function selectStudent(studentCode) {
     showTeacherControls();
     
     // Force display of add buttons
-    addHifzBtn.style.display = 'block';
-    addRevisionBtn.style.display = 'block';
-    addSessionBtn.style.display = 'block';
+    if (window.addHifzBtn) window.addHifzBtn.style.display = 'block';
+    if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'block';
+    if (window.addSessionBtn) window.addSessionBtn.style.display = 'block';
 }
 
 // Show teacher controls
@@ -535,27 +543,46 @@ function showTeacherControls() {
     console.log('showTeacherControls called - currentUserType:', currentUserType);
     console.log('editingStudent:', editingStudent);
     
+    // Check if buttons exist before trying to show them
+    if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
+        console.error('Add buttons not found when trying to show teacher controls!');
+        // Try to re-find the buttons
+        window.addHifzBtn = document.getElementById('addHifzBtn');
+        window.addRevisionBtn = document.getElementById('addRevisionBtn');
+        window.addSessionBtn = document.getElementById('addSessionBtn');
+        
+        if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
+            console.error('Still cannot find add buttons after retry!');
+            return;
+        }
+    }
+    
     // Force display of add buttons for teachers
-    addHifzBtn.style.display = 'block !important';
-    addRevisionBtn.style.display = 'block !important';
-    addSessionBtn.style.display = 'block !important';
+    window.addHifzBtn.style.setProperty('display', 'block', 'important');
+    window.addRevisionBtn.style.setProperty('display', 'block', 'important');
+    window.addSessionBtn.style.setProperty('display', 'block', 'important');
     
-    // Also set the style directly to ensure it works
-    addHifzBtn.style.setProperty('display', 'block', 'important');
-    addRevisionBtn.style.setProperty('display', 'block', 'important');
-    addSessionBtn.style.setProperty('display', 'block', 'important');
+    // Also remove any inline style that might be hiding them
+    window.addHifzBtn.removeAttribute('style');
+    window.addRevisionBtn.removeAttribute('style');
+    window.addSessionBtn.removeAttribute('style');
     
-    console.log('Add buttons display set to block with !important');
-    console.log('addHifzBtn display:', addHifzBtn.style.display);
-    console.log('addRevisionBtn display:', addRevisionBtn.style.display);
-    console.log('addSessionBtn display:', addSessionBtn.style.display);
+    // Set display again after removing inline styles
+    window.addHifzBtn.style.display = 'block';
+    window.addRevisionBtn.style.display = 'block';
+    window.addSessionBtn.style.display = 'block';
+    
+    console.log('Add buttons display set to block');
+    console.log('addHifzBtn display:', window.addHifzBtn.style.display);
+    console.log('addRevisionBtn display:', window.addRevisionBtn.style.display);
+    console.log('addSessionBtn display:', window.addSessionBtn.style.display);
 }
 
 // Hide teacher controls
 function hideTeacherControls() {
-    addHifzBtn.style.display = 'none';
-    addRevisionBtn.style.display = 'none';
-    addSessionBtn.style.display = 'none';
+    if (window.addHifzBtn) window.addHifzBtn.style.display = 'none';
+    if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'none';
+    if (window.addSessionBtn) window.addSessionBtn.style.display = 'none';
 }
 
 
