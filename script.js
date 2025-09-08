@@ -10,11 +10,262 @@ const sampleData = {
     content: {}
 };
 
+// Language translations
+const translations = {
+    en: {
+        // Login
+        'login.title': 'MRIS Quran Program',
+        'login.subtitle': 'Enter your unique code to access the MRIS Quran program',
+        'login.placeholder': 'Enter your unique code',
+        'login.button': 'Login',
+        'login.invalid': 'Invalid user code. Please try again.',
+        
+        // Header
+        'header.logout': 'Logout',
+        'header.administrator': 'Administrator',
+        'header.teacher': 'Teacher',
+        'header.dashboard_mode': 'Dashboard Mode',
+        'header.editing_student': 'Editing Student',
+        
+        // Content
+        'content.next_hifz': 'Next Session\'s Hifz',
+        'content.next_revision': 'Next Session\'s Revision',
+        'content.past_sessions': 'Past Sessions',
+        'content.no_content': 'No content assigned',
+        'content.no_sessions': 'No sessions recorded',
+        'content.select_student': 'Select a student to edit their content',
+        
+        // Modals
+        'modal.add_hifz': 'Add Hifz Content',
+        'modal.add_revision': 'Add Revision Content',
+        'modal.add_session': 'Add Session',
+        'modal.surah_name': 'Surah Name',
+        'modal.select_surah': 'Select Surah',
+        'modal.ayah_range': 'Ayah Range',
+        'modal.ayah_placeholder': 'e.g., 1 - 25',
+        'modal.date': 'Date',
+        'modal.grade': 'Grade',
+        'modal.select_grade': 'Select Grade',
+        'modal.add': 'Add',
+        'modal.cancel': 'Cancel',
+        'modal.close': 'Close',
+        
+        // Admin
+        'admin.system_administration': 'System Administration',
+        'admin.create_account': 'Create New Account',
+        'admin.assign_students': 'Assign Students to Teachers',
+        'admin.system_stats': 'System Statistics',
+        'admin.delete_student': 'Delete Individual Student',
+        'admin.delete_teacher': 'Delete Individual Teacher',
+        'admin.delete_all_teachers': 'Delete All Teachers',
+        'admin.delete_all_students': 'Delete All Students',
+        
+        // Notifications
+        'notification.welcome': 'Welcome back',
+        'notification.logged_out': 'Logged out successfully',
+        'notification.hifz_added': 'Hifz content added successfully!',
+        'notification.revision_added': 'Revision content added successfully!',
+        'notification.session_added': 'Session added successfully!',
+        'notification.content_deleted': 'Content deleted successfully!',
+        'notification.session_deleted': 'Session deleted successfully!',
+        'notification.data_saved': 'Data saved to cloud successfully!',
+        'notification.error_saving': 'Error saving to cloud',
+        'notification.error_loading': 'Error loading from cloud',
+        
+        // Time
+        'time.morning': 'morning',
+        'time.afternoon': 'afternoon',
+        'time.evening': 'evening'
+    },
+    ar: {
+        // Login
+        'login.title': 'برنامج القرآن الكريم - MRIS',
+        'login.subtitle': 'أدخل الرمز الخاص بك للوصول إلى برنامج القرآن الكريم',
+        'login.placeholder': 'أدخل الرمز الخاص بك',
+        'login.button': 'دخول',
+        'login.invalid': 'رمز المستخدم غير صحيح. يرجى المحاولة مرة أخرى.',
+        
+        // Header
+        'header.logout': 'تسجيل الخروج',
+        'header.administrator': 'مدير النظام',
+        'header.teacher': 'معلم',
+        'header.dashboard_mode': 'وضع لوحة التحكم',
+        'header.editing_student': 'تعديل الطالب',
+        
+        // Content
+        'content.next_hifz': 'حفظ الجلسة القادمة',
+        'content.next_revision': 'مراجعة الجلسة القادمة',
+        'content.past_sessions': 'الجلسات السابقة',
+        'content.no_content': 'لا يوجد محتوى مخصص',
+        'content.no_sessions': 'لا توجد جلسات مسجلة',
+        'content.select_student': 'اختر طالباً لتعديل محتواه',
+        
+        // Modals
+        'modal.add_hifz': 'إضافة محتوى الحفظ',
+        'modal.add_revision': 'إضافة محتوى المراجعة',
+        'modal.add_session': 'إضافة جلسة',
+        'modal.surah_name': 'اسم السورة',
+        'modal.select_surah': 'اختر السورة',
+        'modal.ayah_range': 'نطاق الآيات',
+        'modal.ayah_placeholder': 'مثال: 1 - 25',
+        'modal.date': 'التاريخ',
+        'modal.grade': 'الدرجة',
+        'modal.select_grade': 'اختر الدرجة',
+        'modal.add': 'إضافة',
+        'modal.cancel': 'إلغاء',
+        'modal.close': 'إغلاق',
+        
+        // Admin
+        'admin.system_administration': 'إدارة النظام',
+        'admin.create_account': 'إنشاء حساب جديد',
+        'admin.assign_students': 'تعيين الطلاب للمعلمين',
+        'admin.system_stats': 'إحصائيات النظام',
+        'admin.delete_student': 'حذف طالب فردي',
+        'admin.delete_teacher': 'حذف معلم فردي',
+        'admin.delete_all_teachers': 'حذف جميع المعلمين',
+        'admin.delete_all_students': 'حذف جميع الطلاب',
+        
+        // Notifications
+        'notification.welcome': 'مرحباً بعودتك',
+        'notification.logged_out': 'تم تسجيل الخروج بنجاح',
+        'notification.hifz_added': 'تم إضافة محتوى الحفظ بنجاح!',
+        'notification.revision_added': 'تم إضافة محتوى المراجعة بنجاح!',
+        'notification.session_added': 'تم إضافة الجلسة بنجاح!',
+        'notification.content_deleted': 'تم حذف المحتوى بنجاح!',
+        'notification.session_deleted': 'تم حذف الجلسة بنجاح!',
+        'notification.data_saved': 'تم حفظ البيانات في السحابة بنجاح!',
+        'notification.error_saving': 'خطأ في حفظ البيانات في السحابة',
+        'notification.error_loading': 'خطأ في تحميل البيانات من السحابة',
+        
+        // Time
+        'time.morning': 'صباحاً',
+        'time.afternoon': 'بعد الظهر',
+        'time.evening': 'مساءً',
+        
+        // Surah Names
+        'surah.al_fatiha': 'الفاتحة',
+        'surah.al_baqarah': 'البقرة',
+        'surah.al_imran': 'آل عمران',
+        'surah.an_nisa': 'النساء',
+        'surah.al_maidah': 'المائدة',
+        'surah.al_anam': 'الأنعام',
+        'surah.al_araf': 'الأعراف',
+        'surah.al_anfal': 'الأنفال',
+        'surah.at_tawbah': 'التوبة',
+        'surah.yunus': 'يونس',
+        'surah.hud': 'هود',
+        'surah.yusuf': 'يوسف',
+        'surah.ar_rad': 'الرعد',
+        'surah.ibrahim': 'إبراهيم',
+        'surah.al_hijr': 'الحجر',
+        'surah.an_nahl': 'النحل',
+        'surah.al_isra': 'الإسراء',
+        'surah.al_kahf': 'الكهف',
+        'surah.maryam': 'مريم',
+        'surah.ta_ha': 'طه',
+        'surah.al_anbiya': 'الأنبياء',
+        'surah.al_hajj': 'الحج',
+        'surah.al_muminun': 'المؤمنون',
+        'surah.an_nur': 'النور',
+        'surah.al_furqan': 'الفرقان',
+        'surah.ash_shuara': 'الشعراء',
+        'surah.an_naml': 'النمل',
+        'surah.al_qasas': 'القصص',
+        'surah.al_ankabut': 'العنكبوت',
+        'surah.ar_rum': 'الروم',
+        'surah.luqman': 'لقمان',
+        'surah.as_sajdah': 'السجدة',
+        'surah.al_ahzab': 'الأحزاب',
+        'surah.saba': 'سبأ',
+        'surah.fatir': 'فاطر',
+        'surah.ya_sin': 'يس',
+        'surah.as_saffat': 'الصافات',
+        'surah.sad': 'ص',
+        'surah.az_zumar': 'الزمر',
+        'surah.ghafir': 'غافر',
+        'surah.fussilat': 'فصلت',
+        'surah.ash_shura': 'الشورى',
+        'surah.az_zukhruf': 'الزخرف',
+        'surah.ad_dukhan': 'الدخان',
+        'surah.al_jathiyah': 'الجاثية',
+        'surah.al_ahqaf': 'الأحقاف',
+        'surah.muhammad': 'محمد',
+        'surah.al_fath': 'الفتح',
+        'surah.al_hujurat': 'الحجرات',
+        'surah.qaf': 'ق',
+        'surah.adh_dhariyat': 'الذاريات',
+        'surah.at_tur': 'الطور',
+        'surah.an_najm': 'النجم',
+        'surah.al_qamar': 'القمر',
+        'surah.ar_rahman': 'الرحمن',
+        'surah.al_waqiah': 'الواقعة',
+        'surah.al_hadid': 'الحديد',
+        'surah.al_mujadilah': 'المجادلة',
+        'surah.al_hashr': 'الحشر',
+        'surah.al_mumtahanah': 'الممتحنة',
+        'surah.as_saff': 'الصف',
+        'surah.al_jumuah': 'الجمعة',
+        'surah.al_munafiqun': 'المنافقون',
+        'surah.at_taghabun': 'التغابن',
+        'surah.at_talaq': 'الطلاق',
+        'surah.at_tahrim': 'التحريم',
+        'surah.al_mulk': 'الملك',
+        'surah.al_qalam': 'القلم',
+        'surah.al_haqqah': 'الحاقة',
+        'surah.al_maarij': 'المعارج',
+        'surah.nuh': 'نوح',
+        'surah.al_jinn': 'الجن',
+        'surah.al_muzzammil': 'المزمل',
+        'surah.al_muddathir': 'المدثر',
+        'surah.al_qiyamah': 'القيامة',
+        'surah.al_insan': 'الإنسان',
+        'surah.al_mursalat': 'المرسلات',
+        'surah.an_naba': 'النبأ',
+        'surah.an_naziat': 'النازعات',
+        'surah.abasa': 'عبس',
+        'surah.at_takwir': 'التكوير',
+        'surah.al_infitar': 'الانفطار',
+        'surah.al_mutaffifin': 'المطففين',
+        'surah.al_inshiqaq': 'الانشقاق',
+        'surah.al_buruj': 'البروج',
+        'surah.at_tariq': 'الطارق',
+        'surah.al_ala': 'الأعلى',
+        'surah.al_ghashiyah': 'الغاشية',
+        'surah.al_fajr': 'الفجر',
+        'surah.al_balad': 'البلد',
+        'surah.ash_shams': 'الشمس',
+        'surah.al_lail': 'الليل',
+        'surah.ad_duha': 'الضحى',
+        'surah.ash_sharh': 'الشرح',
+        'surah.at_tin': 'التين',
+        'surah.al_alaq': 'العلق',
+        'surah.al_qadr': 'القدر',
+        'surah.al_bayyinah': 'البينة',
+        'surah.az_zalzalah': 'الزلزلة',
+        'surah.al_adiyat': 'العاديات',
+        'surah.al_qariah': 'القارعة',
+        'surah.at_takathur': 'التكاثر',
+        'surah.al_asr': 'العصر',
+        'surah.al_humazah': 'الهمزة',
+        'surah.al_fil': 'الفيل',
+        'surah.quraish': 'قريش',
+        'surah.al_maun': 'الماعون',
+        'surah.al_kawthar': 'الكوثر',
+        'surah.al_kafirun': 'الكافرون',
+        'surah.an_nasr': 'النصر',
+        'surah.al_masad': 'المسد',
+        'surah.al_ikhlas': 'الإخلاص',
+        'surah.al_falaq': 'الفلق',
+        'surah.an_nas': 'الناس'
+    }
+};
+
 // Global variables
 let currentUser = null;
 let currentUserType = null;
 let currentTeacher = null; // Track the original teacher when editing students
 let editingStudent = null; // Track which student teacher is editing
+let currentLanguage = 'en'; // Current language: 'en' or 'ar'
 
 // DOM elements
 const loginSection = document.getElementById('loginSection');
@@ -31,9 +282,190 @@ const hifzContent = document.getElementById('hifzContent');
 const revisionContent = document.getElementById('revisionContent');
 const sessionsList = document.getElementById('sessionsList');
 
+// Language management functions
+function getTranslation(key) {
+    return translations[currentLanguage][key] || key;
+}
+
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('quranLanguage', lang);
+    
+    // Update document direction
+    if (lang === 'ar') {
+        document.body.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+    } else {
+        document.body.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', 'en');
+    }
+    
+    // Update language toggle button
+    const languageToggle = document.getElementById('languageToggle');
+    if (languageToggle) {
+        languageToggle.textContent = lang === 'ar' ? 'EN' : 'ع';
+        languageToggle.classList.toggle('active', lang === 'ar');
+    }
+    
+    // Update all text elements
+    updateUITexts();
+}
+
+function updateUITexts() {
+    // Update login form
+    const loginTitle = document.querySelector('.login-card h2');
+    const loginSubtitle = document.querySelector('.login-card p');
+    const loginInput = document.getElementById('userCode');
+    const loginButton = document.querySelector('.login-btn');
+    
+    if (loginTitle) loginTitle.textContent = getTranslation('login.title');
+    if (loginSubtitle) loginSubtitle.textContent = getTranslation('login.subtitle');
+    if (loginInput) loginInput.placeholder = getTranslation('login.placeholder');
+    if (loginButton) loginButton.textContent = getTranslation('login.button');
+    
+    // Update header
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.textContent = getTranslation('header.logout');
+    
+    // Update content cards
+    const hifzCard = document.querySelector('.hifz-card h3');
+    const revisionCard = document.querySelector('.revision-card h3');
+    const sessionsCard = document.querySelector('.past-sessions-card h3');
+    
+    if (hifzCard) hifzCard.textContent = getTranslation('content.next_hifz');
+    if (revisionCard) revisionCard.textContent = getTranslation('content.next_revision');
+    if (sessionsCard) sessionsCard.textContent = getTranslation('content.past_sessions');
+    
+    // Update modal titles and labels
+    updateModalTexts();
+    
+    // Update admin dashboard if visible
+    if (currentUserType === 'admin') {
+        updateAdminTexts();
+    }
+}
+
+function updateModalTexts() {
+    // Add Hifz Modal
+    const addHifzModal = document.getElementById('addHifzModal');
+    if (addHifzModal) {
+        const title = addHifzModal.querySelector('h3');
+        const surahLabel = addHifzModal.querySelector('label[for="hifzSurah"]');
+        const ayahLabel = addHifzModal.querySelector('label[for="hifzAyahRange"]');
+        const addBtn = addHifzModal.querySelector('.btn-primary');
+        const cancelBtn = addHifzModal.querySelector('.btn-secondary');
+        
+        if (title) title.textContent = getTranslation('modal.add_hifz');
+        if (surahLabel) surahLabel.textContent = getTranslation('modal.surah_name');
+        if (ayahLabel) ayahLabel.textContent = getTranslation('modal.ayah_range');
+        if (addBtn) addBtn.textContent = getTranslation('modal.add');
+        if (cancelBtn) cancelBtn.textContent = getTranslation('modal.cancel');
+        
+        // Update Surah options
+        updateSurahOptions(addHifzModal.querySelector('#hifzSurah'));
+    }
+    
+    // Add Revision Modal
+    const addRevisionModal = document.getElementById('addRevisionModal');
+    if (addRevisionModal) {
+        const title = addRevisionModal.querySelector('h3');
+        const surahLabel = addRevisionModal.querySelector('label[for="revisionSurah"]');
+        const ayahLabel = addRevisionModal.querySelector('label[for="revisionAyahRange"]');
+        const addBtn = addRevisionModal.querySelector('.btn-primary');
+        const cancelBtn = addRevisionModal.querySelector('.btn-secondary');
+        
+        if (title) title.textContent = getTranslation('modal.add_revision');
+        if (surahLabel) surahLabel.textContent = getTranslation('modal.surah_name');
+        if (ayahLabel) ayahLabel.textContent = getTranslation('modal.ayah_range');
+        if (addBtn) addBtn.textContent = getTranslation('modal.add');
+        if (cancelBtn) cancelBtn.textContent = getTranslation('modal.cancel');
+        
+        // Update Surah options
+        updateSurahOptions(addRevisionModal.querySelector('#revisionSurah'));
+    }
+    
+    // Add Session Modal
+    const addSessionModal = document.getElementById('addSessionModal');
+    if (addSessionModal) {
+        const title = addSessionModal.querySelector('h3');
+        const dateLabel = addSessionModal.querySelector('label[for="sessionDate"]');
+        const hifzLabel = addSessionModal.querySelector('label[for="sessionHifz"]');
+        const revisionLabel = addSessionModal.querySelector('label[for="sessionRevision"]');
+        const gradeLabel = addSessionModal.querySelector('label[for="sessionGrade"]');
+        const addBtn = addSessionModal.querySelector('.btn-primary');
+        const cancelBtn = addSessionModal.querySelector('.btn-secondary');
+        
+        if (title) title.textContent = getTranslation('modal.add_session');
+        if (dateLabel) dateLabel.textContent = getTranslation('modal.date');
+        if (hifzLabel) hifzLabel.textContent = getTranslation('modal.surah_name') + ' (Hifz)';
+        if (revisionLabel) revisionLabel.textContent = getTranslation('modal.surah_name') + ' (Revision)';
+        if (gradeLabel) gradeLabel.textContent = getTranslation('modal.grade');
+        if (addBtn) addBtn.textContent = getTranslation('modal.add');
+        if (cancelBtn) cancelBtn.textContent = getTranslation('modal.cancel');
+    }
+}
+
+function updateAdminTexts() {
+    const adminSection = document.querySelector('.admin-section h2');
+    if (adminSection) adminSection.textContent = getTranslation('admin.system_administration');
+    
+    // Update admin buttons
+    const adminButtons = document.querySelectorAll('.admin-btn');
+    adminButtons.forEach(btn => {
+        const icon = btn.querySelector('.icon');
+        if (icon) {
+            const iconText = icon.textContent;
+            if (iconText.includes('👤') && !iconText.includes('🗑️')) {
+                btn.textContent = getTranslation('admin.create_account');
+            } else if (iconText.includes('🔗')) {
+                btn.textContent = getTranslation('admin.assign_students');
+            } else if (iconText.includes('📊')) {
+                btn.textContent = getTranslation('admin.system_stats');
+            } else if (iconText.includes('👤🗑️')) {
+                btn.textContent = getTranslation('admin.delete_student');
+            } else if (iconText.includes('👨‍🏫🗑️')) {
+                btn.textContent = getTranslation('admin.delete_teacher');
+            } else if (iconText.includes('🗑️') && !iconText.includes('👤') && !iconText.includes('👨‍🏫')) {
+                if (btn.textContent.includes('Teachers')) {
+                    btn.textContent = getTranslation('admin.delete_all_teachers');
+                } else if (btn.textContent.includes('Students')) {
+                    btn.textContent = getTranslation('admin.delete_all_students');
+                }
+            }
+        }
+    });
+}
+
+function updateSurahOptions(selectElement) {
+    if (!selectElement) return;
+    
+    const options = selectElement.querySelectorAll('option');
+    options.forEach(option => {
+        if (option.value && option.value !== '') {
+            const surahKey = option.value.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '');
+            const arabicName = getTranslation(`surah.${surahKey}`);
+            if (arabicName && arabicName !== `surah.${surahKey}`) {
+                option.textContent = currentLanguage === 'ar' ? 
+                    `${arabicName} (${option.value})` : 
+                    `${option.value} (${arabicName})`;
+            }
+        }
+    });
+}
+
+function toggleLanguage() {
+    const newLang = currentLanguage === 'en' ? 'ar' : 'en';
+    setLanguage(newLang);
+    showNotification(`Language changed to ${newLang === 'ar' ? 'Arabic' : 'English'}`, 'success');
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('MRIS Quran Program initialized');
+    
+    // Load saved language preference
+    const savedLanguage = localStorage.getItem('quranLanguage') || 'en';
+    setLanguage(savedLanguage);
     
     // Get button elements after DOM is loaded
     window.addHifzBtn = document.getElementById('addHifzBtn');
@@ -73,6 +505,12 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
     
     // Logout button
     logoutBtn.addEventListener('click', handleLogout);
+    
+    // Language toggle button
+    const languageToggle = document.getElementById('languageToggle');
+    if (languageToggle) {
+        languageToggle.addEventListener('click', toggleLanguage);
+    }
     
     // Add content buttons with mobile touch support
     if (addHifzBtn) {
@@ -186,7 +624,7 @@ function handleLogin(event) {
     const userCode = userCodeInput.value.trim().toUpperCase();
     
     if (!userCode) {
-        showNotification('Please enter a user code', 'error');
+        showNotification(getTranslation('login.placeholder'), 'error');
         return;
     }
     
@@ -204,7 +642,7 @@ function handleLogin(event) {
         currentUserType = 'teacher';
         loginSuccess(sampleData.teachers[userCode]);
     } else {
-        showNotification('Invalid user code. Please try again.', 'error');
+        showNotification(getTranslation('login.invalid'), 'error');
         return;
     }
 }
@@ -219,7 +657,7 @@ function loginSuccess(user) {
     if (currentUserType === 'admin') {
         // Admin login
         userNameSpan.textContent = user.name;
-        userClassSpan.textContent = 'Administrator';
+        userClassSpan.textContent = getTranslation('header.administrator');
         userTeacherSpan.textContent = '';
         
         // Show admin dashboard
@@ -235,7 +673,7 @@ function loginSuccess(user) {
         // Teacher login
         currentTeacher = currentUser; // Store the teacher's ID
         userNameSpan.textContent = user.name;
-        userClassSpan.textContent = 'Teacher';
+        userClassSpan.textContent = getTranslation('header.teacher');
         userTeacherSpan.textContent = '';
         
         // Add teacher-mode class to body
@@ -252,7 +690,7 @@ function loginSuccess(user) {
     localStorage.setItem('quranUser', currentUser);
     localStorage.setItem('quranUserType', currentUserType);
     
-    showNotification(`Welcome back, ${user.name}!`, 'success');
+    showNotification(`${getTranslation('notification.welcome')}, ${user.name}!`, 'success');
 }
 
 // Load student content
@@ -272,9 +710,9 @@ function loadStudentContent() {
         console.log('Teacher logged in but no student selected - showing empty state');
         
         // Clear all containers
-        hifzContent.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Select a student to edit their content</p>';
-        revisionContent.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Select a student to edit their content</p>';
-        sessionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Select a student to edit their content</p>';
+        hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
         
         // Ensure teacher controls are visible
         showTeacherControls();
@@ -323,7 +761,7 @@ function loadContentItems(container, items, type) {
     console.log(`Items to load:`, items);
     
     if (!items || items.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No content assigned</p>';
+        container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.no_content')}</p>`;
         return;
     }
     
@@ -362,7 +800,7 @@ function loadSessionsList(sessions) {
     console.log('Loading sessions list:', sessions);
     
     if (!sessions || sessions.length === 0) {
-        sessionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No sessions recorded</p>';
+        sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.no_sessions')}</p>`;
         return;
     }
     
@@ -513,7 +951,7 @@ function selectStudent(studentCode) {
     const student = sampleData.students[studentCode];
     
     // Show "Editing Student: [Name]" in the center
-    userNameSpan.textContent = `Editing Student: ${student.name}`;
+    userNameSpan.textContent = `${getTranslation('header.editing_student')}: ${student.name}`;
     userClassSpan.textContent = student.class;
     userTeacherSpan.textContent = student.teacher;
     
@@ -623,10 +1061,10 @@ function skipToDashboard() {
         </div>
     `;
     
-    // Update header to show teacher mode
-    userNameSpan.textContent = sampleData.teachers[currentUser].name;
-    userClassSpan.textContent = 'Teacher';
-    userTeacherSpan.textContent = 'Dashboard Mode';
+        // Update header to show teacher mode
+        userNameSpan.textContent = sampleData.teachers[currentUser].name;
+        userClassSpan.textContent = getTranslation('header.teacher');
+        userTeacherSpan.textContent = getTranslation('header.dashboard_mode');
     
     // Add dashboard mode styling
     userTeacherSpan.classList.add('dashboard-mode');
@@ -674,7 +1112,7 @@ function handleAddHifz(event) {
     closeModal('addHifzModal');
     document.getElementById('addHifzForm').reset();
     
-    showNotification('Hifz content added successfully!', 'success');
+        showNotification(getTranslation('notification.hifz_added'), 'success');
 }
 
 // Handle add revision
@@ -717,7 +1155,7 @@ function handleAddRevision(event) {
     closeModal('addRevisionModal');
     document.getElementById('addRevisionForm').reset();
     
-    showNotification('Revision content added successfully!', 'success');
+    showNotification(getTranslation('notification.revision_added'), 'success');
 }
 
 // Handle add session
@@ -764,7 +1202,7 @@ function handleAddSession(event) {
     closeModal('addSessionModal');
     document.getElementById('addSessionForm').reset();
     
-    showNotification('Session added successfully!', 'success');
+    showNotification(getTranslation('notification.session_added'), 'success');
 }
 
 // Handle logout
@@ -822,7 +1260,7 @@ function confirmLogout() {
     // Close the confirmation modal
     closeModal('logoutConfirmModal');
     
-    showNotification('Logged out successfully', 'success');
+    showNotification(getTranslation('notification.logged_out'), 'success');
 }
 
 // Check for existing session
