@@ -71,6 +71,121 @@ const translations = {
         'notification.data_saved': 'Data saved to cloud successfully!',
         'notification.error_saving': 'Error saving to cloud',
         'notification.error_loading': 'Error loading from cloud',
+        'notification.language_changed': 'Language changed to',
+        'notification.dashboard_activated': 'Dashboard mode activated. Add buttons are now visible.',
+        'notification.no_student_selected': 'No student selected',
+        'notification.fill_all_fields': 'Please fill in all fields',
+        'notification.please_enter_code': 'Please enter a user code',
+        'notification.arabic': 'Arabic',
+        'notification.english': 'English',
+        
+        // Form validation
+        'validation.required': 'This field is required',
+        'validation.invalid_format': 'Invalid format',
+        'validation.select_option': 'Please select an option',
+        
+        // Student selection
+        'student.no_students_assigned': 'No Students Assigned',
+        'student.no_students_message': 'You don\'t have any students assigned to you yet.',
+        'student.skip_to_dashboard': 'Skip to Dashboard',
+        'student.dashboard_note': 'You can still view the dashboard and add buttons will be visible',
+        'student.select_student': 'Select Student',
+        
+        // Empty states
+        'empty.no_student_selected': 'No Student Selected',
+        'empty.select_student_message': 'Select a student to manage their content, or use the + button to add content.',
+        
+        // Session form labels
+        'session.hifz_surahs': 'Hifz Surah(s) & Ayah Numbers:',
+        'session.revision_surahs': 'Revision Surah(s) & Ayah Numbers:',
+        'session.hifz_placeholder': 'e.g., Al Naba 1-25, Al Mursalat 1-15',
+        'session.revision_placeholder': 'e.g., Al Naba 1-25',
+        
+        // Admin specific
+        'admin.back_to_login': '← Back to Login',
+        'admin.no_assignments': 'No students assigned to teachers yet.',
+        'admin.choose_teacher': 'Choose a teacher...',
+        'admin.choose_student': 'Choose a student...',
+        'admin.choose_teacher_first': 'Choose a teacher first...',
+        'admin.no_unassigned': 'No unassigned students available',
+        'admin.select_teacher': 'Select Teacher:',
+        'admin.select_student': 'Select Student:',
+        'admin.assign_student': 'Assign Student',
+        'admin.current_assignments': 'Current Assignments',
+        'admin.remove': 'Remove',
+        'admin.are_you_sure': 'Are you sure you want to remove this assignment?',
+        'admin.assignment_removed': 'Student assignment removed successfully!',
+        'admin.student_assigned': 'Student assigned to teacher successfully!',
+        'admin.select_both': 'Please select both a teacher and a student',
+        
+        // Delete confirmations
+        'delete.student_title': 'Delete Student',
+        'delete.teacher_title': 'Delete Teacher',
+        'delete.select_student': 'Select a student to delete from the system.',
+        'delete.select_teacher': 'Select a teacher to delete from the system.',
+        'delete.choose_student': 'Choose a student...',
+        'delete.choose_teacher': 'Choose a teacher...',
+        'delete.student_info': 'Student Information',
+        'delete.teacher_info': 'Teacher Information',
+        'delete.name': 'Name:',
+        'delete.class': 'Class:',
+        'delete.teacher': 'Teacher:',
+        'delete.content_items': 'Content Items:',
+        'delete.assigned_students': 'Assigned Students:',
+        'delete.impact': 'Impact:',
+        'delete.confirm_delete_student': 'Delete Student',
+        'delete.confirm_delete_teacher': 'Delete Teacher',
+        'delete.cancel': 'Cancel',
+        
+        // Account creation
+        'account.create_title': 'Create New Account',
+        'account.account_type': 'Account Type',
+        'account.select_type': 'Select Account Type',
+        'account.student': 'Student',
+        'account.teacher': 'Teacher',
+        'account.first_name': 'First Name',
+        'account.last_name': 'Last Name',
+        'account.grade': 'Grade',
+        'account.select_grade': 'Select Grade',
+        'account.class': 'Class',
+        'account.select_class': 'Select Class',
+        'account.select_grade_first': 'Select Grade First',
+        'account.teacher_name': 'Teacher Name (Optional)',
+        'account.leave_unassigned': 'Leave unassigned',
+        'account.grade_7': 'Grade 7',
+        'account.grade_8': 'Grade 8',
+        'account.grade_9': 'Grade 9',
+        'account.grade_10': 'Grade 10',
+        
+        // Account created success
+        'account.created_success': 'Account Created Successfully!',
+        'account.account_type_label': 'Account Type:',
+        'account.name_label': 'Name:',
+        'account.class_label': 'Class:',
+        'account.unique_id': 'Unique ID:',
+        'account.important_note': 'Important:',
+        'account.share_id': 'Please share this ID with the user. They will need it to log in.',
+        
+        // System stats
+        'stats.system_overview': 'System Overview',
+        'stats.students': 'Students',
+        'stats.teachers': 'Teachers',
+        'stats.content_items': 'Content Items',
+        'stats.assignments': 'Assignments',
+        'stats.assignment_details': 'Assignment Details',
+        'stats.user_ids': 'User IDs',
+        'stats.no_impact': 'No impact on students',
+        'stats.will_affect': 'Will affect:',
+        'stats.no_students_assigned': 'No students assigned',
+        'stats.one_student_assigned': '1 student assigned',
+        'stats.students_assigned': 'students assigned',
+        
+        // Logout confirmation
+        'logout.confirm_title': 'Confirm Logout',
+        'logout.are_you_sure': 'Are you sure you want to log out?',
+        'logout.warning': 'This will end your current session.',
+        'logout.yes_logout': 'Yes, Logout',
+        'logout.cancel': 'Cancel',
         
         // Time
         'time.morning': 'morning',
@@ -136,6 +251,121 @@ const translations = {
         'notification.data_saved': 'تم حفظ البيانات في السحابة بنجاح!',
         'notification.error_saving': 'خطأ في حفظ البيانات في السحابة',
         'notification.error_loading': 'خطأ في تحميل البيانات من السحابة',
+        'notification.language_changed': 'تم تغيير اللغة إلى',
+        'notification.dashboard_activated': 'تم تفعيل وضع لوحة التحكم. أزرار الإضافة مرئية الآن.',
+        'notification.no_student_selected': 'لم يتم اختيار طالب',
+        'notification.fill_all_fields': 'يرجى ملء جميع الحقول',
+        'notification.please_enter_code': 'يرجى إدخال رمز المستخدم',
+        'notification.arabic': 'العربية',
+        'notification.english': 'الإنجليزية',
+        
+        // Form validation
+        'validation.required': 'هذا الحقل مطلوب',
+        'validation.invalid_format': 'تنسيق غير صحيح',
+        'validation.select_option': 'يرجى اختيار خيار',
+        
+        // Student selection
+        'student.no_students_assigned': 'لا يوجد طلاب مخصصين',
+        'student.no_students_message': 'ليس لديك أي طلاب مخصصين لك بعد.',
+        'student.skip_to_dashboard': 'تخطي إلى لوحة التحكم',
+        'student.dashboard_note': 'يمكنك仍然 مشاهدة لوحة التحكم وأزرار الإضافة ستكون مرئية',
+        'student.select_student': 'اختر طالباً',
+        
+        // Empty states
+        'empty.no_student_selected': 'لم يتم اختيار طالب',
+        'empty.select_student_message': 'اختر طالباً لإدارة محتواه، أو استخدم زر + لإضافة محتوى.',
+        
+        // Session form labels
+        'session.hifz_surahs': 'سور الحفظ وأرقام الآيات:',
+        'session.revision_surahs': 'سور المراجعة وأرقام الآيات:',
+        'session.hifz_placeholder': 'مثال: النبأ 1-25، المرسلات 1-15',
+        'session.revision_placeholder': 'مثال: النبأ 1-25',
+        
+        // Admin specific
+        'admin.back_to_login': '← العودة إلى تسجيل الدخول',
+        'admin.no_assignments': 'لا يوجد طلاب مخصصين للمعلمين بعد.',
+        'admin.choose_teacher': 'اختر معلماً...',
+        'admin.choose_student': 'اختر طالباً...',
+        'admin.choose_teacher_first': 'اختر معلماً أولاً...',
+        'admin.no_unassigned': 'لا يوجد طلاب غير مخصصين متاحين',
+        'admin.select_teacher': 'اختر المعلّم:',
+        'admin.select_student': 'اختر الطالب:',
+        'admin.assign_student': 'تعيين الطالب',
+        'admin.current_assignments': 'التعيينات الحالية',
+        'admin.remove': 'إزالة',
+        'admin.are_you_sure': 'هل أنت متأكد من إزالة هذا التعيين؟',
+        'admin.assignment_removed': 'تم إزالة تعيين الطالب بنجاح!',
+        'admin.student_assigned': 'تم تعيين الطالب للمعلم بنجاح!',
+        'admin.select_both': 'يرجى اختيار المعلم والطالب',
+        
+        // Delete confirmations
+        'delete.student_title': 'حذف الطالب',
+        'delete.teacher_title': 'حذف المعلم',
+        'delete.select_student': 'اختر طالباً لحذفه من النظام.',
+        'delete.select_teacher': 'اختر معلماً لحذفه من النظام.',
+        'delete.choose_student': 'اختر طالباً...',
+        'delete.choose_teacher': 'اختر معلماً...',
+        'delete.student_info': 'معلومات الطالب',
+        'delete.teacher_info': 'معلومات المعلم',
+        'delete.name': 'الاسم:',
+        'delete.class': 'الصف:',
+        'delete.teacher': 'المعلم:',
+        'delete.content_items': 'عناصر المحتوى:',
+        'delete.assigned_students': 'الطلاب المخصصين:',
+        'delete.impact': 'التأثير:',
+        'delete.confirm_delete_student': 'حذف الطالب',
+        'delete.confirm_delete_teacher': 'حذف المعلم',
+        'delete.cancel': 'إلغاء',
+        
+        // Account creation
+        'account.create_title': 'إنشاء حساب جديد',
+        'account.account_type': 'نوع الحساب',
+        'account.select_type': 'اختر نوع الحساب',
+        'account.student': 'طالب',
+        'account.teacher': 'معلم',
+        'account.first_name': 'الاسم الأول',
+        'account.last_name': 'الاسم الأخير',
+        'account.grade': 'الصف',
+        'account.select_grade': 'اختر الصف',
+        'account.class': 'الفصل',
+        'account.select_class': 'اختر الفصل',
+        'account.select_grade_first': 'اختر الصف أولاً',
+        'account.teacher_name': 'اسم المعلم (اختياري)',
+        'account.leave_unassigned': 'اترك غير مخصص',
+        'account.grade_7': 'الصف السابع',
+        'account.grade_8': 'الصف الثامن',
+        'account.grade_9': 'الصف التاسع',
+        'account.grade_10': 'الصف العاشر',
+        
+        // Account created success
+        'account.created_success': 'تم إنشاء الحساب بنجاح!',
+        'account.account_type_label': 'نوع الحساب:',
+        'account.name_label': 'الاسم:',
+        'account.class_label': 'الفصل:',
+        'account.unique_id': 'المعرف الفريد:',
+        'account.important_note': 'مهم:',
+        'account.share_id': 'يرجى مشاركة هذا المعرف مع المستخدم. سيحتاجه لتسجيل الدخول.',
+        
+        // System stats
+        'stats.system_overview': 'نظرة عامة على النظام',
+        'stats.students': 'الطلاب',
+        'stats.teachers': 'المعلمون',
+        'stats.content_items': 'عناصر المحتوى',
+        'stats.assignments': 'التعيينات',
+        'stats.assignment_details': 'تفاصيل التعيينات',
+        'stats.user_ids': 'معرفات المستخدمين',
+        'stats.no_impact': 'لا تأثير على الطلاب',
+        'stats.will_affect': 'سيؤثر على:',
+        'stats.no_students_assigned': 'لا يوجد طلاب مخصصين',
+        'stats.one_student_assigned': 'طالب واحد مخصص',
+        'stats.students_assigned': 'طلاب مخصصين',
+        
+        // Logout confirmation
+        'logout.confirm_title': 'تأكيد تسجيل الخروج',
+        'logout.are_you_sure': 'هل أنت متأكد من تسجيل الخروج؟',
+        'logout.warning': 'هذا سينهي جلستك الحالية.',
+        'logout.yes_logout': 'نعم، تسجيل الخروج',
+        'logout.cancel': 'إلغاء',
         
         // Time
         'time.morning': 'صباحاً',
@@ -336,6 +566,9 @@ function updateUITexts() {
     if (revisionCard) revisionCard.textContent = getTranslation('content.next_revision');
     if (sessionsCard) sessionsCard.textContent = getTranslation('content.past_sessions');
     
+    // Update elements with data-translate attributes
+    updateDataTranslateElements();
+    
     // Update modal titles and labels
     updateModalTexts();
     
@@ -343,6 +576,20 @@ function updateUITexts() {
     if (currentUserType === 'admin') {
         updateAdminTexts();
     }
+}
+
+function updateDataTranslateElements() {
+    // Update elements with data-translate attribute
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        element.textContent = getTranslation(key);
+    });
+    
+    // Update elements with data-translate-placeholder attribute
+    document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        element.placeholder = getTranslation(key);
+    });
 }
 
 function updateModalTexts() {
@@ -397,8 +644,8 @@ function updateModalTexts() {
         
         if (title) title.textContent = getTranslation('modal.add_session');
         if (dateLabel) dateLabel.textContent = getTranslation('modal.date');
-        if (hifzLabel) hifzLabel.textContent = getTranslation('modal.surah_name') + ' (Hifz)';
-        if (revisionLabel) revisionLabel.textContent = getTranslation('modal.surah_name') + ' (Revision)';
+        if (hifzLabel) hifzLabel.textContent = getTranslation('session.hifz_surahs');
+        if (revisionLabel) revisionLabel.textContent = getTranslation('session.revision_surahs');
         if (gradeLabel) gradeLabel.textContent = getTranslation('modal.grade');
         if (addBtn) addBtn.textContent = getTranslation('modal.add');
         if (cancelBtn) cancelBtn.textContent = getTranslation('modal.cancel');
@@ -456,7 +703,7 @@ function updateSurahOptions(selectElement) {
 function toggleLanguage() {
     const newLang = currentLanguage === 'en' ? 'ar' : 'en';
     setLanguage(newLang);
-    showNotification(`Language changed to ${newLang === 'ar' ? 'Arabic' : 'English'}`, 'success');
+    showNotification(`${getTranslation('notification.language_changed')} ${getTranslation(newLang === 'ar' ? 'notification.arabic' : 'notification.english')}`, 'success');
 }
 
 // Initialize the application
@@ -624,7 +871,7 @@ function handleLogin(event) {
     const userCode = userCodeInput.value.trim().toUpperCase();
     
     if (!userCode) {
-        showNotification(getTranslation('login.placeholder'), 'error');
+        showNotification(getTranslation('notification.please_enter_code'), 'error');
         return;
     }
     
@@ -857,7 +1104,7 @@ function deleteContentItem(type, index) {
         const targetUser = getCurrentStudentId();
         
         if (!targetUser) {
-            showNotification('No student selected', 'error');
+            showNotification(getTranslation('notification.no_student_selected'), 'error');
             return;
         }
         
@@ -878,7 +1125,7 @@ function deleteSession(index) {
         const targetUser = getCurrentStudentId();
         
         if (!targetUser) {
-            showNotification('No student selected', 'error');
+            showNotification(getTranslation('notification.no_student_selected'), 'error');
             return;
         }
         
@@ -907,10 +1154,10 @@ function showStudentSelection() {
         // Teacher has no students - show message and option to skip to dashboard
         studentsList.innerHTML = `
             <div style="text-align: center; padding: 40px 20px;">
-                <h3 style="color: var(--primary-color); margin-bottom: 20px;">No Students Assigned</h3>
-                <p style="color: #666; margin-bottom: 30px;">You don't have any students assigned to you yet.</p>
-                <button class="btn btn-secondary" onclick="skipToDashboard()">Skip to Dashboard</button>
-                <p style="font-size: 12px; color: #999; margin-top: 20px;">You can still view the dashboard and add buttons will be visible</p>
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;">${getTranslation('student.no_students_assigned')}</h3>
+                <p style="color: #666; margin-bottom: 30px;">${getTranslation('student.no_students_message')}</p>
+                <button class="btn btn-secondary" onclick="skipToDashboard()">${getTranslation('student.skip_to_dashboard')}</button>
+                <p style="font-size: 12px; color: #999; margin-top: 20px;">${getTranslation('student.dashboard_note')}</p>
             </div>
         `;
     } else {
@@ -1041,23 +1288,23 @@ function skipToDashboard() {
     // Clear any student content display and show helpful messages
     hifzContent.innerHTML = `
         <div style="text-align: center; padding: 40px 20px;">
-            <h4 style="color: var(--primary-color); margin-bottom: 15px;">No Student Selected</h4>
-            <p style="color: #666; margin-bottom: 20px;">Select a student to manage their content, or use the + button to add content.</p>
-            <button class="btn btn-secondary" onclick="showStudentSelection()">Select Student</button>
+            <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('empty.no_student_selected')}</h4>
+            <p style="color: #666; margin-bottom: 20px;">${getTranslation('empty.select_student_message')}</p>
+            <button class="btn btn-secondary" onclick="showStudentSelection()">${getTranslation('student.select_student')}</button>
         </div>
     `;
     revisionContent.innerHTML = `
         <div style="text-align: center; padding: 40px 20px;">
-            <h4 style="color: var(--primary-color); margin-bottom: 15px;">No Student Selected</h4>
-            <p style="color: #666; margin-bottom: 20px;">Select a student to manage their content, or use the + button to add content.</p>
-            <button class="btn btn-secondary" onclick="showStudentSelection()">Select Student</button>
+            <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('empty.no_student_selected')}</h4>
+            <p style="color: #666; margin-bottom: 20px;">${getTranslation('empty.select_student_message')}</p>
+            <button class="btn btn-secondary" onclick="showStudentSelection()">${getTranslation('student.select_student')}</button>
         </div>
     `;
     sessionsList.innerHTML = `
         <div style="text-align: center; padding: 40px 20px;">
-            <h4 style="color: var(--primary-color); margin-bottom: 15px;">No Student Selected</h4>
-            <p style="color: #666; margin-bottom: 20px;">Select a student to manage their content, or use the + button to add content.</p>
-            <button class="btn btn-secondary" onclick="showStudentSelection()">Select Student</button>
+            <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('empty.no_student_selected')}</h4>
+            <p style="color: #666; margin-bottom: 20px;">${getTranslation('empty.select_student_message')}</p>
+            <button class="btn btn-secondary" onclick="showStudentSelection()">${getTranslation('student.select_student')}</button>
         </div>
     `;
     
@@ -1069,7 +1316,7 @@ function skipToDashboard() {
     // Add dashboard mode styling
     userTeacherSpan.classList.add('dashboard-mode');
     
-    showNotification('Dashboard mode activated. Add buttons are now visible.', 'info');
+    showNotification(getTranslation('notification.dashboard_activated'), 'info');
 }
 
 // Handle add hifz
@@ -1080,7 +1327,7 @@ function handleAddHifz(event) {
     const ayahRange = document.getElementById('hifzAyahRange').value.trim();
     
     if (!surah || !ayahRange) {
-        showNotification('Please fill in all fields', 'error');
+        showNotification(getTranslation('notification.fill_all_fields'), 'error');
         return;
     }
     
@@ -1088,7 +1335,7 @@ function handleAddHifz(event) {
     const targetUser = getCurrentStudentId();
     
     if (!targetUser) {
-        showNotification('No student selected', 'error');
+        showNotification(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
@@ -1123,7 +1370,7 @@ function handleAddRevision(event) {
     const ayahRange = document.getElementById('revisionAyahRange').value.trim();
     
     if (!surah || !ayahRange) {
-        showNotification('Please fill in all fields', 'error');
+        showNotification(getTranslation('notification.fill_all_fields'), 'error');
         return;
     }
     
@@ -1131,7 +1378,7 @@ function handleAddRevision(event) {
     const targetUser = getCurrentStudentId();
     
     if (!targetUser) {
-        showNotification('No student selected', 'error');
+        showNotification(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
@@ -1168,7 +1415,7 @@ function handleAddSession(event) {
     const grade = document.getElementById('sessionGrade').value;
     
     if (!date || !hifz || !revision || !grade) {
-        showNotification('Please fill in all fields', 'error');
+        showNotification(getTranslation('notification.fill_all_fields'), 'error');
         return;
     }
     
@@ -1176,7 +1423,7 @@ function handleAddSession(event) {
     const targetUser = getCurrentStudentId();
     
     if (!targetUser) {
-        showNotification('No student selected', 'error');
+        showNotification(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
@@ -1602,48 +1849,48 @@ function showAdminDashboard() {
     adminContent.className = 'admin-dashboard';
     adminContent.innerHTML = `
         <div class="admin-section">
-            <h2>System Administration</h2>
+            <h2>${getTranslation('admin.system_administration')}</h2>
             
             <div class="admin-actions">
                 <button class="admin-btn" onclick="showCreateAccountModal()">
                     <span class="icon">👤</span>
-                    Create New Account
+                    ${getTranslation('admin.create_account')}
                 </button>
                 <button class="admin-btn" onclick="showAssignStudentsModal()">
                     <span class="icon">🔗</span>
-                    Assign Students to Teachers
+                    ${getTranslation('admin.assign_students')}
                 </button>
                 <button class="admin-btn" onclick="showSystemStats()">
                     <span class="icon">📊</span>
-                    System Statistics
+                    ${getTranslation('admin.system_stats')}
                 </button>
             </div>
             
             <div class="admin-actions" style="margin-top: 20px;">
                 <button class="admin-btn" onclick="showDeleteStudentModal()" style="background: #fff3e0; border-color: #ff9800; color: #e65100;">
                     <span class="icon">👤🗑️</span>
-                    Delete Individual Student
+                    ${getTranslation('admin.delete_student')}
                 </button>
                 <button class="admin-btn" onclick="showDeleteTeacherModal()" style="background: #fff3e0; border-color: #ff9800; color: #e65100;">
                     <span class="icon">👨‍🏫🗑️</span>
-                    Delete Individual Teacher
+                    ${getTranslation('admin.delete_teacher')}
                 </button>
             </div>
             
             <div class="admin-actions" style="margin-top: 20px;">
                 <button class="admin-btn" onclick="deleteAllTeachers()" style="background: #ffebee; border-color: #f44336; color: #d32f2f;">
                     <span class="icon">🗑️</span>
-                    Delete All Teachers
+                    ${getTranslation('admin.delete_all_teachers')}
                 </button>
                 <button class="admin-btn" onclick="deleteAllStudents()" style="background: #ffebee; border-color: #f44336; color: #d32f2f;">
                     <span class="icon">🗑️</span>
-                    Delete All Students
+                    ${getTranslation('admin.delete_all_students')}
                 </button>
             </div>
             
             <div class="admin-actions" style="margin-top: 20px; text-align: center;">
                 <button class="btn btn-secondary" onclick="logout()">
-                    ← Back to Login
+                    ${getTranslation('admin.back_to_login')}
                 </button>
             </div>
 
@@ -1690,7 +1937,7 @@ function showDeleteStudentModal() {
 // Populate delete student dropdown
 function populateDeleteStudentDropdown() {
     const studentSelect = document.getElementById('deleteStudentSelect');
-    studentSelect.innerHTML = '<option value="">Choose a student...</option>';
+    studentSelect.innerHTML = `<option value="">${getTranslation('admin.choose_student')}</option>`;
     
     Object.keys(sampleData.students).forEach(studentId => {
         const student = sampleData.students[studentId];
@@ -2094,7 +2341,7 @@ function updateClassOptions() {
 // Populate teacher dropdown
 function populateTeacherDropdown() {
     const teacherSelect = document.getElementById('assignTeacher');
-    teacherSelect.innerHTML = '<option value="">Choose a teacher...</option>';
+    teacherSelect.innerHTML = `<option value="">${getTranslation('admin.choose_teacher')}</option>`;
     
     Object.keys(sampleData.teachers).forEach(teacherId => {
         const teacher = sampleData.teachers[teacherId];
@@ -2111,7 +2358,7 @@ function loadUnassignedStudents() {
     const studentSelect = document.getElementById('assignStudent');
     
     if (!teacherId) {
-        studentSelect.innerHTML = '<option value="">Choose a teacher first...</option>';
+        studentSelect.innerHTML = `<option value="">${getTranslation('admin.choose_teacher_first')}</option>`;
         return;
     }
     
@@ -2122,10 +2369,10 @@ function loadUnassignedStudents() {
     const assignedStudents = sampleData.teachers[teacherId].students || [];
     const unassignedStudents = allStudents.filter(studentId => !assignedStudents.includes(studentId));
     
-    studentSelect.innerHTML = '<option value="">Choose a student...</option>';
+    studentSelect.innerHTML = `<option value="">${getTranslation('admin.choose_student')}</option>`;
     
     if (unassignedStudents.length === 0) {
-        studentSelect.innerHTML = '<option value="">No unassigned students available</option>';
+        studentSelect.innerHTML = `<option value="">${getTranslation('admin.no_unassigned')}</option>`;
         return;
     }
     

@@ -10,15 +10,15 @@
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
         <div class="login-card">
-                                            <h2>MRIS Quran Program</h2>
-                                <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                                            <h2 data-translate="login.title">MRIS Quran Program</h2>
+                                <p style="font-size: 14px; color: #666; margin-bottom: 20px;" data-translate="login.subtitle">
                             Enter your unique code to access the MRIS Quran program
                         </p>
         <form id="loginForm">
                 <div class="form-group">
-                    <input type="text" id="userCode" placeholder="Enter your unique code" required>
+                    <input type="text" id="userCode" data-translate-placeholder="login.placeholder" placeholder="Enter your unique code" required>
                 </div>
-                <button type="submit" class="login-btn">Login</button>
+                <button type="submit" class="login-btn" data-translate="login.button">Login</button>
             </form>
         </div>
     </div>
@@ -34,7 +34,7 @@
             </div>
             <div class="header-actions">
                 <button id="languageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة">ع</button>
-                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <button id="logoutBtn" class="logout-btn" data-translate="header.logout">Logout</button>
             </div>
         </header>
 
@@ -44,7 +44,7 @@
             <div class="top-cards">
                 <!-- Next Session's Hifz Card -->
                 <div class="content-card hifz-card">
-                    <h3>Next Session's Hifz</h3>
+                    <h3 data-translate="content.next_hifz">Next Session's Hifz</h3>
                     <div class="content-items" id="hifzContent">
                         <!-- Content items will be added here -->
                     </div>
@@ -53,7 +53,7 @@
 
                 <!-- Next Session's Revision Card -->
                 <div class="content-card revision-card">
-                    <h3>Next Session's Revision</h3>
+                    <h3 data-translate="content.next_revision">Next Session's Revision</h3>
                     <div class="content-items" id="revisionContent">
                         <!-- Content items will be added here -->
                     </div>
@@ -63,7 +63,7 @@
 
             <!-- Bottom Row: Large Past Sessions Card -->
             <div class="past-sessions-card">
-                <h3>Past Sessions</h3>
+                <h3 data-translate="content.past_sessions">Past Sessions</h3>
                 <div class="sessions-list" id="sessionsList">
                     <!-- Session items will be added here -->
                 </div>
@@ -77,7 +77,7 @@
     <div id="addHifzModal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3>Add Hifz Content</h3>
+            <h3 data-translate="modal.add_hifz">Add Hifz Content</h3>
             <form id="addHifzForm">
                 <div class="form-group">
                     <label>Surah Name:</label>
@@ -215,7 +215,7 @@
     <div id="addRevisionModal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3>Add Revision Content</h3>
+            <h3 data-translate="modal.add_revision">Add Revision Content</h3>
             <form id="addRevisionForm">
                 <div class="form-group">
                     <label>Surah Name:</label>
@@ -353,24 +353,24 @@
     <div id="addSessionModal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3>Add Session</h3>
+            <h3 data-translate="modal.add_session">Add Session</h3>
             <form id="addSessionForm">
                 <div class="form-group">
-                    <label>Date:</label>
+                    <label data-translate="modal.date">Date:</label>
                     <input type="date" id="sessionDate" required>
                 </div>
                 <div class="form-group">
-                    <label>Hifz Surah(s) & Ayah Numbers:</label>
-                    <input type="text" id="sessionHifz" placeholder="e.g., Al Naba 1-25, Al Mursalat 1-15" required>
+                    <label data-translate="session.hifz_surahs">Hifz Surah(s) & Ayah Numbers:</label>
+                    <input type="text" id="sessionHifz" data-translate-placeholder="session.hifz_placeholder" placeholder="e.g., Al Naba 1-25, Al Mursalat 1-15" required>
                 </div>
                 <div class="form-group">
-                    <label>Revision Surah(s) & Ayah Numbers:</label>
-                    <input type="text" id="sessionRevision" placeholder="e.g., Al Naba 1-25" required>
+                    <label data-translate="session.revision_surahs">Revision Surah(s) & Ayah Numbers:</label>
+                    <input type="text" id="sessionRevision" data-translate-placeholder="session.revision_placeholder" placeholder="e.g., Al Naba 1-25" required>
                 </div>
                 <div class="form-group">
-                    <label>Grade:</label>
+                    <label data-translate="modal.grade">Grade:</label>
                     <select id="sessionGrade" required>
-                        <option value="">Select Grade</option>
+                        <option value="" data-translate="modal.select_grade">Select Grade</option>
                         <option value="10">10</option>
                         <option value="9">9</option>
                         <option value="8">8</option>
@@ -384,8 +384,8 @@
                     </select>
                 </div>
                 <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary">Add</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addSessionModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="modal.add">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addSessionModal')" data-translate="modal.cancel">Cancel</button>
                 </div>
             </form>
         </div>
@@ -395,7 +395,7 @@
     <div id="studentSelectionModal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3>Select Student</h3>
+            <h3 data-translate="student.select_student">Select Student</h3>
             <div class="students-list" id="studentsList">
                 <!-- Students will be listed here -->
             </div>
@@ -406,49 +406,49 @@
     <div id="createAccountModal" class="modal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('createAccountModal')">&times;</span>
-            <h3>Create New Account</h3>
+            <h3 data-translate="account.create_title">Create New Account</h3>
             <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
                 <div class="form-group">
-                    <label for="accountType">Account Type</label>
+                    <label for="accountType" data-translate="account.account_type">Account Type</label>
                     <select id="accountType" required>
-                        <option value="">Select Account Type</option>
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
+                        <option value="" data-translate="account.select_type">Select Account Type</option>
+                        <option value="student" data-translate="account.student">Student</option>
+                        <option value="teacher" data-translate="account.teacher">Teacher</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="firstName">First Name</label>
+                    <label for="firstName" data-translate="account.first_name">First Name</label>
                     <input type="text" id="firstName" required>
                 </div>
                 <div class="form-group">
-                    <label for="lastName">Last Name</label>
+                    <label for="lastName" data-translate="account.last_name">Last Name</label>
                     <input type="text" id="lastName" required>
                 </div>
                 <div class="form-group">
-                    <label for="grade">Grade</label>
+                    <label for="grade" data-translate="account.grade">Grade</label>
                     <select id="grade" required onchange="updateClassOptions()">
-                        <option value="">Select Grade</option>
-                        <option value="7">Grade 7</option>
-                        <option value="8">Grade 8</option>
-                        <option value="9">Grade 9</option>
-                        <option value="10">Grade 10</option>
+                        <option value="" data-translate="account.select_grade">Select Grade</option>
+                        <option value="7" data-translate="account.grade_7">Grade 7</option>
+                        <option value="8" data-translate="account.grade_8">Grade 8</option>
+                        <option value="9" data-translate="account.grade_9">Grade 9</option>
+                        <option value="10" data-translate="account.grade_10">Grade 10</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="className">Class</label>
+                    <label for="className" data-translate="account.class">Class</label>
                     <select id="className" required>
-                        <option value="">Select Grade First</option>
+                        <option value="" data-translate="account.select_grade_first">Select Grade First</option>
                     </select>
                 </div>
                 <div class="form-group" id="teacherNameGroup" style="display: none;">
-                    <label for="teacherName">Teacher Name (Optional)</label>
+                    <label for="teacherName" data-translate="account.teacher_name">Teacher Name (Optional)</label>
                     <select id="teacherName">
-                        <option value="">Leave unassigned</option>
+                        <option value="" data-translate="account.leave_unassigned">Leave unassigned</option>
                     </select>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('createAccountModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Account</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createAccountModal')" data-translate="modal.cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="account.create_title">Create Account</button>
                 </div>
             </form>
         </div>
@@ -556,14 +556,14 @@
                 <div id="logoutConfirmationModal" class="modal">
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeModal('logoutConfirmationModal')">&times;</span>
-                        <h3>Confirm Logout</h3>
+                        <h3 data-translate="logout.confirm_title">Confirm Logout</h3>
                         <p style="text-align: center; color: #666; margin-bottom: 30px;">
-                            Are you sure you want to log out?<br>
-                            <span style="color: var(--warning-color); font-weight: bold;">This will end your current session.</span>
+                            <span data-translate="logout.are_you_sure">Are you sure you want to log out?</span><br>
+                            <span style="color: var(--warning-color); font-weight: bold;" data-translate="logout.warning">This will end your current session.</span>
                         </p>
                         <div class="modal-actions">
-                            <button type="button" class="btn btn-danger" onclick="confirmLogout()">Yes, Logout</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmationModal')">Cancel</button>
+                            <button type="button" class="btn btn-danger" onclick="confirmLogout()" data-translate="logout.yes_logout">Yes, Logout</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmationModal')" data-translate="logout.cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
