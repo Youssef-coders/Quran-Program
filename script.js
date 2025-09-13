@@ -909,6 +909,12 @@ const translations = {
         'login.create_account': 'Create New Account',
         'login.back_to_login': 'Back to Login',
         
+        // Form elements
+        'form.start_ayah': 'Start Ayah',
+        'form.end_ayah': 'End Ayah',
+        'form.to': 'to',
+        'form.select_surah_first': 'Please select a surah first',
+        
         // Header
         'header.logout': 'Logout',
         'header.administrator': 'Administrator',
@@ -1122,6 +1128,12 @@ const translations = {
         'login.no_account': 'ليس لديك حساب؟',
         'login.create_account': 'إنشاء حساب جديد',
         'login.back_to_login': 'العودة إلى تسجيل الدخول',
+        
+        // Form elements
+        'form.start_ayah': 'الآية الأولى',
+        'form.end_ayah': 'الآية الأخيرة',
+        'form.to': 'إلى',
+        'form.select_surah_first': 'يرجى اختيار السورة أولاً',
         
         // Header
         'header.logout': 'تسجيل الخروج',
@@ -3897,12 +3909,12 @@ function generateAyahRangeDropdown(surahName, startId, endId) {
     
     return `
         <select id="${startId}" required style="flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: white; font-size: 14px;">
-            <option value="">Start Ayah</option>
+            <option value="">${getTranslation('form.start_ayah')}</option>
             ${options.join('')}
         </select>
-        <span style="font-weight: 500; color: #333;">to</span>
+        <span style="font-weight: 500; color: #333;">${getTranslation('form.to')}</span>
         <select id="${endId}" required style="flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: white; font-size: 14px;">
-            <option value="">End Ayah</option>
+            <option value="">${getTranslation('form.end_ayah')}</option>
             ${options.join('')}
         </select>
     `;
@@ -3969,14 +3981,14 @@ function updateAyahRangeDropdowns(surahSelectId, containerId) {
     if (!surahSelect || !container) return;
     
     // Set initial state
-    container.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Please select a surah first</p>';
+    container.innerHTML = `<p style="color: #666; text-align: center; padding: 10px;">${getTranslation('form.select_surah_first')}</p>`;
     
     surahSelect.addEventListener('change', function() {
         const surahName = this.value;
         if (surahName) {
             container.innerHTML = generateAyahRangeDropdown(surahName, `${surahSelectId.replace('Surah', 'StartAyah')}`, `${surahSelectId.replace('Surah', 'EndAyah')}`);
         } else {
-            container.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Please select a surah first</p>';
+            container.innerHTML = `<p style="color: #666; text-align: center; padding: 10px;">${getTranslation('form.select_surah_first')}</p>`;
         }
     });
 }
@@ -4681,10 +4693,10 @@ function updateClassOptions() {
     const selectedGrade = gradeSelect.value;
     
     // Clear current options
-    classSelect.innerHTML = '<option value="">Select Class</option>';
+    classSelect.innerHTML = `<option value="">${getTranslation('signup.select_class')}</option>`;
     
     if (!selectedGrade) {
-        classSelect.innerHTML = '<option value="">Select Grade First</option>';
+        classSelect.innerHTML = `<option value="">${getTranslation('signup.select_grade_first')}</option>`;
         return;
     }
     
