@@ -692,7 +692,14 @@ function debugDataStructure() {
 // Sample data for demonstration with new ID system
 const sampleData = {
     admin: {
-        'ADMINYNG9': { name: 'System Administrator', role: 'admin' }
+        'ADMINYNG9': { 
+            name: 'System Administrator', 
+            role: 'admin',
+            id: 'ADMINYNG9',
+            type: 'admin',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        }
     },
     students: {
         'SYN1AM1': { 
@@ -900,6 +907,7 @@ const translations = {
         'login.invalid': 'Invalid user code. Please try again.',
         'login.no_account': 'Don\'t have an account?',
         'login.create_account': 'Create New Account',
+        'login.back_to_login': 'Back to Login',
         
         // Header
         'header.logout': 'Logout',
@@ -1113,6 +1121,7 @@ const translations = {
         'login.invalid': 'رمز المستخدم غير صحيح. يرجى المحاولة مرة أخرى.',
         'login.no_account': 'ليس لديك حساب؟',
         'login.create_account': 'إنشاء حساب جديد',
+        'login.back_to_login': 'العودة إلى تسجيل الدخول',
         
         // Header
         'header.logout': 'تسجيل الخروج',
@@ -4083,6 +4092,7 @@ async function loadDataFromStorage() {
         // Then try Firebase if available
         if (window.firebaseService && window.firebaseService.initialized) {
             try {
+                console.log('Loading data from Firebase...');
                 const students = await window.firebaseService.getAllStudents();
                 const teachers = await window.firebaseService.getAllTeachers();
                 
@@ -4105,6 +4115,7 @@ async function loadDataFromStorage() {
             } catch (firebaseError) {
                 console.error('Error loading from Firebase:', firebaseError);
                 console.log('Using localStorage data as fallback');
+                // Don't show error to user, just continue with local data
             }
         } else {
             console.log('Firebase not available, using localStorage data');

@@ -296,7 +296,7 @@
     </div>
 
     <div class="auth-container">
-        <button id="languageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة">ع</button>
+        <button id="languageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">ع</button>
         
         <div class="auth-card">
             <div class="auth-header">
@@ -456,6 +456,17 @@
             console.log('DOM loaded, initializing SignupManager...');
             window.signupManager = new SignupManager();
             console.log('SignupManager initialized:', window.signupManager);
+            
+            // Add language toggle functionality
+            const languageToggle = document.getElementById('languageToggle');
+            if (languageToggle) {
+                languageToggle.addEventListener('click', function() {
+                    if (window.signupManager) {
+                        window.signupManager.toggleLanguage();
+                    }
+                });
+                console.log('Language toggle event listener added');
+            }
         });
         
         function updateClassOptions() {
