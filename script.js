@@ -4016,6 +4016,17 @@ async function syncDeleteStudentToFirebase(studentId) {
         try {
             await window.firebaseService.deleteStudent(studentId);
             console.log('Student deleted from Firebase:', studentId);
+            
+            // Also delete from localStorage immediately
+            const students = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+            delete students[studentId];
+            localStorage.setItem('quranStudents', JSON.stringify(students));
+            
+            const content = JSON.parse(localStorage.getItem('quranContent') || '{}');
+            delete content[studentId];
+            localStorage.setItem('quranContent', JSON.stringify(content));
+            
+            console.log('Student also removed from localStorage:', studentId);
         } catch (error) {
             console.error('Error deleting student from Firebase:', error);
         }
@@ -4158,6 +4169,10 @@ async function loadDataFromStorage() {
         // First try to load from localStorage as fallback
         loadAllDataFromStorage();
         
+        // Clear any existing data to ensure clean state
+        sampleData.students = {};
+        sampleData.teachers = {};
+        
         // Then try Firebase if available
         if (window.firebaseService && window.firebaseService.initialized) {
             try {
@@ -4166,17 +4181,23 @@ async function loadDataFromStorage() {
                 const teachers = await window.firebaseService.getAllTeachers();
                 
                 if (students && Object.keys(students).length > 0) {
-                    // Always prioritize Firebase data over localStorage
+                    // Replace localStorage data with Firebase data completely
                     console.log('Loading students from Firebase:', Object.keys(students).length);
-                    sampleData.students = { ...sampleData.students, ...students };
+                    sampleData.students = students;
+                    // Update localStorage to match Firebase
+                    localStorage.setItem('quranStudents', JSON.stringify(students));
                 }
                 if (teachers && Object.keys(teachers).length > 0) {
-                    // Always prioritize Firebase data over localStorage
+                    // Replace localStorage data with Firebase data completely
                     console.log('Loading teachers from Firebase:', Object.keys(teachers).length);
-                    sampleData.teachers = { ...sampleData.teachers, ...teachers };
-                }
+                    sampleData.teachers = teachers;
+                    // Update localStorage to match Firebase
+                    localStorage.setItem('quranTeachers', JSON.stringify(teachers));
+            }
             
             console.log('Data loaded from Firebase:', sampleData);
+            console.log('Students after Firebase load:', Object.keys(sampleData.students));
+            console.log('Teachers after Firebase load:', Object.keys(sampleData.teachers));
             } catch (firebaseError) {
                 console.error('Error loading from Firebase:', firebaseError);
                 console.log('Using localStorage data as fallback');
@@ -4393,6 +4414,10 @@ function confirmDeleteStudent() {
         
         // Sync to Firebase
         syncDeleteStudentToFirebase(studentId);
+        
+        // Force update localStorage to ensure deletion is persisted
+        localStorage.setItem('quranStudents', JSON.stringify(sampleData.students));
+        localStorage.setItem('quranContent', JSON.stringify(sampleData.content));
         
         // Close modals
         closeModal('deleteStudentModal');
