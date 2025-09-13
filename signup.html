@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MRIS Quran Program - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .auth-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: transparent;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .auth-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #5a67d8;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .success-message h3 {
+            margin: 0 0 15px 0;
+            color: #155724;
+        }
+
+        .success-message .id-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            border: 2px dashed #28a745;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .language-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .language-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Checkbox Styles */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .checkbox-label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + span {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .checkbox-label:has(input:checked) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        /* Fix auth container positioning for RTL */
+        body[dir="rtl"] .auth-container {
+            direction: ltr; /* Force LTR for layout stability */
+        }
+
+        body[dir="rtl"] .auth-card {
+            direction: ltr; /* Force LTR for layout stability */
+            text-align: center; /* Ensure center alignment */
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" data-translate="loading.creating_account">Creating Account...</div>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <button id="languageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة">ع</button>
+        
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 data-translate="auth.title">MRIS Quran Program</h2>
+                <p data-translate="auth.subtitle">Join the MRIS Quran memorization program</p>
+            </div>
+
+            <div class="auth-buttons">
+                <button id="loginBtn" class="auth-btn active" data-translate="auth.login">Login</button>
+                <button id="signupBtn" class="auth-btn" data-translate="auth.signup">Sign Up</button>
+            </div>
+
+            <!-- Login Section -->
+            <div id="loginSection" class="form-section active">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <input type="text" id="userCode" data-translate-placeholder="login.placeholder" placeholder="Enter your unique code" required>
+                    </div>
+                    <button type="submit" class="submit-btn" data-translate="login.button">Login</button>
+                </form>
+            </div>
+
+            <!-- Sign Up Section -->
+            <div id="signupSection" class="form-section">
+                <!-- Error message removed - no more popups! -->
+                <div id="successMessage" class="success-message">
+                    <h3 data-translate="signup.success_title">Account Created Successfully!</h3>
+                    <p data-translate="signup.success_message">Your account has been created. Here is your unique ID:</p>
+                    <div id="generatedId" class="id-display"></div>
+                    <p><strong data-translate="signup.important_note">IMPORTANT:</strong> <span data-translate="signup.save_id">Please SAVE this ID. You will need it to log in to the system.</span></p>
+                    <div class="program-info">
+                        <h4 data-translate="signup.program_schedule">Program Schedule:</h4>
+                        <p>📅 <strong data-translate="signup.days">Days:</strong> <span data-translate="signup.schedule_days">Every Monday and Thursday</span></p>
+                        <p>🕕 <strong data-translate="signup.time">Time:</strong> <span data-translate="signup.schedule_time">6:45 AM - 7:15 AM</span></p>
+                    </div>
+                </div>
+
+                <form id="signupForm">
+                    <!-- Notification will be sent via email only -->
+                    <input type="hidden" id="notificationMethod" name="notificationMethod" value="email">
+
+                    <div class="form-group">
+                        <label for="userType" data-translate="signup.user_type">User Type</label>
+                        <select id="userType" name="userType" required>
+                            <option value="" data-translate="signup.select_type">Select Type</option>
+                            <option value="student" data-translate="signup.student">Student</option>
+                            <option value="teacher" data-translate="signup.teacher">Teacher</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="firstName" data-translate="signup.first_name">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName" data-translate="signup.last_name">Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+
+                    <div class="form-group" id="gradeGroup">
+                        <label for="grade" data-translate="signup.grade">Grade</label>
+                        <select id="grade" name="grade" required>
+                            <option value="" data-translate="signup.select_grade">Select Grade</option>
+                            <option value="5">Grade 5</option>
+                            <option value="6">Grade 6</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="Teacher">Teacher</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="classGroup">
+                        <label for="class" data-translate="signup.class">Class</label>
+                        <select id="class">
+                            <option value="" data-translate="signup.select_class">Select Class</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="teacherGradesGroup" style="display: none;">
+                        <label data-translate="signup.teacher_grades">What grades do you teach?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="5">
+                                <span>Grade 5</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="6">
+                                <span>Grade 6</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="7">
+                                <span>Grade 7</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="8">
+                                <span>Grade 8</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="9">
+                                <span>Grade 9</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="teacherGrades" value="10">
+                                <span>Grade 10</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="teacherClassesGroup" style="display: none;">
+                        <label data-translate="signup.teacher_classes">What classes do you teach?</label>
+                        <div class="checkbox-group" id="teacherClassesCheckboxes">
+                            <p data-translate="signup.select_grades_first">Select grades first</p>
+                    </div>
+                    </div>
+
+
+
+                    <button type="submit" class="submit-btn" data-translate="signup.create_account">Create Account</button>
+                </form>
+            </div>
+
+            <a href="index.html" class="back-link" data-translate="auth.back_to_main">← Back to Main</a>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSOZYCUMqO9KEr9a93GaanxuIelJIIIGM",
+            authDomain: "quran-tracker-6a536.firebaseapp.com",
+            projectId: "quran-tracker-6a536",
+            storageBucket: "quran-tracker-6a536.firebasestorage.app",
+            messagingSenderId: "988749694504",
+            appId: "1:988749694504:web:91af1972179d797409171d"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- Load Services -->
+    <script src="firebaseService.js"></script>
+    <script src="emailService.js"></script>
+    <script src="signup.js"></script>
+    
+    <!-- Initialize SignupManager -->
+    <script>
+        // Initialize the signup manager when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing SignupManager...');
+            window.signupManager = new SignupManager();
+            console.log('SignupManager initialized:', window.signupManager);
+        });
+        
+        function updateClassOptions() {
+            if (window.signupManager) {
+                window.signupManager.updateClassOptions();
+            }
+        }
+        
+        function updateTeacherClassOptions() {
+            if (window.signupManager) {
+                window.signupManager.updateTeacherClassOptions();
+            }
+        }
+    </script>
+</body>
+</html>

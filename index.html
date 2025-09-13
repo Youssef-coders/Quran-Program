@@ -5,10 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MRIS Quran Program</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- Load scripts in correct order -->
+    <script src="script.js"></script>
+    <!-- Remove conflicting auth.js -->
 </head>
 <body>
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
+        <div class="login-header">
+            <button id="loginLanguageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة">ع</button>
+        </div>
         <div class="login-card">
                                             <h2 data-translate="login.title">MRIS Quran Program</h2>
                                 <p style="font-size: 14px; color: #666; margin-bottom: 20px;" data-translate="login.subtitle">
@@ -18,8 +30,13 @@
                 <div class="form-group">
                     <input type="text" id="userCode" data-translate-placeholder="login.placeholder" placeholder="Enter your unique code" required>
                 </div>
-                <button type="submit" class="login-btn" data-translate="login.button">Login</button>
+                <button type="submit" id="loginBtn" class="login-btn" data-translate="login.button">Login</button>
             </form>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <p style="color: #666; margin-bottom: 15px;" data-translate="login.no_account">Don't have an account?</p>
+                <a href="signup.html" class="signup-link" data-translate="login.create_account">Create New Account</a>
+            </div>
         </div>
     </div>
 
@@ -34,7 +51,8 @@
             </div>
             <div class="header-actions">
                 <button id="languageToggle" class="language-toggle-btn" title="Switch Language / تبديل اللغة">ع</button>
-                <button id="logoutBtn" class="logout-btn" data-translate="header.logout">Logout</button>
+                <button id="testModalBtn" class="language-toggle-btn" onclick="testModal()" style="margin-right: 10px;">Options</button>
+                        <button id="logoutBtn" class="logout-btn" data-translate="header.logout" onclick="handleLogout()">Logout</button>
             </div>
         </header>
 
@@ -80,9 +98,9 @@
             <h3 data-translate="modal.add_hifz">Add Hifz Content</h3>
             <form id="addHifzForm">
                 <div class="form-group">
-                    <label>Surah Name:</label>
+                    <label data-translate="modal.surah_name">Surah Name:</label>
                     <select id="hifzSurah" required>
-                        <option value="">Select Surah</option>
+                        <option value="" data-translate="modal.select_surah">Select Surah</option>
                         <option value="Al Fatiha">Al Fatiha</option>
                         <option value="Al Baqarah">Al Baqarah</option>
                         <option value="Al Imran">Al Imran</option>
@@ -200,12 +218,14 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ayah Range:</label>
-                    <input type="text" id="hifzAyahRange" placeholder="e.g., 1 - 25" required>
+                    <label data-translate="modal.ayah_range">Ayah Range:</label>
+                    <div id="hifzAyahRangeContainer">
+                        <!-- Ayah range dropdowns will be generated here -->
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">Add</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addHifzModal')">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addHifzModal')" data-translate="modal.cancel">Cancel</button>
                 </div>
             </form>
         </div>
@@ -218,9 +238,9 @@
             <h3 data-translate="modal.add_revision">Add Revision Content</h3>
             <form id="addRevisionForm">
                 <div class="form-group">
-                    <label>Surah Name:</label>
+                    <label data-translate="modal.surah_name">Surah Name:</label>
                     <select id="revisionSurah" required>
-                        <option value="">Select Surah</option>
+                        <option value="" data-translate="modal.select_surah">Select Surah</option>
                         <option value="Al Fatiha">Al Fatiha</option>
                         <option value="Al Baqarah">Al Baqarah</option>
                         <option value="Al Imran">Al Imran</option>
@@ -338,12 +358,14 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ayah Range:</label>
-                    <input type="text" id="revisionAyahRange" placeholder="e.g., 1 - 25" required>
+                    <label data-translate="modal.ayah_range">Ayah Range:</label>
+                    <div id="revisionAyahRangeContainer">
+                        <!-- Ayah range dropdowns will be generated here -->
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">Add</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addRevisionModal')">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addRevisionModal')" data-translate="modal.cancel">Cancel</button>
                 </div>
             </form>
         </div>
@@ -361,16 +383,20 @@
                 </div>
                 <div class="form-group">
                     <label data-translate="session.hifz_surahs">Hifz Surah(s) & Ayah Numbers:</label>
-                    <input type="text" id="sessionHifz" data-translate-placeholder="session.hifz_placeholder" placeholder="e.g., Al Naba 1-25, Al Mursalat 1-15" required>
+                    <select id="sessionHifzSurah" required>
+                        <option value="">Select Hifz Item</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label data-translate="session.revision_surahs">Revision Surah(s) & Ayah Numbers:</label>
-                    <input type="text" id="sessionRevision" data-translate-placeholder="session.revision_placeholder" placeholder="e.g., Al Naba 1-25" required>
+                    <select id="sessionRevisionSurah" required>
+                        <option value="">Select Revision Item</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label data-translate="modal.grade">Grade:</label>
-                    <select id="sessionGrade" required>
-                        <option value="" data-translate="modal.select_grade">Select Grade</option>
+                    <label data-translate="modal.score">Score:</label>
+                    <select id="sessionScore" required>
+                        <option value="" data-translate="modal.select_score">Select Score</option>
                         <option value="10">10</option>
                         <option value="9">9</option>
                         <option value="8">8</option>
@@ -391,16 +417,6 @@
         </div>
     </div>
 
-    <!-- Student Selection Modal (for teachers) -->
-    <div id="studentSelectionModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h3 data-translate="student.select_student">Select Student</h3>
-            <div class="students-list" id="studentsList">
-                <!-- Students will be listed here -->
-            </div>
-        </div>
-    </div>
 
     <!-- Create Account Modal (for admin) -->
     <div id="createAccountModal" class="modal">
@@ -458,8 +474,8 @@
                 <div id="assignStudentsModal" class="modal">
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeModal('assignStudentsModal')">&times;</span>
-                        <h3>Assign Students to Teachers</h3>
-                        <p style="text-align: center; color: #666; margin-bottom: 25px;">
+                        <h3 data-translate="admin.assign_students">Assign Students to Teachers</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 25px;" data-translate="admin.assign_description">
                             Select a teacher and then choose an unassigned student to create an assignment.
                         </p>
                         <div class="assignment-section">
@@ -476,8 +492,8 @@
                                 </select>
                             </div>
                             <div class="modal-actions">
-                                <button type="button" class="btn btn-primary" onclick="assignStudentToTeacher()">Assign Student</button>
-                                <button type="button" class="btn btn-secondary" onclick="closeModal('assignStudentsModal')">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="assignStudentToTeacher()" data-translate="admin.assign_student">Assign Student</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('assignStudentsModal')" data-translate="modal.cancel">Cancel</button>
                             </div>
                         </div>
                         <div class="current-assignments">
@@ -493,9 +509,9 @@
                 <div id="deleteStudentModal" class="modal">
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeModal('deleteStudentModal')">&times;</span>
-                        <h3>Delete Student</h3>
+                        <h3 data-translate="admin.delete_student">Delete Student</h3>
                         <div class="delete-student-content">
-                            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                            <p style="text-align: center; color: #666; margin-bottom: 20px;" data-translate="admin.delete_student_warning">
                                 Select a student to delete from the system.
                             </p>
                             <div class="form-group">
@@ -505,18 +521,18 @@
                                 </select>
                             </div>
                             <div class="student-preview" id="studentPreview" style="display: none;">
-                                <h4>Student Information</h4>
+                                <h4 data-translate="admin.student_info">Student Information</h4>
                                 <div class="student-details">
-                                    <p><strong>Name:</strong> <span id="previewStudentName"></span></p>
-                                    <p><strong>Class:</strong> <span id="previewStudentClass"></span></p>
-                                    <p><strong>Teacher:</strong> <span id="previewStudentTeacher"></span></p>
-                                    <p><strong>Content Items:</strong> <span id="previewStudentContent"></span></p>
+                                    <p><strong data-translate="admin.name">Name:</strong> <span id="previewStudentName"></span></p>
+                                    <p><strong data-translate="admin.class">Class:</strong> <span id="previewStudentClass"></span></p>
+                                    <p><strong data-translate="admin.teacher">Teacher:</strong> <span id="previewStudentTeacher"></span></p>
+                                    <p><strong data-translate="admin.content_items">Content Items:</strong> <span id="previewStudentContent"></span></p>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-actions">
-                            <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent()" id="confirmDeleteBtn" disabled>Delete Student</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteStudentModal')">Cancel</button>
+                            <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent()" id="confirmDeleteBtn" disabled data-translate="delete.confirm_delete_student">Delete Student</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteStudentModal')" data-translate="modal.cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -525,9 +541,9 @@
                 <div id="deleteTeacherModal" class="modal">
                     <div class="modal-content">
                         <span class="modal-close" onclick="closeModal('deleteTeacherModal')">&times;</span>
-                        <h3>Delete Teacher</h3>
+                        <h3 data-translate="admin.delete_teacher">Delete Teacher</h3>
                         <div class="delete-teacher-content">
-                            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                            <p style="text-align: center; color: #666; margin-bottom: 20px;" data-translate="admin.delete_teacher_warning">
                                 Select a teacher to delete from the system.
                             </p>
                             <div class="form-group">
@@ -537,43 +553,69 @@
                                 </select>
                             </div>
                             <div class="teacher-preview" id="teacherPreview" style="display: none;">
-                                <h4>Teacher Information</h4>
+                                <h4 data-translate="admin.teacher_info">Teacher Information</h4>
                                 <div class="teacher-details">
-                                    <p><strong>Name:</strong> <span id="previewTeacherName"></span></p>
-                                    <p><strong>Assigned Students:</strong> <span id="previewTeacherStudents"></span></p>
-                                    <p><strong>Impact:</strong> <span id="previewTeacherImpact"></span></p>
+                                    <p><strong data-translate="admin.name">Name:</strong> <span id="previewTeacherName"></span></p>
+                                    <p><strong data-translate="admin.assigned_students">Assigned Students:</strong> <span id="previewTeacherStudents"></span></p>
+                                    <p><strong data-translate="admin.impact">Impact:</strong> <span id="previewTeacherImpact"></span></p>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-actions">
-                            <button type="button" class="btn btn-danger" onclick="confirmDeleteTeacher()" id="confirmDeleteTeacherBtn" disabled>Delete Teacher</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteTeacherModal')">Cancel</button>
+                            <button type="button" class="btn btn-danger" onclick="confirmDeleteTeacher()" id="confirmDeleteTeacherBtn" disabled data-translate="delete.confirm_delete_teacher">Delete Teacher</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteTeacherModal')" data-translate="modal.cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Logout Confirmation Modal -->
-                <div id="logoutConfirmationModal" class="modal">
+                <!-- Logout confirmation modal removed - direct logout now! -->
+
+                <!-- Class Selection Modal for Teachers -->
+                <div id="classSelectionModal" class="modal">
                     <div class="modal-content">
-                        <span class="modal-close" onclick="closeModal('logoutConfirmationModal')">&times;</span>
-                        <h3 data-translate="logout.confirm_title">Confirm Logout</h3>
-                        <p style="text-align: center; color: #666; margin-bottom: 30px;">
-                            <span data-translate="logout.are_you_sure">Are you sure you want to log out?</span><br>
-                            <span style="color: var(--warning-color); font-weight: bold;" data-translate="logout.warning">This will end your current session.</span>
-                        </p>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-danger" onclick="confirmLogout()" data-translate="logout.yes_logout">Yes, Logout</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('logoutConfirmationModal')" data-translate="logout.cancel">Cancel</button>
+                        <span class="modal-close" onclick="closeModal('classSelectionModal')">&times;</span>
+                        <h3 data-translate="teacher.select_class">Select a Class</h3>
+                        <p data-translate="teacher.class_description">Choose a class to view and assign students</p>
+                        <div id="classesList" class="classes-grid">
+                            <!-- Classes will be populated here -->
                         </div>
                     </div>
                 </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+                <!-- Student Selection Modal -->
+                <div id="studentSelectionModal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeModal('studentSelectionModal')">&times;</span>
+                        <h3 data-translate="teacher.select_student">Select Students</h3>
+                        <p id="selectedClassInfo" data-translate="teacher.students_in_class">Students in this class:</p>
+                        <div class="modal-actions" style="margin-bottom: 20px;">
+                            <button type="button" class="btn btn-primary" onclick="addSelectedStudents()" data-translate="teacher.add_selected">Add Selected Students</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('studentSelectionModal')" data-translate="modal.cancel">Cancel</button>
+                        </div>
+                        <div id="studentsList" class="students-grid">
+                            <!-- Students will be populated here -->
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Teacher Dashboard Options Modal -->
+                <div id="teacherOptionsModal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeModal('teacherOptionsModal')">&times;</span>
+                        <h3 data-translate="teacher.dashboard_options">Teacher Dashboard Options</h3>
+                        <p data-translate="teacher.choose_action">Choose an action:</p>
+                        <div class="teacher-options">
+                            <button type="button" class="btn btn-primary" onclick="showClassSelection()" data-translate="teacher.add_student">Add Student</button>
+                            <button type="button" class="btn btn-secondary" onclick="showAssignedStudents()" data-translate="teacher.edit_students">Edit Students</button>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('teacherOptionsModal')" data-translate="modal.cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+    <!-- Firebase Configuration -->
+    <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBSOZYCUMqO9KEr9a93GaanxuIelJIIIGM",
@@ -585,15 +627,10 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Make Firebase available globally
-        window.db = db;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
+        firebase.initializeApp(firebaseConfig);
     </script>
-    <script src="script.js"></script>
+    
+    <!-- Load Firebase Service -->
+    <script src="firebaseService.js"></script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+{
+  "name": "mris-quran-program",
+  "version": "1.0.0",
+  "description": "MRIS Quran Program with Firebase integration and student signup system",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx http-server -p 8000",
+    "deploy": "gh-pages -d .",
+    "build": "echo 'No build step required for static site'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/quran-program.git"
+  },
+  "keywords": [
+    "quran",
+    "education",
+    "firebase",
+    "javascript",
+    "mris",
+    "student-management"
+  ],
+  "author": "MRIS Development Team",
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^6.0.0",
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

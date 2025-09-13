@@ -1,13 +1,892 @@
 // MRIS Quran Program - Main Script
 
+// Surah data with ayah counts
+const surahData = {
+    1: { name: 'Al-Fatihah', arabicName: 'الفاتحة', ayahs: 7 },
+    2: { name: 'Al-Baqarah', arabicName: 'البقرة', ayahs: 286 },
+    3: { name: 'Ali Imran', arabicName: 'آل عمران', ayahs: 200 },
+    4: { name: 'An-Nisa', arabicName: 'النساء', ayahs: 176 },
+    5: { name: 'Al-Maidah', arabicName: 'المائدة', ayahs: 120 },
+    6: { name: 'Al-Anam', arabicName: 'الأنعام', ayahs: 165 },
+    7: { name: 'Al-Araf', arabicName: 'الأعراف', ayahs: 206 },
+    8: { name: 'Al-Anfal', arabicName: 'الأنفال', ayahs: 75 },
+    9: { name: 'At-Tawbah', arabicName: 'التوبة', ayahs: 129 },
+    10: { name: 'Yunus', arabicName: 'يونس', ayahs: 109 },
+    11: { name: 'Hud', arabicName: 'هود', ayahs: 123 },
+    12: { name: 'Yusuf', arabicName: 'يوسف', ayahs: 111 },
+    13: { name: 'Ar-Rad', arabicName: 'الرعد', ayahs: 43 },
+    14: { name: 'Ibrahim', arabicName: 'إبراهيم', ayahs: 52 },
+    15: { name: 'Al-Hijr', arabicName: 'الحجر', ayahs: 99 },
+    16: { name: 'An-Nahl', arabicName: 'النحل', ayahs: 128 },
+    17: { name: 'Al-Isra', arabicName: 'الإسراء', ayahs: 111 },
+    18: { name: 'Al-Kahf', arabicName: 'الكهف', ayahs: 110 },
+    19: { name: 'Maryam', arabicName: 'مريم', ayahs: 98 },
+    20: { name: 'Taha', arabicName: 'طه', ayahs: 135 },
+    21: { name: 'Al-Anbiya', arabicName: 'الأنبياء', ayahs: 112 },
+    22: { name: 'Al-Hajj', arabicName: 'الحج', ayahs: 78 },
+    23: { name: 'Al-Muminun', arabicName: 'المؤمنون', ayahs: 118 },
+    24: { name: 'An-Nur', arabicName: 'النور', ayahs: 64 },
+    25: { name: 'Al-Furqan', arabicName: 'الفرقان', ayahs: 77 },
+    26: { name: 'Ash-Shuara', arabicName: 'الشعراء', ayahs: 227 },
+    27: { name: 'An-Naml', arabicName: 'النمل', ayahs: 93 },
+    28: { name: 'Al-Qasas', arabicName: 'القصص', ayahs: 88 },
+    29: { name: 'Al-Ankabut', arabicName: 'العنكبوت', ayahs: 69 },
+    30: { name: 'Ar-Rum', arabicName: 'الروم', ayahs: 60 },
+    31: { name: 'Luqman', ayahs: 34 },
+    32: { name: 'As-Sajdah', ayahs: 30 },
+    33: { name: 'Al-Ahzab', ayahs: 73 },
+    34: { name: 'Saba', ayahs: 54 },
+    35: { name: 'Fatir', ayahs: 45 },
+    36: { name: 'Ya-Sin', arabicName: 'يس', ayahs: 83 },
+    37: { name: 'As-Saffat', ayahs: 182 },
+    38: { name: 'Sad', ayahs: 88 },
+    39: { name: 'Az-Zumar', ayahs: 75 },
+    40: { name: 'Ghafir', ayahs: 85 },
+    41: { name: 'Fussilat', ayahs: 54 },
+    42: { name: 'Ash-Shura', ayahs: 53 },
+    43: { name: 'Az-Zukhruf', ayahs: 89 },
+    44: { name: 'Ad-Dukhan', ayahs: 59 },
+    45: { name: 'Al-Jathiyah', ayahs: 37 },
+    46: { name: 'Al-Ahqaf', ayahs: 35 },
+    47: { name: 'Muhammad', ayahs: 38 },
+    48: { name: 'Al-Fath', ayahs: 29 },
+    49: { name: 'Al-Hujurat', ayahs: 18 },
+    50: { name: 'Qaf', ayahs: 45 },
+    51: { name: 'Adh-Dhariyat', ayahs: 60 },
+    52: { name: 'At-Tur', ayahs: 49 },
+    53: { name: 'An-Najm', ayahs: 62 },
+    54: { name: 'Al-Qamar', ayahs: 55 },
+    55: { name: 'Ar-Rahman', arabicName: 'الرحمن', ayahs: 78 },
+    56: { name: 'Al-Waqiah', ayahs: 96 },
+    57: { name: 'Al-Hadid', ayahs: 29 },
+    58: { name: 'Al-Mujadilah', ayahs: 22 },
+    59: { name: 'Al-Hashr', ayahs: 24 },
+    60: { name: 'Al-Mumtahanah', ayahs: 13 },
+    61: { name: 'As-Saff', ayahs: 14 },
+    62: { name: 'Al-Jumuah', ayahs: 11 },
+    63: { name: 'Al-Munafiqun', ayahs: 11 },
+    64: { name: 'At-Taghabun', ayahs: 18 },
+    65: { name: 'At-Talaq', ayahs: 12 },
+    66: { name: 'At-Tahrim', ayahs: 12 },
+    67: { name: 'Al-Mulk', arabicName: 'الملك', ayahs: 30 },
+    68: { name: 'Al-Qalam', ayahs: 52 },
+    69: { name: 'Al-Haqqah', ayahs: 52 },
+    70: { name: 'Al-Maarij', ayahs: 44 },
+    71: { name: 'Nuh', ayahs: 28 },
+    72: { name: 'Al-Jinn', ayahs: 28 },
+    73: { name: 'Al-Muzzammil', ayahs: 20 },
+    74: { name: 'Al-Muddaththir', ayahs: 56 },
+    75: { name: 'Al-Qiyamah', ayahs: 40 },
+    76: { name: 'Al-Insan', ayahs: 31 },
+    77: { name: 'Al-Mursalat', ayahs: 50 },
+    78: { name: 'An-Naba', arabicName: 'النبأ', ayahs: 40 },
+    79: { name: 'An-Naziat', ayahs: 46 },
+    80: { name: 'Abasa', ayahs: 42 },
+    81: { name: 'At-Takwir', ayahs: 29 },
+    82: { name: 'Al-Infitar', ayahs: 19 },
+    83: { name: 'Al-Mutaffifin', ayahs: 36 },
+    84: { name: 'Al-Inshiqaq', ayahs: 25 },
+    85: { name: 'Al-Buruj', ayahs: 22 },
+    86: { name: 'At-Tariq', ayahs: 17 },
+    87: { name: 'Al-Ala', ayahs: 19 },
+    88: { name: 'Al-Ghashiyah', ayahs: 26 },
+    89: { name: 'Al-Fajr', ayahs: 30 },
+    90: { name: 'Al-Balad', ayahs: 20 },
+    91: { name: 'Ash-Shams', ayahs: 15 },
+    92: { name: 'Al-Layl', ayahs: 21 },
+    93: { name: 'Ad-Duha', ayahs: 11 },
+    94: { name: 'Ash-Sharh', ayahs: 8 },
+    95: { name: 'At-Tin', ayahs: 8 },
+    96: { name: 'Al-Alaq', ayahs: 19 },
+    97: { name: 'Al-Qadr', ayahs: 5 },
+    98: { name: 'Al-Bayyinah', ayahs: 8 },
+    99: { name: 'Az-Zalzalah', ayahs: 8 },
+    100: { name: 'Al-Adiyat', ayahs: 11 },
+    101: { name: 'Al-Qariah', ayahs: 11 },
+    102: { name: 'At-Takathur', ayahs: 8 },
+    103: { name: 'Al-Asr', ayahs: 3 },
+    104: { name: 'Al-Humazah', ayahs: 9 },
+    105: { name: 'Al-Fil', ayahs: 5 },
+    106: { name: 'Quraysh', ayahs: 4 },
+    107: { name: 'Al-Maun', ayahs: 7 },
+    108: { name: 'Al-Kawthar', ayahs: 3 },
+    109: { name: 'Al-Kafirun', ayahs: 6 },
+    110: { name: 'An-Nasr', ayahs: 3 },
+    111: { name: 'Al-Masad', ayahs: 5 },
+    112: { name: 'Al-Ikhlas', arabicName: 'الإخلاص', ayahs: 4 },
+    113: { name: 'Al-Falaq', arabicName: 'الفلق', ayahs: 5 },
+    114: { name: 'An-Nas', arabicName: 'الناس', ayahs: 6 }
+};
+
+// Helper function to get surah name based on language
+function getSurahName(surahNumber, isArabic = false) {
+    const surah = surahData[surahNumber];
+    if (!surah) return 'Unknown';
+    return isArabic ? surah.arabicName : surah.name;
+}
+
+// Helper function to format ayah range
+function formatAyahRange(surahNumber, startAyah, endAyah, isArabic = false) {
+    const surahName = getSurahName(surahNumber, isArabic);
+    // Show range format
+    if (startAyah === endAyah) {
+        return `${surahName} ${startAyah}`;
+    } else {
+        return `${surahName} ${startAyah} - ${endAyah}`;
+    }
+}
+
+// Helper function to format date in Arabic (Gregorian)
+function formatDateArabic(date) {
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        calendar: 'gregory'
+    };
+    return new Intl.DateTimeFormat('ar-SA', options).format(new Date(date));
+}
+
+// Migration function to handle old data format
+function migrateOldData() {
+    console.log('Running migration for old data format...');
+    let migrationCount = 0;
+    
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        
+        // Migrate sessions from old format to new format
+        if (userContent.sessions) {
+            userContent.sessions = userContent.sessions.map(session => {
+                let migrated = false;
+                
+                // If session.hifz is a string, convert it to object format
+                if (typeof session.hifz === 'string') {
+                    console.log('Migrating hifz string:', session.hifz);
+                    // Try different patterns to match the data
+                    let hifzMatch = session.hifz.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
+                    if (!hifzMatch) {
+                        // Try pattern without space before number
+                        hifzMatch = session.hifz.match(/^(.+?)(\d+)(?:-(\d+))?$/);
+                    }
+                    if (!hifzMatch) {
+                        // Try pattern with just surah name and single number
+                        hifzMatch = session.hifz.match(/^(.+?)\s*(\d+)$/);
+                    }
+                    
+                    if (hifzMatch) {
+                        const surah = hifzMatch[1].trim();
+                        const startAyah = parseInt(hifzMatch[2]);
+                        const endAyah = hifzMatch[3] ? parseInt(hifzMatch[3]) : startAyah;
+                        session.hifz = {
+                            surah: surah,
+                            ayahRange: `${startAyah}-${endAyah}`,
+                            startAyah: startAyah,
+                            endAyah: endAyah
+                        };
+                        migrated = true;
+                        console.log('Migrated hifz to:', session.hifz);
+                    } else {
+                        console.log('Could not parse hifz string:', session.hifz);
+                    }
+                }
+                
+                // If session.revision is a string, convert it to object format
+                if (typeof session.revision === 'string') {
+                    console.log('Migrating revision string:', session.revision);
+                    // Try different patterns to match the data
+                    let revisionMatch = session.revision.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
+                    if (!revisionMatch) {
+                        // Try pattern without space before number
+                        revisionMatch = session.revision.match(/^(.+?)(\d+)(?:-(\d+))?$/);
+                    }
+                    if (!revisionMatch) {
+                        // Try pattern with just surah name and single number
+                        revisionMatch = session.revision.match(/^(.+?)\s*(\d+)$/);
+                    }
+                    
+                    if (revisionMatch) {
+                        const surah = revisionMatch[1].trim();
+                        const startAyah = parseInt(revisionMatch[2]);
+                        const endAyah = revisionMatch[3] ? parseInt(revisionMatch[3]) : startAyah;
+                        session.revision = {
+                            surah: surah,
+                            ayahRange: `${startAyah}-${endAyah}`,
+                            startAyah: startAyah,
+                            endAyah: endAyah
+                        };
+                        migrated = true;
+                        console.log('Migrated revision to:', session.revision);
+                    } else {
+                        console.log('Could not parse revision string:', session.revision);
+                    }
+                }
+                
+                if (migrated) migrationCount++;
+                return session;
+            });
+        }
+    });
+    
+    console.log(`Migration completed. Migrated ${migrationCount} sessions.`);
+    
+    // Save migrated data
+    if (migrationCount > 0) {
+        saveAllDataToStorage();
+        console.log('Migrated data saved to localStorage');
+    }
+}
+
+// Force clear localStorage and reset to sample data (for testing)
+function forceResetData() {
+    console.log('Force resetting data to sample data...');
+    localStorage.clear();
+    saveAllDataToStorage();
+    console.log('Data reset complete. Please refresh the page.');
+}
+
+// Aggressive fix for ayah ranges - directly modify existing data
+function fixAyahRanges() {
+    console.log('Fixing ayah ranges in existing data...');
+    let fixedCount = 0;
+    
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        
+        if (userContent.sessions) {
+            userContent.sessions.forEach(session => {
+                // Fix hifz if it's a string
+                if (typeof session.hifz === 'string') {
+                    console.log('Found string hifz:', session.hifz);
+                    const parts = session.hifz.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            session.hifz = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            fixedCount++;
+                            console.log('Fixed hifz:', session.hifz);
+                        }
+                    }
+                }
+                
+                // Fix revision if it's a string
+                if (typeof session.revision === 'string') {
+                    console.log('Found string revision:', session.revision);
+                    const parts = session.revision.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            session.revision = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            fixedCount++;
+                            console.log('Fixed revision:', session.revision);
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+    if (fixedCount > 0) {
+        saveAllDataToStorage();
+        console.log(`Fixed ${fixedCount} ayah ranges. Data saved.`);
+    } else {
+        console.log('No ayah ranges needed fixing.');
+    }
+}
+
+// Force fix all existing data to proper format
+function forceFixAllData() {
+    console.log('Force fixing all data...');
+    let fixedCount = 0;
+    
+    // Also fix hifz and revision arrays
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        
+        // Fix hifz array
+        if (userContent.hifz) {
+            userContent.hifz = userContent.hifz.map(item => {
+                if (typeof item === 'string') {
+                    console.log('Converting string hifz item:', item);
+                    const parts = item.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            fixedCount++;
+                            const newItem = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            console.log('Converted hifz item to:', newItem);
+                            return newItem;
+                        }
+                    }
+                }
+                return item;
+            });
+        }
+        
+        // Fix revision array
+        if (userContent.revision) {
+            userContent.revision = userContent.revision.map(item => {
+                if (typeof item === 'string') {
+                    console.log('Converting string revision item:', item);
+                    const parts = item.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            fixedCount++;
+                            const newItem = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            console.log('Converted revision item to:', newItem);
+                            return newItem;
+                        }
+                    }
+                }
+                return item;
+            });
+        }
+        
+        // Fix sessions - FORCE conversion even if surah names don't match
+        if (userContent.sessions) {
+            userContent.sessions = userContent.sessions.map(session => {
+                // Convert any string data to proper object format
+                let hifz = session.hifz;
+                let revision = session.revision;
+                let sessionFixed = false;
+                
+                if (typeof hifz === 'string') {
+                    console.log('Converting string hifz:', hifz);
+                    const parts = hifz.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            hifz = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            sessionFixed = true;
+                            console.log('Converted hifz to:', hifz);
+                        }
+                    }
+                }
+                
+                if (typeof revision === 'string') {
+                    console.log('Converting string revision:', revision);
+                    const parts = revision.split(' ');
+                    if (parts.length >= 2) {
+                        const surah = parts[0];
+                        const ayahPart = parts[1];
+                        const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+                        if (ayahMatch) {
+                            const startAyah = parseInt(ayahMatch[1]);
+                            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                            revision = {
+                                surah: surah,
+                                ayahRange: `${startAyah}-${endAyah}`,
+                                startAyah: startAyah,
+                                endAyah: endAyah
+                            };
+                            sessionFixed = true;
+                            console.log('Converted revision to:', revision);
+                        }
+                    }
+                }
+                
+                if (sessionFixed) fixedCount++;
+                
+                return {
+                    date: session.date,
+                    hifz: hifz,
+                    revision: revision,
+                    score: session.score
+                };
+            });
+        }
+    });
+    
+    if (fixedCount > 0) {
+        // Save the fixed data
+        saveAllDataToStorage();
+        console.log(`Fixed ${fixedCount} items. Data saved.`);
+        
+        // Force reload the content to show changes
+        if (currentUser && currentUserType) {
+            console.log('Reloading content after data fix...');
+            loadStudentContent();
+        }
+    } else {
+        console.log('No items needed fixing.');
+    }
+}
+
+// Additional function to force convert sample data
+function forceConvertSampleData() {
+    console.log('Force converting sample data...');
+    
+    // Convert the sample data sessions to use proper HTML surah names
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        if (userContent.sessions) {
+            userContent.sessions = userContent.sessions.map(session => {
+                let hifz = session.hifz;
+                let revision = session.revision;
+                
+                // Convert surah names to match HTML dropdowns
+                if (hifz && typeof hifz === 'object' && hifz.surah) {
+                    const surahNameMap = {
+                        'Al-Fatihah': 'Al Fatiha',
+                        'Ali Imran': 'Al Imran', 
+                        'Taha': 'Ta Ha',
+                        'Al-Anfal': 'Al Anfal',
+                        'Al-Mulk': 'Al Mulk',
+                        'An-Nazi\'at': 'An Nazi\'at'
+                    };
+                    
+                    if (surahNameMap[hifz.surah]) {
+                        hifz.surah = surahNameMap[hifz.surah];
+                        console.log('Converted hifz surah name to:', hifz.surah);
+                    }
+                }
+                
+                if (revision && typeof revision === 'object' && revision.surah) {
+                    const surahNameMap = {
+                        'Al-Fatihah': 'Al Fatiha',
+                        'Ali Imran': 'Al Imran', 
+                        'Taha': 'Ta Ha',
+                        'Al-Anfal': 'Al Anfal',
+                        'Al-Mulk': 'Al Mulk',
+                        'An-Nazi\'at': 'An Nazi\'at'
+                    };
+                    
+                    if (surahNameMap[revision.surah]) {
+                        revision.surah = surahNameMap[revision.surah];
+                        console.log('Converted revision surah name to:', revision.surah);
+                    }
+                }
+                
+                return session;
+            });
+        }
+    });
+    
+    saveAllDataToStorage();
+    console.log('Sample data converted and saved.');
+}
+
+// AGGRESSIVE FIX: Force add endAyah to all existing data
+function forceAddEndAyah() {
+    console.log('Force adding endAyah to all data...');
+    let fixedCount = 0;
+    
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        
+        // Fix hifz array
+        if (userContent.hifz) {
+            userContent.hifz = userContent.hifz.map(item => {
+                if (typeof item === 'object' && item.startAyah !== undefined && item.endAyah === undefined) {
+                    // Only set endAyah = startAyah if we don't have a range in ayahRange
+                    if (item.ayahRange && item.ayahRange.includes('-')) {
+                        const rangeMatch = item.ayahRange.match(/(\d+)-(\d+)/);
+                        if (rangeMatch) {
+                            item.endAyah = parseInt(rangeMatch[2]);
+                        } else {
+                            item.endAyah = item.startAyah;
+                        }
+                    } else {
+                        item.endAyah = item.startAyah;
+                    }
+                    fixedCount++;
+                    console.log('Added endAyah to hifz item:', item);
+                }
+                return item;
+            });
+        }
+        
+        // Fix revision array
+        if (userContent.revision) {
+            userContent.revision = userContent.revision.map(item => {
+                if (typeof item === 'object' && item.startAyah !== undefined && item.endAyah === undefined) {
+                    // Only set endAyah = startAyah if we don't have a range in ayahRange
+                    if (item.ayahRange && item.ayahRange.includes('-')) {
+                        const rangeMatch = item.ayahRange.match(/(\d+)-(\d+)/);
+                        if (rangeMatch) {
+                            item.endAyah = parseInt(rangeMatch[2]);
+                        } else {
+                            item.endAyah = item.startAyah;
+                        }
+                    } else {
+                        item.endAyah = item.startAyah;
+                    }
+                    fixedCount++;
+                    console.log('Added endAyah to revision item:', item);
+                }
+                return item;
+            });
+        }
+        
+        // Fix sessions
+        if (userContent.sessions) {
+            userContent.sessions = userContent.sessions.map(session => {
+                let sessionFixed = false;
+                
+                if (session.hifz && typeof session.hifz === 'object' && session.hifz.startAyah !== undefined && session.hifz.endAyah === undefined) {
+                    // Only set endAyah = startAyah if we don't have a range in ayahRange
+                    if (session.hifz.ayahRange && session.hifz.ayahRange.includes('-')) {
+                        const rangeMatch = session.hifz.ayahRange.match(/(\d+)-(\d+)/);
+                        if (rangeMatch) {
+                            session.hifz.endAyah = parseInt(rangeMatch[2]);
+                        } else {
+                            session.hifz.endAyah = session.hifz.startAyah;
+                        }
+                    } else {
+                        session.hifz.endAyah = session.hifz.startAyah;
+                    }
+                    sessionFixed = true;
+                    console.log('Added endAyah to session hifz:', session.hifz);
+                }
+                
+                if (session.revision && typeof session.revision === 'object' && session.revision.startAyah !== undefined && session.revision.endAyah === undefined) {
+                    // Only set endAyah = startAyah if we don't have a range in ayahRange
+                    if (session.revision.ayahRange && session.revision.ayahRange.includes('-')) {
+                        const rangeMatch = session.revision.ayahRange.match(/(\d+)-(\d+)/);
+                        if (rangeMatch) {
+                            session.revision.endAyah = parseInt(rangeMatch[2]);
+                        } else {
+                            session.revision.endAyah = session.revision.startAyah;
+                        }
+                    } else {
+                        session.revision.endAyah = session.revision.startAyah;
+                    }
+                    sessionFixed = true;
+                    console.log('Added endAyah to session revision:', session.revision);
+                }
+                
+                if (sessionFixed) fixedCount++;
+                return session;
+            });
+        }
+    });
+    
+    if (fixedCount > 0) {
+        saveAllDataToStorage();
+        console.log(`Added endAyah to ${fixedCount} items. Data saved.`);
+    } else {
+        console.log('No items needed endAyah added.');
+    }
+}
+
+// ULTIMATE FIX: Force create test data with proper structure
+function createTestDataWithRanges() {
+    console.log('Creating test data with proper ayah ranges...');
+    
+    // Add test sessions to SMA2AM1 with proper structure
+    if (!sampleData.content['SMA2AM1']) {
+        sampleData.content['SMA2AM1'] = { hifz: [], revision: [], sessions: [] };
+    }
+    
+    // Add test sessions with proper ayah range structure
+    sampleData.content['SMA2AM1'].sessions = [
+        {
+            date: '2025-09-13',
+            hifz: {
+                surah: 'Al Mulk',
+                ayahRange: '12-12',
+                startAyah: 12,
+                endAyah: 12
+            },
+            revision: {
+                surah: 'Al Anfal',
+                ayahRange: '3-3',
+                startAyah: 3,
+                endAyah: 3
+            },
+            score: 9
+        },
+        {
+            date: '2025-09-19',
+            hifz: {
+                surah: 'Ta Ha',
+                ayahRange: '14-14',
+                startAyah: 14,
+                endAyah: 14
+            },
+            revision: {
+                surah: 'Al Anfal',
+                ayahRange: '3-3',
+                startAyah: 3,
+                endAyah: 3
+            },
+            score: 7
+        }
+    ];
+    
+    saveAllDataToStorage();
+    console.log('Test data created with proper ayah ranges.');
+}
+
+// Debug function to check current data structure
+function debugDataStructure() {
+    console.log('=== DEBUGGING DATA STRUCTURE ===');
+    Object.keys(sampleData.content).forEach(userId => {
+        const userContent = sampleData.content[userId];
+        console.log(`User: ${userId}`);
+        console.log('Hifz:', userContent.hifz);
+        console.log('Revision:', userContent.revision);
+        console.log('Sessions:', userContent.sessions);
+        
+        if (userContent.sessions && userContent.sessions.length > 0) {
+            userContent.sessions.forEach((session, index) => {
+                console.log(`Session ${index}:`, {
+                    hifz: session.hifz,
+                    revision: session.revision,
+                    hifzType: typeof session.hifz,
+                    revisionType: typeof session.revision
+                });
+            });
+        }
+        console.log('---');
+    });
+    console.log('=== END DEBUG ===');
+}
+
 // Sample data for demonstration with new ID system
 const sampleData = {
     admin: {
         'ADMINYNG9': { name: 'System Administrator', role: 'admin' }
     },
-    students: {},
-    teachers: {},
-    content: {}
+    students: {
+        'SYN1AM1': { 
+            id: 'SYN1AM1', 
+            name: 'Youssef Nafei', 
+            firstName: 'Youssef', 
+            lastName: 'Nafei', 
+            class: '9AM1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SAA2AM1': { 
+            id: 'SAA2AM1', 
+            name: 'Ahmed Ali', 
+            firstName: 'Ahmed', 
+            lastName: 'Ali', 
+            class: '9AM1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SSM3AM1': { 
+            id: 'SSM3AM1', 
+            name: 'Sara Mohammed', 
+            firstName: 'Sara', 
+            lastName: 'Mohammed', 
+            class: '9AM1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SFK1BR1': { 
+            id: 'SFK1BR1', 
+            name: 'Fatima Khalid', 
+            firstName: 'Fatima', 
+            lastName: 'Khalid', 
+            class: '9BR1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SOM2BR1': { 
+            id: 'SOM2BR1', 
+            name: 'Omar Hassan', 
+            firstName: 'Omar', 
+            lastName: 'Hassan', 
+            class: '9BR1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SNA1AM1': { 
+            id: 'SNA1AM1', 
+            name: 'Nour Ahmed', 
+            firstName: 'Nour', 
+            lastName: 'Ahmed', 
+            class: '10AM1', 
+            grade: '10', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SMA2AM1': { 
+            id: 'SMA2AM1', 
+            name: 'Mohammed Ali', 
+            firstName: 'Mohammed', 
+            lastName: 'Ali', 
+            class: '10AM1', 
+            grade: '10', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SZA1BR1': { 
+            id: 'SZA1BR1', 
+            name: 'Zainab Ahmed', 
+            firstName: 'Zainab', 
+            lastName: 'Ahmed', 
+            class: '10BR1', 
+            grade: '10', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SAA8BA1': { 
+            id: 'SAA8BA1', 
+            name: 'Ali Ahmed', 
+            firstName: 'Ali', 
+            lastName: 'Ahmed', 
+            class: '8Ba1', 
+            grade: '8', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SMM7BA2': { 
+            id: 'SMM7BA2', 
+            name: 'Mariam Hassan', 
+            firstName: 'Mariam', 
+            lastName: 'Hassan', 
+            class: '7Ba2', 
+            grade: '7', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SOO6BA3': { 
+            id: 'SOO6BA3', 
+            name: 'Omar Ibrahim', 
+            firstName: 'Omar', 
+            lastName: 'Ibrahim', 
+            class: '6Ba3', 
+            grade: '6', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        },
+        'SFF5BA4': { 
+            id: 'SFF5BA4', 
+            name: 'Fatima Omar', 
+            firstName: 'Fatima', 
+            lastName: 'Omar', 
+            class: '5Ba4', 
+            grade: '5', 
+            teacher: null, 
+            type: 'student',
+            createdAt: new Date().toISOString()
+        }
+    },
+    teachers: {
+        'TMA9AM1': { 
+            id: 'TMA9AM1', 
+            name: 'Teacher Mohammed', 
+            firstName: 'Mohammed', 
+            lastName: 'Ahmed', 
+            class: '9AM1', 
+            grade: '9', 
+            teacher: null, 
+            type: 'teacher',
+            students: [],
+            createdAt: new Date().toISOString()
+        }
+    },
+    content: {
+        'SMA2AM1': {
+            hifz: [
+                { surah: 'Yunus', ayahRange: '1-6', startAyah: 1, endAyah: 6 },
+                { surah: 'Al-Ma\'idah', ayahRange: '14-16', startAyah: 14, endAyah: 16 }
+            ],
+            revision: [
+                { surah: 'Al-Fatihah', ayahRange: '1-7', startAyah: 1, endAyah: 7 }
+            ],
+            sessions: [
+                {
+                    date: '2025-09-13',
+                    hifz: {
+                        surah: 'An Nazi\'at',
+                        ayahRange: '2-19',
+                        startAyah: 2,
+                        endAyah: 19
+                    },
+                    revision: {
+                        surah: 'Yunus',
+                        ayahRange: '7-7',
+                        startAyah: 7,
+                        endAyah: 7
+                    },
+                    score: 9
+                },
+                {
+                    date: '2025-09-18',
+                    hifz: {
+                        surah: 'Al-Ma\'idah',
+                        ayahRange: '14-16',
+                        startAyah: 14,
+                        endAyah: 16
+                    },
+                    revision: {
+                        surah: 'Yunus',
+                        ayahRange: '7-7',
+                        startAyah: 7,
+                        endAyah: 7
+                    },
+                    score: 9
+                }
+            ]
+        }
+    }
 };
 
 // Language translations
@@ -19,6 +898,8 @@ const translations = {
         'login.placeholder': 'Enter your unique code',
         'login.button': 'Login',
         'login.invalid': 'Invalid user code. Please try again.',
+        'login.no_account': 'Don\'t have an account?',
+        'login.create_account': 'Create New Account',
         
         // Header
         'header.logout': 'Logout',
@@ -41,43 +922,74 @@ const translations = {
         'modal.add_session': 'Add Session',
         'modal.surah_name': 'Surah Name',
         'modal.select_surah': 'Select Surah',
+        'modal.select_start_ayah': 'Start Ayah',
+        'modal.select_end_ayah': 'End Ayah',
         'modal.ayah_range': 'Ayah Range',
         'modal.ayah_placeholder': 'e.g., 1 - 25',
         'modal.date': 'Date',
         'modal.grade': 'Grade',
         'modal.select_grade': 'Select Grade',
+        'modal.score': 'Score',
+        'modal.select_score': 'Select Score',
         'modal.add': 'Add',
         'modal.cancel': 'Cancel',
         'modal.close': 'Close',
+        'modal.confirm_delete': 'Are you sure you want to delete this item?',
+        'modal.confirm_delete_session': 'Are you sure you want to delete this session?',
         
         // Admin
         'admin.system_administration': 'System Administration',
         'admin.create_account': 'Create New Account',
         'admin.assign_students': 'Assign Students to Teachers',
+        'admin.assign_description': 'Select a teacher and then choose an unassigned student to create an assignment.',
         'admin.system_stats': 'System Statistics',
         'admin.delete_student': 'Delete Individual Student',
+        'admin.delete_student_warning': 'Select a student to delete from the system.',
         'admin.delete_teacher': 'Delete Individual Teacher',
+        'admin.delete_teacher_warning': 'Select a teacher to delete from the system.',
+        'admin.student_info': 'Student Information',
+        'admin.teacher_info': 'Teacher Information',
+        'admin.name': 'Name',
+        'admin.class': 'Class',
+        'admin.teacher': 'Teacher',
+        'admin.content_items': 'Content Items',
+        'admin.assigned_students': 'Assigned Students',
+        'admin.impact': 'Impact',
         'admin.delete_all_teachers': 'Delete All Teachers',
         'admin.delete_all_students': 'Delete All Students',
         
+        // Teacher Dashboard
+        'teacher.select_class': 'Select a Class',
+        'teacher.class_description': 'Choose a class to view and assign students',
+        'teacher.select_student': 'Select Students',
+        'teacher.students_in_class': 'Students in this class:',
+        'teacher.dashboard_options': 'Teacher Dashboard Options',
+        'teacher.choose_action': 'Choose an action:',
+        'teacher.add_student': 'Add Student',
+        'teacher.edit_students': 'Edit Students',
+        'teacher.assigned_students': 'Your Assigned Students',
+        'teacher.no_students_assigned': 'No students assigned yet',
+        'teacher.student_assigned': 'Student assigned successfully',
+        'teacher.student_removed': 'Student removed successfully',
+        'teacher.add_selected': 'Add Selected Students',
+        'teacher.no_students_selected': 'Please select at least one student',
+        
         // Notifications
-        'notification.welcome': 'Welcome back',
-        'notification.logged_out': 'Logged out successfully',
-        'notification.hifz_added': 'Hifz content added successfully!',
-        'notification.revision_added': 'Revision content added successfully!',
-        'notification.session_added': 'Session added successfully!',
-        'notification.content_deleted': 'Content deleted successfully!',
-        'notification.session_deleted': 'Session deleted successfully!',
-        'notification.data_saved': 'Data saved to cloud successfully!',
-        'notification.error_saving': 'Error saving to cloud',
-        'notification.error_loading': 'Error loading from cloud',
-        'notification.language_changed': 'Language changed to',
-        'notification.dashboard_activated': 'Dashboard mode activated. Add buttons are now visible.',
-        'notification.no_student_selected': 'No student selected',
-        'notification.fill_all_fields': 'Please fill in all fields',
-        'notification.please_enter_code': 'Please enter a user code',
+        'notification.welcome': 'Welcome',
+        // 'notification.please_enter_code': 'Please enter your code', // REMOVED
+        'notification.language_changed': 'Language changed to English',
         'notification.arabic': 'Arabic',
         'notification.english': 'English',
+        'notification.hifz_added': 'Hifz entry added successfully',
+        'notification.revision_added': 'Revision entry added successfully',
+        'notification.session_added': 'Session added successfully',
+        'notification.account_created': 'Account created successfully',
+        'notification.student_assigned': 'Student assigned successfully',
+        'notification.student_deleted': 'Student deleted successfully',
+        'notification.teacher_deleted': 'Teacher deleted successfully',
+        'notification.all_students_deleted': 'All students deleted successfully',
+        'notification.all_teachers_deleted': 'All teachers deleted successfully',
+        'notification.logged_out': 'You have been logged out successfully',
         
         // Form validation
         'validation.required': 'This field is required',
@@ -199,6 +1111,8 @@ const translations = {
         'login.placeholder': 'أدخل الرمز الخاص بك',
         'login.button': 'دخول',
         'login.invalid': 'رمز المستخدم غير صحيح. يرجى المحاولة مرة أخرى.',
+        'login.no_account': 'ليس لديك حساب؟',
+        'login.create_account': 'إنشاء حساب جديد',
         
         // Header
         'header.logout': 'تسجيل الخروج',
@@ -221,24 +1135,57 @@ const translations = {
         'modal.add_session': 'إضافة جلسة',
         'modal.surah_name': 'اسم السورة',
         'modal.select_surah': 'اختر السورة',
+        'modal.select_start_ayah': 'الآية الأولى',
+        'modal.select_end_ayah': 'الآية الأخيرة',
         'modal.ayah_range': 'نطاق الآيات',
         'modal.ayah_placeholder': 'مثال: 1 - 25',
         'modal.date': 'التاريخ',
         'modal.grade': 'الدرجة',
         'modal.select_grade': 'اختر الدرجة',
+        'modal.score': 'النتيجة',
+        'modal.select_score': 'اختر النتيجة',
         'modal.add': 'إضافة',
         'modal.cancel': 'إلغاء',
         'modal.close': 'إغلاق',
+        'modal.confirm_delete': 'هل أنت متأكد من حذف هذا العنصر؟',
+        'modal.confirm_delete_session': 'هل أنت متأكد من حذف هذه الجلسة؟',
         
         // Admin
         'admin.system_administration': 'إدارة النظام',
         'admin.create_account': 'إنشاء حساب جديد',
         'admin.assign_students': 'تعيين الطلاب للمعلمين',
+        'admin.assign_description': 'اختر معلماً ثم اختر طالباً غير مخصص لإنشاء تعيين.',
         'admin.system_stats': 'إحصائيات النظام',
         'admin.delete_student': 'حذف طالب فردي',
+        'admin.delete_student_warning': 'اختر طالباً لحذفه من النظام.',
         'admin.delete_teacher': 'حذف معلم فردي',
+        'admin.delete_teacher_warning': 'اختر معلماً لحذفه من النظام.',
+        'admin.student_info': 'معلومات الطالب',
+        'admin.teacher_info': 'معلومات المعلم',
+        'admin.name': 'الاسم',
+        'admin.class': 'الفصل',
+        'admin.teacher': 'المعلم',
+        'admin.content_items': 'عناصر المحتوى',
+        'admin.assigned_students': 'الطلاب المخصصون',
+        'admin.impact': 'التأثير',
         'admin.delete_all_teachers': 'حذف جميع المعلمين',
         'admin.delete_all_students': 'حذف جميع الطلاب',
+        
+        // Teacher Dashboard
+        'teacher.select_class': 'اختر الفصل',
+        'teacher.class_description': 'اختر فصلاً لعرض وتعيين الطلاب',
+        'teacher.select_student': 'اختر الطلاب',
+        'teacher.students_in_class': 'الطلاب في هذا الفصل:',
+        'teacher.dashboard_options': 'خيارات لوحة المعلم',
+        'teacher.choose_action': 'اختر إجراء:',
+        'teacher.add_student': 'إضافة طالب',
+        'teacher.edit_students': 'تعديل الطلاب',
+        'teacher.assigned_students': 'الطلاب المعينون لك',
+        'teacher.no_students_assigned': 'لم يتم تعيين طلاب بعد',
+        'teacher.student_assigned': 'تم تعيين الطالب بنجاح',
+        'teacher.student_removed': 'تم إزالة الطالب بنجاح',
+        'teacher.add_selected': 'إضافة الطلاب المحددين',
+        'teacher.no_students_selected': 'يرجى اختيار طالب واحد على الأقل',
         
         // Notifications
         'notification.welcome': 'مرحباً بعودتك',
@@ -537,8 +1484,39 @@ function setLanguage(lang) {
         languageToggle.classList.toggle('active', lang === 'ar');
     }
     
+    const loginLanguageToggle = document.getElementById('loginLanguageToggle');
+    if (loginLanguageToggle) {
+        loginLanguageToggle.textContent = lang === 'ar' ? 'EN' : 'ع';
+        loginLanguageToggle.classList.toggle('active', lang === 'ar');
+    }
+    
     // Update all text elements
     updateUITexts();
+    
+    // Refresh content display to show translated Surah names
+    if (currentUser && currentUserType !== 'admin') {
+        if (currentUserType === 'teacher') {
+            // Refresh teacher dashboard
+            if (selectedStudent) {
+                loadStudentContent(selectedStudent);
+            } else {
+                // Show empty state with translated text
+                const hifzContent = document.getElementById('hifzContent');
+                const revisionContent = document.getElementById('revisionContent');
+                const sessionsList = document.getElementById('sessionsList');
+                
+                if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+                if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+                if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+            }
+        } else if (currentUserType === 'student') {
+            // Refresh student content
+            loadStudentContent(currentUser);
+        }
+    } else if (currentUser && currentUserType === 'admin') {
+        // Just update the admin dashboard texts without recreating it
+        updateAdminTexts();
+    }
 }
 
 function updateUITexts() {
@@ -638,7 +1616,7 @@ function updateModalTexts() {
         const dateLabel = addSessionModal.querySelector('label[for="sessionDate"]');
         const hifzLabel = addSessionModal.querySelector('label[for="sessionHifz"]');
         const revisionLabel = addSessionModal.querySelector('label[for="sessionRevision"]');
-        const gradeLabel = addSessionModal.querySelector('label[for="sessionGrade"]');
+        const gradeLabel = addSessionModal.querySelector('label[for="sessionScore"]');
         const addBtn = addSessionModal.querySelector('.btn-primary');
         const cancelBtn = addSessionModal.querySelector('.btn-secondary');
         
@@ -646,7 +1624,19 @@ function updateModalTexts() {
         if (dateLabel) dateLabel.textContent = getTranslation('modal.date');
         if (hifzLabel) hifzLabel.textContent = getTranslation('session.hifz_surahs');
         if (revisionLabel) revisionLabel.textContent = getTranslation('session.revision_surahs');
-        if (gradeLabel) gradeLabel.textContent = getTranslation('modal.grade');
+        
+        // Update session form Surah dropdowns
+        const sessionHifzSurah = addSessionModal.querySelector('#sessionHifzSurah');
+        const sessionHifzStartAyah = addSessionModal.querySelector('#sessionHifzStartAyah');
+        const sessionHifzEndAyah = addSessionModal.querySelector('#sessionHifzEndAyah');
+        const sessionRevisionSurah = addSessionModal.querySelector('#sessionRevisionSurah');
+        const sessionRevisionStartAyah = addSessionModal.querySelector('#sessionRevisionStartAyah');
+        const sessionRevisionEndAyah = addSessionModal.querySelector('#sessionRevisionEndAyah');
+        
+        if (sessionHifzSurah) updateSurahOptions(sessionHifzSurah);
+        if (sessionRevisionSurah) updateSurahOptions(sessionRevisionSurah);
+        
+        if (gradeLabel) gradeLabel.textContent = getTranslation('modal.score');
         if (addBtn) addBtn.textContent = getTranslation('modal.add');
         if (cancelBtn) cancelBtn.textContent = getTranslation('modal.cancel');
     }
@@ -656,31 +1646,44 @@ function updateAdminTexts() {
     const adminSection = document.querySelector('.admin-section h2');
     if (adminSection) adminSection.textContent = getTranslation('admin.system_administration');
     
-    // Update admin buttons
+    // Update admin buttons with proper structure preservation
     const adminButtons = document.querySelectorAll('.admin-btn');
     adminButtons.forEach(btn => {
         const icon = btn.querySelector('.icon');
         if (icon) {
             const iconText = icon.textContent;
+            let newText = '';
+            
             if (iconText.includes('👤') && !iconText.includes('🗑️')) {
-                btn.textContent = getTranslation('admin.create_account');
+                newText = getTranslation('admin.create_account');
             } else if (iconText.includes('🔗')) {
-                btn.textContent = getTranslation('admin.assign_students');
+                newText = getTranslation('admin.assign_students');
             } else if (iconText.includes('📊')) {
-                btn.textContent = getTranslation('admin.system_stats');
+                newText = getTranslation('admin.system_stats');
             } else if (iconText.includes('👤🗑️')) {
-                btn.textContent = getTranslation('admin.delete_student');
+                newText = getTranslation('admin.delete_student');
             } else if (iconText.includes('👨‍🏫🗑️')) {
-                btn.textContent = getTranslation('admin.delete_teacher');
+                newText = getTranslation('admin.delete_teacher');
             } else if (iconText.includes('🗑️') && !iconText.includes('👤') && !iconText.includes('👨‍🏫')) {
-                if (btn.textContent.includes('Teachers')) {
-                    btn.textContent = getTranslation('admin.delete_all_teachers');
-                } else if (btn.textContent.includes('Students')) {
-                    btn.textContent = getTranslation('admin.delete_all_students');
+                if (btn.innerHTML.includes('Teachers') || btn.onclick.toString().includes('deleteAllTeachers')) {
+                    newText = getTranslation('admin.delete_all_teachers');
+                } else if (btn.innerHTML.includes('Students') || btn.onclick.toString().includes('deleteAllStudents')) {
+                    newText = getTranslation('admin.delete_all_students');
                 }
+            }
+            
+            if (newText) {
+                // Preserve the icon and update only the text
+                btn.innerHTML = `<span class="icon">${iconText}</span>${newText}`;
             }
         }
     });
+    
+    // Update back to login button
+    const backBtn = document.querySelector('.admin-actions .btn-secondary');
+    if (backBtn) {
+        backBtn.textContent = getTranslation('admin.back_to_login');
+    }
 }
 
 function updateSurahOptions(selectElement) {
@@ -693,26 +1696,330 @@ function updateSurahOptions(selectElement) {
             const arabicName = getTranslation(`surah.${surahKey}`);
             if (arabicName && arabicName !== `surah.${surahKey}`) {
                 option.textContent = currentLanguage === 'ar' ? 
-                    `${arabicName} (${option.value})` : 
+                    arabicName : 
                     `${option.value} (${arabicName})`;
             }
         }
     });
 }
 
+// Surah ayah counts (number of verses in each Surah)
+const surahAyahCounts = {
+    'Al Fatiha': 7,
+    'Al Baqarah': 286,
+    'Al Imran': 200,
+    'An Nisa': 176,
+    'Al Ma\'idah': 120,
+    'Al Anam': 165,
+    'Al Araf': 206,
+    'Al Anfal': 75,
+    'At Tawbah': 129,
+    'Yunus': 109,
+    'Hud': 123,
+    'Yusuf': 111,
+    'Ar Ra\'d': 43,
+    'Ibrahim': 52,
+    'Al Hijr': 99,
+    'An Nahl': 128,
+    'Al Isra': 111,
+    'Al Kahf': 110,
+    'Maryam': 98,
+    'Taha': 135,
+    'Al Anbiya': 112,
+    'Al Hajj': 78,
+    'Al Muminun': 118,
+    'An Nur': 64,
+    'Al Furqan': 77,
+    'Ash Shuara': 227,
+    'An Naml': 93,
+    'Al Qasas': 88,
+    'Al Ankabut': 69,
+    'Ar Rum': 60,
+    'Luqman': 34,
+    'As Sajdah': 30,
+    'Al Ahzab': 73,
+    'Saba': 54,
+    'Fatir': 45,
+    'Ya Sin': 83,
+    'As Saffat': 182,
+    'Sad': 88,
+    'Az Zumar': 75,
+    'Ghafir': 85,
+    'Fussilat': 54,
+    'Ash Shura': 53,
+    'Az Zukhruf': 89,
+    'Ad Dukhan': 59,
+    'Al Jathiyah': 37,
+    'Al Ahqaf': 35,
+    'Muhammad': 38,
+    'Al Fath': 29,
+    'Al Hujurat': 18,
+    'Qaf': 45,
+    'Adh Dhariyat': 60,
+    'At Tur': 49,
+    'An Najm': 62,
+    'Al Qamar': 55,
+    'Ar Rahman': 78,
+    'Al Waqiah': 96,
+    'Al Hadid': 29,
+    'Al Mujadilah': 22,
+    'Al Hashr': 24,
+    'Al Mumtahanah': 13,
+    'As Saff': 14,
+    'Al Jumuah': 11,
+    'Al Munafiqun': 11,
+    'At Taghabun': 18,
+    'At Talaq': 12,
+    'At Tahrim': 12,
+    'Al Mulk': 30,
+    'Al Qalam': 52,
+    'Al Haqqah': 52,
+    'Al Maarij': 44,
+    'Nuh': 28,
+    'Al Jinn': 28,
+    'Al Muzzammil': 20,
+    'Al Muddaththir': 56,
+    'Al Qiyamah': 40,
+    'Al Insan': 31,
+    'Al Mursalat': 50,
+    'An Naba': 40,
+    'An Nazi\'at': 46,
+    'Abasa': 42,
+    'At Takwir': 29,
+    'Al Infitar': 19,
+    'Al Mutaffifin': 36,
+    'Al Inshiqaq': 25,
+    'Al Buruj': 22,
+    'At Tariq': 17,
+    'Al Ala': 19,
+    'Al Ghashiyah': 26,
+    'Al Fajr': 30,
+    'Al Balad': 20,
+    'Ash Shams': 15,
+    'Al Layl': 21,
+    'Ad Duha': 11,
+    'Ash Sharh': 8,
+    'At Tin': 8,
+    'Al Alaq': 19,
+    'Al Qadr': 5,
+    'Al Bayyinah': 8,
+    'Az Zalzalah': 8,
+    'Al Adiyat': 11,
+    'Al Qariah': 11,
+    'At Takathur': 8,
+    'Al Asr': 3,
+    'Al Humazah': 9,
+    'Al Fil': 5,
+    'Quraysh': 4,
+    'Al Maun': 7,
+    'Al Kawthar': 3,
+    'Al Kafirun': 6,
+    'An Nasr': 3,
+    'Al Masad': 5,
+    'Al Ikhlas': 4,
+    'Al Falaq': 5,
+    'An Nas': 6
+};
+
+function updateAyahOptions(surahSelect, startAyahSelect, endAyahSelect) {
+    if (!surahSelect || !startAyahSelect || !endAyahSelect) return;
+    
+    const selectedSurah = surahSelect.value;
+    const ayahCount = surahAyahCounts[selectedSurah];
+    
+    // Clear existing options
+    startAyahSelect.innerHTML = `<option value="">${getTranslation('modal.select_start_ayah')}</option>`;
+    endAyahSelect.innerHTML = `<option value="">${getTranslation('modal.select_end_ayah')}</option>`;
+    
+    if (!selectedSurah || !ayahCount) {
+        return;
+    }
+    
+    // Generate ayah options
+    for (let i = 1; i <= ayahCount; i++) {
+        const startOption = document.createElement('option');
+        startOption.value = i;
+        startOption.textContent = i;
+        startAyahSelect.appendChild(startOption);
+        
+        const endOption = document.createElement('option');
+        endOption.value = i;
+        endOption.textContent = i;
+        endAyahSelect.appendChild(endOption);
+    }
+    
+    // Update end ayah options when start ayah changes
+    startAyahSelect.addEventListener('change', () => {
+        const startValue = parseInt(startAyahSelect.value);
+        if (startValue) {
+            endAyahSelect.innerHTML = `<option value="">${getTranslation('modal.select_end_ayah')}</option>`;
+            for (let i = startValue; i <= ayahCount; i++) {
+                const endOption = document.createElement('option');
+                endOption.value = i;
+                endOption.textContent = i;
+                endAyahSelect.appendChild(endOption);
+            }
+        }
+    });
+}
+
+function getTranslatedSurahName(surahName) {
+    if (!surahName) return surahName;
+    
+    const surahKey = surahName.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '');
+    const arabicName = getTranslation(`surah.${surahKey}`);
+    
+    if (arabicName && arabicName !== `surah.${surahKey}`) {
+        return currentLanguage === 'ar' ? 
+            arabicName : 
+            `${surahName} (${arabicName})`;
+    }
+    
+    return surahName;
+}
+
+function translateSessionContent(content) {
+    if (!content) return content;
+    
+    // Check if we're in Arabic mode
+    const isArabic = currentLanguage === 'ar';
+    
+    // Split content by commas and translate each part
+    const parts = content.split(',').map(part => {
+        const trimmed = part.trim();
+        
+        // Parse surah and ayah range (format: "SurahName startAyah-endAyah" or "SurahName ayah")
+        const surahAyahMatch = trimmed.match(/^(.+?)\s+(\d+)(?:-(\d+))?$/);
+        if (surahAyahMatch) {
+            const surahName = surahAyahMatch[1].trim();
+            const startAyah = parseInt(surahAyahMatch[2]);
+            const endAyah = surahAyahMatch[3] ? parseInt(surahAyahMatch[3]) : startAyah;
+            
+            // Find surah number by name
+            let surahNumber = null;
+            for (const [num, surah] of Object.entries(surahData)) {
+                if (surah.name === surahName) {
+                    surahNumber = parseInt(num);
+                    break;
+                }
+            }
+            
+            if (surahNumber) {
+                return formatAyahRange(surahNumber, startAyah, endAyah, isArabic);
+            }
+        }
+        
+        return trimmed;
+    });
+    
+    return parts.join(', ');
+}
+
+// Helper function to format content items for display
+function formatContentItem(item, isArabic = false) {
+    if (!item) return '';
+    
+    
+    // If we have startAyah and endAyah, use them
+    if (item.startAyah !== undefined && item.endAyah !== undefined) {
+        const surahNumber = getSurahNumberFromName(item.surah);
+        if (surahNumber) {
+            return formatAyahRange(surahNumber, item.startAyah, item.endAyah, isArabic);
+        }
+    }
+    
+    // Fallback to parsing the ayahRange string
+    const surahAyahMatch = item.ayahRange ? item.ayahRange.match(/^(\d+)(?:-(\d+))?$/) : null;
+    if (surahAyahMatch) {
+        const startAyah = parseInt(surahAyahMatch[1]);
+        const endAyah = surahAyahMatch[2] ? parseInt(surahAyahMatch[2]) : startAyah;
+        const surahNumber = getSurahNumberFromName(item.surah);
+        if (surahNumber) {
+            return formatAyahRange(surahNumber, startAyah, endAyah, isArabic);
+        }
+    }
+    
+    // AGGRESSIVE FIX: If we have a surah and ayahRange, try to parse it directly
+    if (item.surah && item.ayahRange) {
+        const ayahMatch = item.ayahRange.match(/^(\d+)(?:-(\d+))?$/);
+        if (ayahMatch) {
+            const startAyah = parseInt(ayahMatch[1]);
+            const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+            const surahNumber = getSurahNumberFromName(item.surah);
+            if (surahNumber) {
+                return formatAyahRange(surahNumber, startAyah, endAyah, isArabic);
+            }
+        }
+    }
+    
+    // AGGRESSIVE FIX: Try to parse from the string format "SurahName AyahNumber"
+    if (typeof item === 'string') {
+        const parts = item.split(' ');
+        if (parts.length >= 2) {
+            const surah = parts[0];
+            const ayahPart = parts[1];
+            const ayahMatch = ayahPart.match(/(\d+)(?:-(\d+))?/);
+            if (ayahMatch) {
+                const startAyah = parseInt(ayahMatch[1]);
+                const endAyah = ayahMatch[2] ? parseInt(ayahMatch[2]) : startAyah;
+                const surahNumber = getSurahNumberFromName(surah);
+                if (surahNumber) {
+                    return formatAyahRange(surahNumber, startAyah, endAyah, isArabic);
+                }
+            }
+        }
+    }
+    
+    // Final fallback
+    return `${item.surah || item} ${item.ayahRange || ''}`;
+}
+
 function toggleLanguage() {
     const newLang = currentLanguage === 'en' ? 'ar' : 'en';
     setLanguage(newLang);
-    showNotification(`${getTranslation('notification.language_changed')} ${getTranslation(newLang === 'ar' ? 'notification.arabic' : 'notification.english')}`, 'success');
 }
+
+// Make language functions globally accessible
+window.toggleLanguage = toggleLanguage;
+window.setLanguage = setLanguage;
+window.getTranslation = getTranslation;
+window.forceResetData = forceResetData;
+window.debugDataStructure = debugDataStructure;
+window.fixAyahRanges = fixAyahRanges;
+window.forceFixAllData = forceFixAllData;
+window.forceConvertSampleData = forceConvertSampleData;
+window.forceAddEndAyah = forceAddEndAyah;
+window.createTestDataWithRanges = createTestDataWithRanges;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     console.log('MRIS Quran Program initialized');
     
+    // Migrate old data format if needed
+    migrateOldData();
+    
+    // Force migration on every page load to ensure data is properly formatted
+    setTimeout(() => {
+        console.log('Running additional migration check...');
+        migrateOldData();
+        fixAyahRanges();
+        forceFixAllData();
+        forceConvertSampleData();
+        // forceAddEndAyah(); // DISABLED - was overwriting user input
+        createTestDataWithRanges();
+        
+        // Force reload content after fixing data
+        if (currentUser && currentUserType) {
+            loadStudentContent();
+        }
+    }, 1000);
+    
     // Load saved language preference
     const savedLanguage = localStorage.getItem('quranLanguage') || 'en';
     setLanguage(savedLanguage);
+    
+    // Initialize dropdown functionality
+    initializeDropdowns();
     
     // Get button elements after DOM is loaded
     window.addHifzBtn = document.getElementById('addHifzBtn');
@@ -732,11 +2039,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load data first, then check for existing session
     loadDataFromStorage().then(() => {
         console.log('Data loaded, now checking for existing session');
-        checkForExistingSession();
+        // Small delay to ensure DOM is fully ready
+        setTimeout(() => {
+            checkExistingSession();
+        }, 100);
     }).catch(error => {
         console.error('Error loading data:', error);
         // Still check for session even if data loading fails
-        checkForExistingSession();
+        setTimeout(() => {
+            checkExistingSession();
+        }, 100);
     });
     
     setupEventListeners(window.addHifzBtn, window.addRevisionBtn, window.addSessionBtn);
@@ -748,15 +2060,71 @@ document.addEventListener('DOMContentLoaded', function() {
 // Setup event listeners
 function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
     // Login form
-    loginForm.addEventListener('submit', handleLogin);
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        console.log('Login form found, adding event listener');
+        loginForm.addEventListener('submit', function(e) {
+            console.log('Form submit event triggered');
+            handleLogin(e);
+        });
+        console.log('Login form event listener added');
+    } else {
+        console.error('Login form not found');
+    }
     
-    // Logout button
-    logoutBtn.addEventListener('click', handleLogout);
+    // Logout button - show confirmation modal first
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Logout button clicked, showing confirmation modal');
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('Logout confirmation modal displayed');
+            } else {
+                console.error('Logout confirmation modal not found');
+                // Fallback to direct logout if modal not found
+                handleLogout();
+            }
+        });
+    }
     
     // Language toggle button
     const languageToggle = document.getElementById('languageToggle');
     if (languageToggle) {
+        // Remove any existing event listeners
+        languageToggle.removeEventListener('click', toggleLanguage);
         languageToggle.addEventListener('click', toggleLanguage);
+        console.log('Language toggle event listener added');
+    }
+    
+    // Login language toggle button
+    const loginLanguageToggle = document.getElementById('loginLanguageToggle');
+    if (loginLanguageToggle) {
+        // Remove any existing event listeners
+        loginLanguageToggle.removeEventListener('click', toggleLanguage);
+        loginLanguageToggle.addEventListener('click', toggleLanguage);
+        console.log('Login language toggle event listener added');
+    }
+    
+    // Session form Surah selection event listeners
+    const sessionHifzSurah = document.getElementById('sessionHifzSurah');
+    const sessionHifzStartAyah = document.getElementById('sessionHifzStartAyah');
+    const sessionHifzEndAyah = document.getElementById('sessionHifzEndAyah');
+    const sessionRevisionSurah = document.getElementById('sessionRevisionSurah');
+    const sessionRevisionStartAyah = document.getElementById('sessionRevisionStartAyah');
+    const sessionRevisionEndAyah = document.getElementById('sessionRevisionEndAyah');
+    
+    if (sessionHifzSurah && sessionHifzStartAyah && sessionHifzEndAyah) {
+        sessionHifzSurah.addEventListener('change', () => {
+            updateAyahOptions(sessionHifzSurah, sessionHifzStartAyah, sessionHifzEndAyah);
+        });
+    }
+    
+    if (sessionRevisionSurah && sessionRevisionStartAyah && sessionRevisionEndAyah) {
+        sessionRevisionSurah.addEventListener('change', () => {
+            updateAyahOptions(sessionRevisionSurah, sessionRevisionStartAyah, sessionRevisionEndAyah);
+        });
     }
     
     // Add content buttons with mobile touch support
@@ -866,78 +2234,194 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
 
 // Handle login
 function handleLogin(event) {
-    event.preventDefault();
+    console.log('handleLogin called with event:', event);
+    if (event) {
+        event.preventDefault();
+        console.log('Event prevented');
+    }
     
-    const userCode = userCodeInput.value.trim().toUpperCase();
+    console.log('Login attempt started');
     
-    if (!userCode) {
-        showNotification(getTranslation('notification.please_enter_code'), 'error');
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('quranUser');
+    const savedUserType = localStorage.getItem('quranUserType');
+    if (savedUser && savedUserType) {
+        console.log('User already logged in, showing dashboard');
+        // Don't redirect - just show the dashboard
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        if (loginSection && dashboardSection) {
+            loginSection.style.display = 'none';
+            dashboardSection.style.display = 'block';
+        }
         return;
     }
     
-    // Check if user exists
-    if (sampleData.admin[userCode]) {
-        currentUser = userCode;
-        currentUserType = 'admin';
-        loginSuccess(sampleData.admin[userCode]);
-    } else if (sampleData.students[userCode]) {
-        currentUser = userCode;
-        currentUserType = 'student';
-        loginSuccess(sampleData.students[userCode]);
-    } else if (sampleData.teachers[userCode]) {
-        currentUser = userCode;
-        currentUserType = 'teacher';
-        loginSuccess(sampleData.teachers[userCode]);
-    } else {
-        showNotification(getTranslation('login.invalid'), 'error');
+    const userCodeInput = document.getElementById('userCode');
+    if (!userCodeInput) {
+        console.error('User code input not found');
         return;
+    }
+    
+    const userCode = userCodeInput.value.trim().toUpperCase();
+    console.log('User code entered:', userCode);
+    
+    if (!userCode) {
+        // Reset button state
+        if (loginBtn) {
+            loginBtn.textContent = 'Login';
+            loginBtn.disabled = false;
+        }
+        return;
+    }
+    
+    // Show loading state
+    if (loginBtn) {
+        loginBtn.textContent = 'Logging in...';
+        loginBtn.disabled = true;
+    }
+    
+    try {
+        // Check if user exists
+        console.log('Checking admin users:', Object.keys(sampleData.admin));
+        console.log('Checking students:', Object.keys(sampleData.students));
+        console.log('Checking teachers:', Object.keys(sampleData.teachers));
+        
+        if (sampleData.admin[userCode]) {
+            console.log('Admin user found:', userCode);
+            currentUser = userCode;
+            currentUserType = 'admin';
+            // Admin login - no popup, direct login
+            loginSuccess(sampleData.admin[userCode]);
+        } else if (sampleData.students[userCode]) {
+            console.log('Student user found:', userCode);
+            currentUser = userCode;
+            currentUserType = 'student';
+            loginSuccess(sampleData.students[userCode]);
+        } else if (sampleData.teachers[userCode]) {
+            console.log('Teacher user found:', userCode);
+            currentUser = userCode;
+            currentUserType = 'teacher';
+            console.log('About to call loginSuccess for teacher:', userCode);
+            loginSuccess(sampleData.teachers[userCode]);
+        } else {
+            console.log('User not found:', userCode);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+    } finally {
+        // Reset button state
+        if (loginBtn) {
+            loginBtn.textContent = getTranslation('login.button');
+            loginBtn.disabled = false;
+        }
     }
 }
 
 // Handle successful login
 function loginSuccess(user) {
+    console.log('Login successful for user:', user.name, 'Type:', currentUserType);
+    
+    // Get DOM elements
+    const loginSection = document.getElementById('loginSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const userNameSpan = document.getElementById('userName');
+    const userClassSpan = document.getElementById('userClass');
+    const userTeacherSpan = document.getElementById('userTeacher');
+    
+    if (!loginSection || !dashboardSection) {
+        console.error('Required DOM elements not found');
+        return;
+    }
+    
+    // Store session data
+    localStorage.setItem('quranUser', currentUser);
+    localStorage.setItem('quranUserType', currentUserType);
+    
     // Hide login, show dashboard
     loginSection.style.display = 'none';
     dashboardSection.style.display = 'block';
     
+    // Add a small delay to ensure DOM is ready
+    setTimeout(() => {
+        console.log('Dashboard shown, checking if teacher login');
+        if (currentUserType === 'teacher') {
+            console.log('Teacher detected after dashboard shown, showing modal');
+            const modal = document.getElementById('teacherOptionsModal');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                modal.style.zIndex = '2000';
+                console.log('Teacher modal forced to show');
+            }
+        }
+    }, 100);
+    
     // Update header
     if (currentUserType === 'admin') {
-        // Admin login
-        userNameSpan.textContent = user.name;
-        userClassSpan.textContent = getTranslation('header.administrator');
-        userTeacherSpan.textContent = '';
+        // Admin login - NO POPUP, direct login
+        if (userNameSpan) userNameSpan.textContent = user.name;
+        if (userClassSpan) userClassSpan.textContent = getTranslation('header.administrator');
+        if (userTeacherSpan) userTeacherSpan.textContent = '';
         
-        // Show admin dashboard
+        // Show admin dashboard immediately
         showAdminDashboard();
     } else if (currentUserType === 'student') {
-        userNameSpan.textContent = user.name;
-        userClassSpan.textContent = user.class;
-        userTeacherSpan.textContent = user.teacher;
+        if (userNameSpan) userNameSpan.textContent = user.name;
+        if (userClassSpan) userClassSpan.textContent = user.class;
+        if (userTeacherSpan) userTeacherSpan.textContent = user.teacher;
         
         // Load student content
         loadStudentContent();
     } else {
         // Teacher login
+        console.log('Teacher login section reached');
         currentTeacher = currentUser; // Store the teacher's ID
-        userNameSpan.textContent = user.name;
-        userClassSpan.textContent = getTranslation('header.teacher');
-        userTeacherSpan.textContent = '';
+        if (userNameSpan) userNameSpan.textContent = user.name;
+        if (userClassSpan) userClassSpan.textContent = getTranslation('header.teacher');
+        if (userTeacherSpan) userTeacherSpan.textContent = '';
         
         // Add teacher-mode class to body
         document.body.classList.add('teacher-mode');
         
-        // Show student selection for teachers
-        showStudentSelection();
-        
-        // Also load content to show teacher controls
+        // Load content to show teacher options
+        console.log('About to call loadStudentContent for teacher');
         loadStudentContent();
+        
+        // Also directly show teacher options modal
+        setTimeout(() => {
+            console.log('Direct call to showTeacherOptions from teacher login');
+            console.log('Current user type:', currentUserType);
+            console.log('Current user:', currentUser);
+            
+            // Force show the modal
+            const modal = document.getElementById('teacherOptionsModal');
+            console.log('Modal element:', modal);
+            if (modal) {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                modal.style.zIndex = '2000';
+                console.log('Modal should now be visible');
+            } else {
+                console.error('teacherOptionsModal not found!');
+            }
+        }, 1000);
     }
     
     // Store in localStorage
     localStorage.setItem('quranUser', currentUser);
     localStorage.setItem('quranUserType', currentUserType);
     
-    showNotification(`${getTranslation('notification.welcome')}, ${user.name}!`, 'success');
+    // Clear form inputs
+    const userCodeInput = document.getElementById('userCode');
+    if (userCodeInput) userCodeInput.value = '';
+    
+    // Show welcome notification
+    console.log(`${getTranslation('notification.welcome')}, ${user.name}!`, 'success');
 }
 
 // Load student content
@@ -952,17 +2436,31 @@ function loadStudentContent() {
     console.log('Current user type:', currentUserType);
     console.log('Editing student:', editingStudent);
     
-    // For teachers without a selected student, show empty state but keep controls visible
+    // For teachers without a selected student, show teacher options
     if (currentUserType === 'teacher' && !targetUser) {
-        console.log('Teacher logged in but no student selected - showing empty state');
+        console.log('Teacher logged in but no student selected - showing teacher options');
+        console.log('currentUserType:', currentUserType);
+        console.log('targetUser:', targetUser);
+        console.log('currentUser:', currentUser);
+        
+        // Remove editing header if it exists
+        const editingHeader = document.getElementById('editingStudentHeader');
+        if (editingHeader) {
+            editingHeader.remove();
+        }
         
         // Clear all containers
-        hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
-        revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
-        sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
         
-        // Ensure teacher controls are visible
-        showTeacherControls();
+        // Show teacher options modal
+        console.log('About to call showTeacherOptions in 500ms');
+        setTimeout(() => {
+            console.log('Calling showTeacherOptions now');
+            showTeacherOptions();
+        }, 500); // Small delay to ensure UI is ready
+        
         return;
     }
     
@@ -976,21 +2474,50 @@ function loadStudentContent() {
     }
     
     const userData = sampleData.content[targetUser];
-    console.log('User data loaded:', userData);
+    console.log('User data loaded for', targetUser, ':', userData);
+    console.log('Hifz entries:', userData.hifz);
+    console.log('Revision entries:', userData.revision);
+    console.log('Sessions entries:', userData.sessions);
+    
+    // Get container references
+    const hifzContent = document.getElementById('hifzContent');
+    const revisionContent = document.getElementById('revisionContent');
+    const sessionsList = document.getElementById('sessionsList');
+    
+    console.log('Container references:', {
+        hifzContent: hifzContent,
+        revisionContent: revisionContent,
+        sessionsList: sessionsList
+    });
     
     // Clear all containers first to prevent mixing
-    hifzContent.innerHTML = '';
-    revisionContent.innerHTML = '';
-    sessionsList.innerHTML = '';
+    if (hifzContent) hifzContent.innerHTML = '';
+    if (revisionContent) revisionContent.innerHTML = '';
+    if (sessionsList) sessionsList.innerHTML = '';
     
     // Load Hifz content
+    console.log('Loading hifz content, container:', hifzContent);
+    if (hifzContent) {
     loadContentItems(hifzContent, userData.hifz, 'hifz');
+    } else {
+        console.error('hifzContent container not found!');
+    }
     
     // Load Revision content
+    console.log('Loading revision content, container:', revisionContent);
+    if (revisionContent) {
     loadContentItems(revisionContent, userData.revision, 'revision');
+    } else {
+        console.error('revisionContent container not found!');
+    }
     
     // Load Past Sessions
+    console.log('Loading sessions content, container:', sessionsList);
+    if (sessionsList) {
     loadSessionsList(userData.sessions);
+    } else {
+        console.error('sessionsList container not found!');
+    }
     
     // Ensure teacher controls are visible if teacher is editing
     if (currentUserType === 'teacher' && editingStudent) {
@@ -1001,6 +2528,12 @@ function loadStudentContent() {
 
 // Load content items (assignment-style)
 function loadContentItems(container, items, type) {
+    // Check if container exists
+    if (!container) {
+        console.error('Container is null for type:', type);
+        return;
+    }
+    
     // Clear container first
     container.innerHTML = '';
     
@@ -1016,10 +2549,14 @@ function loadContentItems(container, items, type) {
         const contentItem = document.createElement('div');
         contentItem.className = 'content-item';
         
+        // Format the content display
+        const isArabic = currentLanguage === 'ar';
+        const ayahRange = formatContentItem(item, isArabic);
+        
         // Only show delete button for teachers
         if (currentUserType === 'teacher') {
             contentItem.innerHTML = `
-                <h4>${item.surah} ${item.ayahRange}</h4>
+                <h4>${ayahRange}</h4>
                 <button class="delete-btn teacher-delete-btn" onclick="deleteContentItem('${type}', ${index})" style="opacity: 1 !important;">−</button>
             `;
             
@@ -1029,7 +2566,7 @@ function loadContentItems(container, items, type) {
             });
         } else {
             contentItem.innerHTML = `
-                <h4>${item.surah} ${item.ayahRange}</h4>
+                <h4>${ayahRange}</h4>
             `;
         }
         
@@ -1041,6 +2578,14 @@ function loadContentItems(container, items, type) {
 
 // Load sessions list (assignment-style)
 function loadSessionsList(sessions) {
+    // Get container reference
+    const sessionsList = document.getElementById('sessionsList');
+    
+    if (!sessionsList) {
+        console.error('sessionsList container not found!');
+        return;
+    }
+    
     // Clear container first
     sessionsList.innerHTML = '';
     
@@ -1055,15 +2600,25 @@ function loadSessionsList(sessions) {
         const sessionItem = document.createElement('div');
         sessionItem.className = 'session-item';
         
-        const gradeClass = getGradeClass(session.grade);
+        const scoreClass = getGradeClass(session.score);
+        
+        // Format hifz and revision content
+        const isArabic = currentLanguage === 'ar';
+        const hifzDisplay = session.hifz && typeof session.hifz === 'object' 
+            ? formatContentItem(session.hifz, isArabic)
+            : translateSessionContent(session.hifz);
+        const revisionDisplay = session.revision && typeof session.revision === 'object'
+            ? formatContentItem(session.revision, isArabic)
+            : translateSessionContent(session.revision);
         
         // Only show delete button for teachers
         if (currentUserType === 'teacher') {
+            const dateDisplay = currentLanguage === 'ar' ? formatDateArabic(session.date) : formatDate(session.date);
             sessionItem.innerHTML = `
-                <div class="session-date">${formatDate(session.date)}</div>
-                <div class="session-hifz">${session.hifz}</div>
-                <div class="session-revision">${session.revision}</div>
-                <div class="session-grade ${gradeClass}">${session.grade}</div>
+                <div class="session-date">${dateDisplay}</div>
+                <div class="session-hifz">${hifzDisplay}</div>
+                <div class="session-revision">${revisionDisplay}</div>
+                <div class="session-score ${scoreClass}">${session.score}</div>
                 <button class="delete-btn teacher-delete-btn" onclick="deleteSession(${index})" style="opacity: 1 !important;">−</button>
             `;
             
@@ -1072,11 +2627,12 @@ function loadSessionsList(sessions) {
                 showDeleteButton(sessionItem);
             });
         } else {
+            const dateDisplay = currentLanguage === 'ar' ? formatDateArabic(session.date) : formatDate(session.date);
             sessionItem.innerHTML = `
-                <div class="session-date">${formatDate(session.date)}</div>
-                <div class="session-hifz">${session.hifz}</div>
-                <div class="session-revision">${session.revision}</div>
-                <div class="session-grade ${gradeClass}">${session.grade}</div>
+                <div class="session-date">${dateDisplay}</div>
+                <div class="session-hifz">${hifzDisplay}</div>
+                <div class="session-revision">${revisionDisplay}</div>
+                <div class="session-score ${scoreClass}">${session.score}</div>
             `;
         }
         
@@ -1099,12 +2655,13 @@ function showDeleteButton(item) {
 
 // Delete content item
 function deleteContentItem(type, index) {
-    if (confirm(`Are you sure you want to delete this ${type} content?`)) {
+    // Delete content item
+    {
         // Get the current student ID using the utility function
         const targetUser = getCurrentStudentId();
         
         if (!targetUser) {
-            showNotification(getTranslation('notification.no_student_selected'), 'error');
+            console.log(getTranslation('notification.no_student_selected'), 'error');
             return;
         }
         
@@ -1114,18 +2671,19 @@ function deleteContentItem(type, index) {
         // Update localStorage to persist changes
         saveAllDataToStorage();
         
-        showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} content deleted successfully!`, 'success');
+        console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} content deleted successfully!`, 'success');
     }
 }
 
 // Delete session
 function deleteSession(index) {
-    if (confirm('Are you sure you want to delete this session?')) {
+    // Delete session
+    {
         // Get the current student ID using the utility function
         const targetUser = getCurrentStudentId();
         
         if (!targetUser) {
-            showNotification(getTranslation('notification.no_student_selected'), 'error');
+            console.log(getTranslation('notification.no_student_selected'), 'error');
             return;
         }
         
@@ -1135,7 +2693,7 @@ function deleteSession(index) {
         // Update localStorage to persist changes
         saveAllDataToStorage();
         
-        showNotification('Session deleted successfully!', 'success');
+        console.log('Session deleted successfully!', 'success');
     }
 }
 
@@ -1316,7 +2874,7 @@ function skipToDashboard() {
     // Add dashboard mode styling
     userTeacherSpan.classList.add('dashboard-mode');
     
-    showNotification(getTranslation('notification.dashboard_activated'), 'info');
+    console.log(getTranslation('notification.dashboard_activated'), 'info');
 }
 
 // Handle add hifz
@@ -1324,42 +2882,64 @@ function handleAddHifz(event) {
     event.preventDefault();
     
     const surah = document.getElementById('hifzSurah').value.trim();
-    const ayahRange = document.getElementById('hifzAyahRange').value.trim();
+    const startAyah = document.getElementById('hifzStartAyah').value;
+    const endAyah = document.getElementById('hifzEndAyah').value;
+    const ayahRange = `${startAyah}-${endAyah}`;
     
-    if (!surah || !ayahRange) {
-        showNotification(getTranslation('notification.fill_all_fields'), 'error');
+    if (!surah || !startAyah || !endAyah) {
+        console.log(getTranslation('notification.fill_all_fields'), 'error');
+        return;
+    }
+    
+    if (parseInt(startAyah) > parseInt(endAyah)) {
+        console.log('Start ayah cannot be greater than end ayah', 'error');
         return;
     }
     
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
     
+    console.log('Adding hifz entry for target user:', targetUser);
+    console.log('Current user type:', currentUserType);
+    console.log('Editing student:', editingStudent);
+    
     if (!targetUser) {
-        showNotification(getTranslation('notification.no_student_selected'), 'error');
+        console.log(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
     // Add to data
+    if (!sampleData.content[targetUser]) {
+        sampleData.content[targetUser] = { hifz: [], revision: [], sessions: [] };
+    }
+    
     if (!sampleData.content[targetUser].hifz) {
         sampleData.content[targetUser].hifz = [];
     }
     
-    sampleData.content[targetUser].hifz.push({
+    const newEntry = {
         surah: surah,
-        ayahRange: ayahRange
-    });
+        ayahRange: ayahRange,
+        startAyah: parseInt(startAyah),
+        endAyah: parseInt(endAyah)
+    };
+    
+    sampleData.content[targetUser].hifz.push(newEntry);
+    
+    
+    // Save data
+    saveAllDataToStorage();
+    console.log('Data saved to storage');
     
     // Reload content
+    console.log('Reloading student content...');
     loadStudentContent();
-    
-    // Update localStorage to persist changes
-    saveAllDataToStorage();
     
     // Close modal and reset form
     closeModal('addHifzModal');
     document.getElementById('addHifzForm').reset();
     
-        showNotification(getTranslation('notification.hifz_added'), 'success');
+        console.log(getTranslation('notification.hifz_added'), 'success');
 }
 
 // Handle add revision
@@ -1367,42 +2947,66 @@ function handleAddRevision(event) {
     event.preventDefault();
     
     const surah = document.getElementById('revisionSurah').value.trim();
-    const ayahRange = document.getElementById('revisionAyahRange').value.trim();
+    const startAyah = document.getElementById('revisionStartAyah').value;
+    const endAyah = document.getElementById('revisionEndAyah').value;
+    const ayahRange = `${startAyah}-${endAyah}`;
     
-    if (!surah || !ayahRange) {
-        showNotification(getTranslation('notification.fill_all_fields'), 'error');
+    if (!surah || !startAyah || !endAyah) {
+        console.log(getTranslation('notification.fill_all_fields'), 'error');
+        return;
+    }
+    
+    if (parseInt(startAyah) > parseInt(endAyah)) {
+        console.log('Start ayah cannot be greater than end ayah', 'error');
         return;
     }
     
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
     
+    console.log('Adding revision entry for target user:', targetUser);
+    console.log('Current user type:', currentUserType);
+    console.log('Editing student:', editingStudent);
+    
     if (!targetUser) {
-        showNotification(getTranslation('notification.no_student_selected'), 'error');
+        console.log(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
     // Add to data
+    if (!sampleData.content[targetUser]) {
+        sampleData.content[targetUser] = { hifz: [], revision: [], sessions: [] };
+    }
+    
     if (!sampleData.content[targetUser].revision) {
         sampleData.content[targetUser].revision = [];
     }
     
-    sampleData.content[targetUser].revision.push({
+    const newEntry = {
         surah: surah,
-        ayahRange: ayahRange
-    });
+        ayahRange: ayahRange,
+        startAyah: parseInt(startAyah),
+        endAyah: parseInt(endAyah)
+    };
+    
+    sampleData.content[targetUser].revision.push(newEntry);
+    
+    console.log('Added revision entry:', newEntry);
+    console.log('Total revision entries for', targetUser, ':', sampleData.content[targetUser].revision.length);
+    
+    // Save data
+    saveAllDataToStorage();
+    console.log('Data saved to storage');
     
     // Reload content
+    console.log('Reloading student content...');
     loadStudentContent();
-    
-    // Update localStorage to persist changes
-    saveAllDataToStorage();
     
     // Close modal and reset form
     closeModal('addRevisionModal');
     document.getElementById('addRevisionForm').reset();
     
-    showNotification(getTranslation('notification.revision_added'), 'success');
+    console.log(getTranslation('notification.revision_added'), 'success');
 }
 
 // Handle add session
@@ -1410,12 +3014,41 @@ function handleAddSession(event) {
     event.preventDefault();
     
     const date = document.getElementById('sessionDate').value;
-    const hifz = document.getElementById('sessionHifz').value.trim();
-    const revision = document.getElementById('sessionRevision').value.trim();
-    const grade = document.getElementById('sessionGrade').value;
+    const hifzSelection = document.getElementById('sessionHifzSurah').value;
+    const revisionSelection = document.getElementById('sessionRevisionSurah').value;
+    const score = document.getElementById('sessionScore').value;
     
-    if (!date || !hifz || !revision || !grade) {
-        showNotification(getTranslation('notification.fill_all_fields'), 'error');
+    // Parse hifz and revision selections
+    // Format: "البقرة 2 - 16" or "Al-Baqarah 2 - 16" -> extract surah and ayah range
+    const hifzMatch = hifzSelection.match(/^(.+?)\s+(\d+(?:\s*-\s*\d+)?)$/);
+    const revisionMatch = revisionSelection.match(/^(.+?)\s+(\d+(?:\s*-\s*\d+)?)$/);
+    
+    console.log('=== SESSION PARSING DEBUG ===');
+    console.log('Hifz selection:', hifzSelection);
+    console.log('Hifz match result:', hifzMatch);
+    console.log('Revision selection:', revisionSelection);
+    console.log('Revision match result:', revisionMatch);
+    
+    if (!hifzMatch || !revisionMatch) {
+        console.log('Invalid hifz or revision selection format', 'error');
+        return;
+    }
+    
+    const hifzSurah = hifzMatch[1].trim();
+    const hifzAyahRange = hifzMatch[2].trim();
+    const revisionSurah = revisionMatch[1].trim();
+    const revisionAyahRange = revisionMatch[2].trim();
+    
+    console.log('=== SESSION DEBUG ===');
+    console.log('Hifz selection:', hifzSelection);
+    console.log('Parsed hifz surah:', hifzSurah);
+    console.log('Parsed hifz ayah range:', hifzAyahRange);
+    console.log('Revision selection:', revisionSelection);
+    console.log('Parsed revision surah:', revisionSurah);
+    console.log('Parsed revision ayah range:', revisionAyahRange);
+    
+    if (!date || !hifzSelection || !revisionSelection || !score) {
+        console.log(getTranslation('notification.fill_all_fields'), 'error');
         return;
     }
     
@@ -1423,7 +3056,7 @@ function handleAddSession(event) {
     const targetUser = getCurrentStudentId();
     
     if (!targetUser) {
-        showNotification(getTranslation('notification.no_student_selected'), 'error');
+        console.log(getTranslation('notification.no_student_selected'), 'error');
         return;
     }
     
@@ -1432,11 +3065,35 @@ function handleAddSession(event) {
         sampleData.content[targetUser].sessions = [];
     }
     
+    // Parse ayah ranges to get start and end ayahs
+    const hifzAyahParts = hifzAyahRange.split(/\s*-\s*/);
+    const revisionAyahParts = revisionAyahRange.split(/\s*-\s*/);
+    
+    const hifzStartAyah = parseInt(hifzAyahParts[0]);
+    const hifzEndAyah = hifzAyahParts[1] ? parseInt(hifzAyahParts[1]) : hifzStartAyah;
+    
+    const revisionStartAyah = parseInt(revisionAyahParts[0]);
+    const revisionEndAyah = revisionAyahParts[1] ? parseInt(revisionAyahParts[1]) : revisionStartAyah;
+    
+    console.log('Parsed ayah values:');
+    console.log('Hifz start:', hifzStartAyah, 'end:', hifzEndAyah);
+    console.log('Revision start:', revisionStartAyah, 'end:', revisionEndAyah);
+    
     sampleData.content[targetUser].sessions.push({
         date: date,
-        hifz: hifz,
-        revision: revision,
-        grade: grade
+        hifz: {
+            surah: hifzSurah,
+            ayahRange: hifzAyahRange,
+            startAyah: hifzStartAyah,
+            endAyah: hifzEndAyah
+        },
+        revision: {
+            surah: revisionSurah,
+            ayahRange: revisionAyahRange,
+            startAyah: revisionStartAyah,
+            endAyah: revisionEndAyah
+        },
+        score: score
     });
     
     // Reload content
@@ -1449,112 +3106,606 @@ function handleAddSession(event) {
     closeModal('addSessionModal');
     document.getElementById('addSessionForm').reset();
     
-    showNotification(getTranslation('notification.session_added'), 'success');
+    console.log(getTranslation('notification.session_added'), 'success');
+}
+
+// Handle logout function
+// Show logout confirmation
+function showLogoutConfirmation() {
+    if (confirm(getTranslation('notification.confirm_logout'))) {
+        handleLogout();
+    }
 }
 
 // Handle logout
 function handleLogout() {
-    // Show custom confirmation modal
-    showModal('logoutConfirmationModal');
-}
-
-// Confirm logout after user confirms
-function confirmLogout() {
-    currentUser = null;
-    currentUserType = null;
-    currentTeacher = null;
-    editingStudent = null;
+    console.log('Logout initiated');
     
-    // Clear localStorage
+    // Clear session data
     localStorage.removeItem('quranUser');
     localStorage.removeItem('quranUserType');
     
-    // Reset forms
-    document.getElementById('addHifzForm').reset();
-    document.getElementById('addRevisionForm').reset();
-    document.getElementById('addSessionForm').reset();
+    // Reset global variables
+    currentUser = null;
+    currentUserType = null;
+    currentTeacher = null;
     
-    // Hide add buttons using global references
-    if (window.addHifzBtn) window.addHifzBtn.style.display = 'none';
-    if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'none';
-    if (window.addSessionBtn) window.addSessionBtn.style.display = 'none';
+    // Reset language to default
+    setLanguage('en');
     
-    // Show login, hide dashboard
-    loginSection.style.display = 'flex';
-    dashboardSection.style.display = 'none';
-    
-    // Reset header
-    userNameSpan.textContent = 'Student Name';
-    userClassSpan.textContent = 'Class';
-    userTeacherSpan.textContent = 'Teacher';
-    
-    // Remove editing mode styling
-    userNameSpan.classList.remove('editing-mode');
-    
-    // Remove dashboard mode styling
-    userNameSpan.classList.remove('dashboard-mode');
-    
-    // Remove teacher-mode class
+    // Reset body direction and classes
+    document.body.setAttribute('dir', 'ltr');
     document.body.classList.remove('teacher-mode');
+    document.body.style.direction = 'ltr';
     
-    // Restore original main content if admin was logged in
-    if (window.originalMainContent) {
-        const mainContent = document.querySelector('.main-content');
-        mainContent.innerHTML = window.originalMainContent;
-        window.originalMainContent = null;
+    // Reset login container to original state after logout
+    setTimeout(() => {
+        const loginContainer = document.querySelector('.login-container');
+        if (loginContainer) {
+            // Reset to original CSS values
+            loginContainer.style.position = 'fixed';
+            loginContainer.style.top = '0';
+            loginContainer.style.left = '0';
+            loginContainer.style.width = '100%';
+            loginContainer.style.height = '100%';
+            loginContainer.style.transform = '';
+            loginContainer.style.right = '';
+            loginContainer.style.maxWidth = '';
+            loginContainer.style.display = 'flex';
+            loginContainer.style.flexDirection = 'column';
+            loginContainer.style.justifyContent = 'center';
+            loginContainer.style.alignItems = 'center';
+        }
+    }, 100);
+    
+    // Hide dashboard and show login
+    const loginSection = document.getElementById('loginSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    
+    if (dashboardSection) {
+        dashboardSection.style.display = 'none';
+        dashboardSection.classList.remove('show');
+    }
+    if (loginSection) {
+        loginSection.style.display = 'block';
+        loginSection.classList.add('show');
     }
     
-    // Close the confirmation modal
-    closeModal('logoutConfirmModal');
     
-    showNotification(getTranslation('notification.logged_out'), 'success');
+    // Clear form inputs
+    const userCodeInput = document.getElementById('userCode');
+    if (userCodeInput) userCodeInput.value = '';
+    
+    // Reset main content if it was modified for admin
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent && window.originalMainContent) {
+        mainContent.innerHTML = window.originalMainContent;
+    }
+    
+    // Reset display styles
+    const topCards = document.querySelector('.top-cards');
+    const pastSessionsCard = document.querySelector('.past-sessions-card');
+    if (topCards) topCards.style.display = 'flex';
+    if (pastSessionsCard) pastSessionsCard.style.display = 'block';
+    
+    console.log('Logout completed');
 }
 
-// Check for existing session
-function checkForExistingSession() {
-    const savedUser = localStorage.getItem('quranUser');
-    const savedUserType = localStorage.getItem('quranUserType');
-    
-    console.log('Checking for existing session:', { savedUser, savedUserType });
-    
-    if (savedUser && savedUserType) {
-        currentUser = savedUser;
-        currentUserType = savedUserType;
-        
-        if (savedUserType === 'admin') {
-            const admin = sampleData.admin[savedUser];
-            if (admin) {
-                console.log('Restoring admin session for:', admin.name);
-                loginSuccess(admin);
-            } else {
-                console.log('Admin not found, clearing session');
-                localStorage.removeItem('quranUser');
-                localStorage.removeItem('quranUserType');
-            }
-        } else if (savedUserType === 'student') {
-            const student = sampleData.students[savedUser];
-            if (student) {
-                console.log('Restoring student session for:', student.name);
-                loginSuccess(student);
-            } else {
-                console.log('Student not found, clearing session');
-                localStorage.removeItem('quranUser');
-                localStorage.removeItem('quranUserType');
-            }
-        } else if (savedUserType === 'teacher') {
-            const teacher = sampleData.teachers[savedUser];
-            if (teacher) {
-                console.log('Restoring teacher session for:', teacher.name);
-                loginSuccess(teacher);
-            } else {
-                console.log('Teacher not found, clearing session');
-                localStorage.removeItem('quranUser');
-                localStorage.removeItem('quranUserType');
-            }
-        }
+// Logout confirmation functions removed - direct logout now!
+
+// Teacher Dashboard Functions
+function testModal() {
+    console.log('testModal called');
+    const modal = document.getElementById('teacherOptionsModal');
+    console.log('Modal element:', modal);
+    if (modal) {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '2000';
+        console.log('Modal should be visible now');
     } else {
-        console.log('No saved session found');
+        console.error('Modal not found!');
     }
+}
+
+function showTeacherOptions() {
+    console.log('showTeacherOptions called');
+    console.log('Looking for modal with ID: teacherOptionsModal');
+    const modal = document.getElementById('teacherOptionsModal');
+    console.log('Modal found:', modal);
+    if (modal) {
+        console.log('Modal exists, calling showModal');
+        showModal('teacherOptionsModal');
+    } else {
+        console.error('teacherOptionsModal not found in DOM!');
+    }
+}
+
+function showClassSelection() {
+    closeModal('teacherOptionsModal');
+    populateClassesList();
+    showModal('classSelectionModal');
+}
+
+function populateClassesList() {
+    const classesList = document.getElementById('classesList');
+    if (!classesList) return;
+    
+    // Get all unique classes from students
+    const classes = new Set();
+    Object.values(sampleData.students).forEach(student => {
+        if (student.class) {
+            classes.add(student.class);
+        }
+    });
+    
+    classesList.innerHTML = '';
+    
+    if (classes.size === 0) {
+        classesList.innerHTML = '<p style="text-align: center; color: #666;">No classes found</p>';
+        return;
+    }
+    
+    Array.from(classes).sort().forEach(className => {
+        const classItem = document.createElement('div');
+        classItem.className = 'class-item';
+        classItem.onclick = () => selectClass(className);
+        
+        // Count students in this class
+        const studentCount = Object.values(sampleData.students).filter(s => s.class === className).length;
+        
+        const studentText = currentLanguage === 'ar' ? 
+            `${studentCount} ${studentCount === 1 ? 'طالب' : 'طالب'}` : 
+            `${studentCount} student${studentCount !== 1 ? 's' : ''}`;
+            
+        classItem.innerHTML = `
+            <h4>${className}</h4>
+            <p>${studentText}</p>
+        `;
+        
+        classesList.appendChild(classItem);
+    });
+}
+
+function selectClass(className) {
+    closeModal('classSelectionModal');
+    populateStudentsList(className);
+    showModal('studentSelectionModal');
+}
+
+function populateStudentsList(className) {
+    const studentsList = document.getElementById('studentsList');
+    const selectedClassInfo = document.getElementById('selectedClassInfo');
+    const modalActions = document.querySelector('#studentSelectionModal .modal-actions');
+    
+    if (!studentsList || !selectedClassInfo) {
+        console.error('studentsList or selectedClassInfo not found');
+        return;
+    }
+    
+    
+    selectedClassInfo.textContent = `${getTranslation('teacher.students_in_class')} ${className}`;
+    
+    // Add selection counter
+    const selectionCounter = document.createElement('div');
+    selectionCounter.id = 'selectionCounter';
+    selectionCounter.style.cssText = `
+        text-align: center;
+        margin: 10px 0;
+        font-weight: bold;
+        color: var(--primary-color);
+    `;
+    selectionCounter.textContent = '0 students selected';
+    
+    // Insert counter after selectedClassInfo
+    selectedClassInfo.parentNode.insertBefore(selectionCounter, selectedClassInfo.nextSibling);
+    
+    // Get students in this class
+    const studentsInClass = Object.entries(sampleData.students).filter(([id, student]) => student.class === className);
+    
+    console.log('Students in class', className, ':', studentsInClass);
+    console.log('All students:', Object.keys(sampleData.students));
+    
+    studentsList.innerHTML = '';
+    
+    if (studentsInClass.length === 0) {
+        studentsList.innerHTML = '<p style="text-align: center; color: #666;">No students in this class</p>';
+        console.log('No students found in class:', className);
+        return;
+    }
+    
+    console.log('Found', studentsInClass.length, 'students in class', className);
+    
+    studentsInClass.forEach(([studentId, student]) => {
+        const studentItem = document.createElement('div');
+        studentItem.className = 'student-item';
+        
+        // Check if student is already assigned to current teacher
+        const isAssigned = sampleData.teachers[currentUser] && 
+                          sampleData.teachers[currentUser].students && 
+                          sampleData.teachers[currentUser].students.includes(studentId);
+        
+        console.log('Checking assignment for student:', studentId);
+        console.log('Teacher students array:', sampleData.teachers[currentUser]?.students);
+        console.log('Is assigned:', isAssigned);
+        
+        if (isAssigned) {
+            studentItem.classList.add('assigned');
+        }
+        
+        studentItem.innerHTML = `
+            <input type="checkbox" id="student_${studentId}" ${isAssigned ? 'disabled' : ''} class="student-checkbox">
+            <div class="student-info">
+                <span class="student-name">${student.name}</span>
+                <span class="student-class">${student.class}</span>
+            </div>
+        `;
+        
+        
+        // Make entire item clickable for selection
+        if (!isAssigned) {
+            studentItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            const checkbox = studentItem.querySelector('.student-checkbox');
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = !checkbox.checked;
+                    // Add visual feedback
+                    if (checkbox.checked) {
+                        studentItem.style.backgroundColor = '#e8f5e8';
+                        studentItem.style.borderColor = '#27ae60';
+                        studentItem.style.borderWidth = '2px';
+                    } else {
+                        studentItem.style.backgroundColor = '';
+                        studentItem.style.borderColor = '';
+                        studentItem.style.borderWidth = '';
+                    }
+                    console.log('Toggled checkbox for student:', studentId, 'Checked:', checkbox.checked);
+                    updateSelectionCounter();
+                }
+            });
+        }
+        
+        studentsList.appendChild(studentItem);
+    });
+}
+
+function updateSelectionCounter() {
+    const counter = document.getElementById('selectionCounter');
+    if (counter) {
+        const checkedBoxes = document.querySelectorAll('#studentsList input[type="checkbox"]:checked:not(:disabled)');
+        counter.textContent = `${checkedBoxes.length} student(s) selected`;
+    }
+}
+
+function addSelectedStudents() {
+    const checkboxes = document.querySelectorAll('#studentsList input[type="checkbox"]:checked:not(:disabled)');
+    let addedCount = 0;
+    
+    console.log('Found checkboxes:', checkboxes.length);
+    console.log('Current user:', currentUser);
+    console.log('Teacher data:', sampleData.teachers[currentUser]);
+    
+    // Don't reset the teacher's students array - this was causing the issue!
+    // if (sampleData.teachers[currentUser]) {
+    //     sampleData.teachers[currentUser].students = [];
+    //     console.log('Reset teacher students array for testing');
+    // }
+    
+    if (checkboxes.length === 0) {
+        alert(getTranslation('teacher.no_students_selected') || 'Please select at least one student.');
+        return;
+    }
+    
+    checkboxes.forEach(checkbox => {
+        const studentId = checkbox.id.replace('student_', '');
+        console.log('Processing student:', studentId);
+        if (addStudentToTeacher(studentId)) {
+            addedCount++;
+            console.log('Successfully added student:', studentId);
+        } else {
+            console.log('Failed to add student:', studentId);
+        }
+    });
+    
+    console.log('Total added:', addedCount);
+    console.log('Teacher students after:', sampleData.teachers[currentUser]?.students);
+    
+    if (addedCount > 0) {
+        console.log(`Added ${addedCount} students to teacher ${currentUser}`);
+        alert(`${addedCount} student(s) added successfully! You can now manage them in "Edit Students".`);
+        
+        // Close the modal
+        closeModal('studentSelectionModal');
+        closeModal('classSelectionModal');
+        
+        // Show assigned students (Edit Students view)
+        showAssignedStudents();
+        
+        // Update button color
+        updateEditStudentsButtonColor();
+    } else {
+        alert('No students were added. They may already be assigned to you.');
+    }
+}
+
+function addStudentToTeacher(studentId) {
+    console.log('assignStudentToTeacher called with:', studentId);
+    console.log('Current user:', currentUser);
+    console.log('Teacher exists:', !!sampleData.teachers[currentUser]);
+    
+    if (!sampleData.teachers[currentUser]) {
+        console.log('Current teacher not found');
+        return false;
+    }
+    
+    // Initialize students array if it doesn't exist
+    if (!sampleData.teachers[currentUser].students) {
+        sampleData.teachers[currentUser].students = [];
+        console.log('Initialized students array for teacher');
+    }
+    
+    console.log('Current students before check:', sampleData.teachers[currentUser].students);
+    console.log('Looking for student:', studentId);
+    console.log('Array includes check:', sampleData.teachers[currentUser].students.includes(studentId));
+    
+    // Check if student is already assigned
+    if (sampleData.teachers[currentUser].students.includes(studentId)) {
+        console.log('Student already assigned to this teacher');
+        return false;
+    }
+    
+    // Add student to teacher
+    sampleData.teachers[currentUser].students.push(studentId);
+    console.log('Added student to array. New students:', sampleData.teachers[currentUser].students);
+    
+    // Save data
+    saveAllDataToStorage();
+    
+    console.log(`Student ${studentId} assigned to teacher ${currentUser}`);
+    return true;
+}
+
+function showAssignedStudents() {
+    closeModal('teacherOptionsModal');
+    
+    if (!sampleData.teachers[currentUser] || !sampleData.teachers[currentUser].students || sampleData.teachers[currentUser].students.length === 0) {
+        // Show empty state
+        const hifzContent = document.getElementById('hifzContent');
+        const revisionContent = document.getElementById('revisionContent');
+        const sessionsList = document.getElementById('sessionsList');
+        
+        if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
+        if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
+        if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
+        
+        // Show teacher options button
+        showTeacherControls();
+        return;
+    }
+    
+    // Show assigned students list in a separate container, not in hifz content
+    const hifzContent = document.getElementById('hifzContent');
+    if (hifzContent) {
+        hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+    }
+    
+    // Remove existing container if it exists
+    const existingContainer = document.getElementById('assignedStudentsContainer');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create a new dedicated container for assigned students
+    const assignedStudentsContainer = document.createElement('div');
+    assignedStudentsContainer.id = 'assignedStudentsContainer';
+    assignedStudentsContainer.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border: 2px solid var(--primary-color);
+        border-radius: 15px;
+        padding: 20px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80%;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    `;
+    document.body.appendChild(assignedStudentsContainer);
+    
+    // Group students by class
+    const studentsByClass = {};
+    console.log('Teacher students array:', sampleData.teachers[currentUser].students);
+    console.log('Total students assigned to teacher:', sampleData.teachers[currentUser].students.length);
+    
+    sampleData.teachers[currentUser].students.forEach((studentId, index) => {
+        const student = sampleData.students[studentId];
+        console.log(`Processing student ${index + 1}/${sampleData.teachers[currentUser].students.length}:`, studentId, student);
+        if (student) {
+            if (!studentsByClass[student.class]) {
+                studentsByClass[student.class] = [];
+                console.log('Created new class group:', student.class);
+            }
+            // Check if student is already in this class to avoid duplicates
+            const alreadyExists = studentsByClass[student.class].some(s => s.id === student.id);
+            if (!alreadyExists) {
+                studentsByClass[student.class].push(student);
+                console.log('Added student to class:', student.class, 'Total in class:', studentsByClass[student.class].length);
+            } else {
+                console.log('Student already exists in class:', student.class, 'Skipping duplicate');
+            }
+        } else {
+            console.error('Student not found in sampleData.students:', studentId);
+        }
+    });
+    
+    console.log('Students by class:', studentsByClass);
+    console.log('Class names:', Object.keys(studentsByClass));
+    console.log('Number of classes:', Object.keys(studentsByClass).length);
+    
+    // Check if we have any classes
+    if (Object.keys(studentsByClass).length === 0) {
+        console.error('No classes found! This should not happen.');
+        return;
+    }
+    
+    assignedStudentsContainer.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3>${getTranslation('teacher.assigned_students')}</h3>
+            <button onclick="closeAssignedStudents()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+        <div id="classesList">
+            ${Object.keys(studentsByClass).map(className => `
+                <div class="class-section" style="margin-bottom: 20px;">
+                    <h4 onclick="toggleClassStudents('${className}')" style="cursor: pointer; padding: 10px; background: var(--primary-color); color: white; border-radius: 8px; margin: 0 0 10px 0; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0056b3';" onmouseout="this.style.backgroundColor='var(--primary-color)';">
+                        Class ${className} (${studentsByClass[className].length} students) ▼
+                    </h4>
+                    <div id="students-${className}" class="students-grid" style="display: none; margin-left: 20px;">
+                        ${studentsByClass[className].map(student => `
+                            <div class="student-item" onclick="selectStudentForEditing('${student.id}')" style="cursor: pointer; padding: 12px 16px; margin: 2px 0; border: 1px solid var(--border-color); border-radius: 6px; background: var(--card-background); transition: all 0.3s ease; display: flex; align-items: center; gap: 16px;" onmouseover="this.style.borderColor='var(--primary-color)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: bold; color: var(--text-primary); font-size: 14px;">${student.name}</span>
+                                    <span style="color: var(--primary-color); font-size: 14px; font-weight: 600;">${student.class}</span>
+                        </div>
+                                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); removeStudentFromTeacher('${student.id}')" style="padding: 2px 6px; font-size: 10px; min-width: 50px;">×</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('')}
+            </div>
+        `;
+    
+    // Clear other content areas
+    const revisionContent = document.getElementById('revisionContent');
+    const sessionsList = document.getElementById('sessionsList');
+    if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+    if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+    
+    // Show teacher controls
+    showTeacherControls();
+}
+
+function closeAssignedStudents() {
+    const container = document.getElementById('assignedStudentsContainer');
+    if (container) {
+        container.remove();
+    }
+}
+
+function updateEditStudentsButtonColor() {
+    const editButton = document.querySelector('button[data-translate="teacher.edit_students"]');
+    if (editButton) {
+        // Always make it green (btn-success)
+        editButton.classList.remove('btn-secondary', 'btn-primary');
+        editButton.classList.add('btn-success');
+        editButton.style.backgroundColor = 'var(--success-color)';
+        editButton.style.borderColor = 'var(--success-color)';
+        editButton.style.color = 'white';
+    }
+}
+
+function toggleClassStudents(className) {
+    const studentsDiv = document.getElementById(`students-${className}`);
+    const classHeader = document.querySelector(`h4[onclick="toggleClassStudents('${className}')"]`);
+    
+    if (studentsDiv && classHeader) {
+        if (studentsDiv.style.display === 'none') {
+            studentsDiv.style.display = 'block';
+            classHeader.innerHTML = classHeader.innerHTML.replace('▼', '▲');
+        } else {
+            studentsDiv.style.display = 'none';
+            classHeader.innerHTML = classHeader.innerHTML.replace('▲', '▼');
+        }
+    }
+}
+
+function selectStudentForEditing(studentId) {
+    console.log('Selecting student for editing:', studentId);
+    editingStudent = studentId;
+    
+    // Close the assigned students modal
+    closeAssignedStudents();
+    
+    // Show editing header
+    showEditingStudentHeader(studentId);
+    
+    // Load the student's content
+    loadStudentContent();
+    
+    // Populate past sessions dropdowns for this student
+    populatePastSessionsDropdowns();
+    
+    console.log('Student editing mode activated for:', studentId);
+}
+
+function showEditingStudentHeader(studentId) {
+    const student = sampleData.students[studentId];
+    if (!student) return;
+    
+    // Create or update the editing header
+    let editingHeader = document.getElementById('editingStudentHeader');
+    if (!editingHeader) {
+        editingHeader = document.createElement('div');
+        editingHeader.id = 'editingStudentHeader';
+        editingHeader.style.cssText = `
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        `;
+        
+        // Insert at the top of the main content
+        const mainContent = document.querySelector('.main-content') || document.querySelector('#mainContent');
+        if (mainContent) {
+            mainContent.insertBefore(editingHeader, mainContent.firstChild);
+        }
+    }
+    
+    editingHeader.innerHTML = `
+        <h3 style="margin: 0; color: white;">Editing Student: ${student.name} (${student.class})</h3>
+        <button onclick="stopEditingStudent()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+    `;
+}
+
+function stopEditingStudent() {
+    editingStudent = null;
+    const editingHeader = document.getElementById('editingStudentHeader');
+    if (editingHeader) {
+        editingHeader.remove();
+    }
+    
+    // Reload content to show teacher options
+    loadStudentContent();
+}
+
+function removeStudentFromTeacher(studentId) {
+    if (!sampleData.teachers[currentUser] || !sampleData.teachers[currentUser].students) {
+        return;
+    }
+    
+    // Remove student from teacher's list
+    sampleData.teachers[currentUser].students = sampleData.teachers[currentUser].students.filter(id => id !== studentId);
+    
+    // Save data
+    saveAllDataToStorage();
+    
+    console.log(`Student ${studentId} removed from teacher ${currentUser}`);
+    
+    // Refresh the assigned students list
+    showAssignedStudents();
+    
+    // Update button color
+    updateEditStudentsButtonColor();
 }
 
 // Modal functions
@@ -1563,9 +3714,32 @@ function showModal(modalId) {
     const modal = document.getElementById(modalId);
     console.log('Modal element found:', modal);
     if (modal) {
+        console.log('Modal before changes:');
+        console.log('- display:', modal.style.display);
+        console.log('- classList:', modal.classList.toString());
+        
         modal.style.display = 'block';
-        console.log('Modal display set to block');
-        console.log('Modal current display:', modal.style.display);
+        modal.classList.add('show');
+        
+        console.log('Modal after changes:');
+        console.log('- display:', modal.style.display);
+        console.log('- classList:', modal.classList.toString());
+        console.log('- computed display:', window.getComputedStyle(modal).display);
+        
+        // Force visibility
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '2000';
+        
+        console.log('Modal should now be visible');
+        
+        // If this is the session modal, populate past sessions dropdowns
+        if (modalId === 'addSessionModal') {
+            console.log('Session modal opened - populating past sessions dropdowns');
+            setTimeout(() => {
+                populatePastSessionsDropdowns();
+            }, 100);
+        }
     } else {
         console.error('Modal not found:', modalId);
     }
@@ -1654,6 +3828,163 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+}
+
+// Helper function to get surah number from surah name
+function getSurahNumberFromName(surahName) {
+    // Map HTML surah names to surah numbers (matching the exact HTML values)
+    const surahNameMap = {
+        'Al Fatiha': 1, 'Al Baqarah': 2, 'Al Imran': 3, 'An Nisa': 4, 'Al Ma\'idah': 5,
+        'Al An\'am': 6, 'Al A\'raf': 7, 'Al Anfal': 8, 'At Tawbah': 9, 'Yunus': 10,
+        'Hud': 11, 'Yusuf': 12, 'Ar Ra\'d': 13, 'Ibrahim': 14, 'Al Hijr': 15,
+        'An Nahl': 16, 'Al Isra': 17, 'Al Kahf': 18, 'Maryam': 19, 'Ta Ha': 20,
+        'Al Anbiya': 21, 'Al Hajj': 22, 'Al Mu\'minun': 23, 'An Nur': 24, 'Al Furqan': 25,
+        'Ash Shu\'ara': 26, 'An Naml': 27, 'Al Qasas': 28, 'Al \'Ankabut': 29, 'Ar Rum': 30,
+        'Luqman': 31, 'As Sajdah': 32, 'Al Ahzab': 33, 'Saba': 34, 'Fatir': 35,
+        'Ya Sin': 36, 'As Saffat': 37, 'Sad': 38, 'Az Zumar': 39, 'Ghafir': 40,
+        'Fussilat': 41, 'Ash Shura': 42, 'Az Zukhruf': 43, 'Ad Dukhan': 44, 'Al Jathiyah': 45,
+        'Al Ahqaf': 46, 'Muhammad': 47, 'Al Fath': 48, 'Al Hujurat': 49, 'Qaf': 50,
+        'Adh Dhariyat': 51, 'At Tur': 52, 'An Najm': 53, 'Al Qamar': 54, 'Ar Rahman': 55,
+        'Al Waqi\'ah': 56, 'Al Hadid': 57, 'Al Mujadilah': 58, 'Al Hashr': 59, 'Al Mumtahanah': 60,
+        'As Saff': 61, 'Al Jumu\'ah': 62, 'Al Munafiqun': 63, 'At Taghabun': 64, 'At Talaq': 65,
+        'At Tahrim': 66, 'Al Mulk': 67, 'Al Qalam': 68, 'Al Haqqah': 69, 'Al Ma\'arij': 70,
+        'Nuh': 71, 'Al Jinn': 72, 'Al Muzzammil': 73, 'Al Muddathir': 74, 'Al Qiyamah': 75,
+        'Al Insan': 76, 'Al Mursalat': 77, 'An Naba': 78, 'An Nazi\'at': 79, 'Abasa': 80,
+        'At Takwir': 81, 'Al Infitar': 82, 'Al Mutaffifin': 83, 'Al Inshiqaq': 84, 'Al Buruj': 85,
+        'At Tariq': 86, 'Al A\'la': 87, 'Al Ghashiyah': 88, 'Al Fajr': 89, 'Al Balad': 90,
+        'Ash Shams': 91, 'Al Lail': 92, 'Ad Duha': 93, 'Ash Sharh': 94, 'At Tin': 95,
+        'Al \'Alaq': 96, 'Al Qadr': 97, 'Al Bayyinah': 98, 'Az Zalzalah': 99, 'Al \'Adiyat': 100,
+        'Al Qari\'ah': 101, 'At Takathur': 102, 'Al \'Asr': 103, 'Al Humazah': 104, 'Al Fil': 105,
+        'Quraish': 106, 'Al Ma\'un': 107, 'Al Kawthar': 108, 'Al Kafirun': 109, 'An Nasr': 110,
+        'Al Masad': 111, 'Al Ikhlas': 112, 'Al Falaq': 113, 'An Nas': 114
+    };
+    
+    return surahNameMap[surahName] || null;
+}
+
+// Helper function to generate ayah range dropdowns
+function generateAyahRangeDropdown(surahName, startId, endId) {
+    const surahNumber = getSurahNumberFromName(surahName);
+    if (!surahNumber) {
+        console.error('Surah not found:', surahName);
+        return '<p style="color: red;">Surah not found: ' + surahName + '</p>';
+    }
+    
+    const surah = surahData[surahNumber];
+    if (!surah) {
+        console.error('Surah data not found for number:', surahNumber);
+        return '<p style="color: red;">Surah data not found</p>';
+    }
+    
+    console.log('Generating dropdown for surah:', surahName, '(#' + surahNumber + ') with', surah.ayahs, 'ayahs');
+    
+    const options = [];
+    for (let i = 1; i <= surah.ayahs; i++) {
+        options.push(`<option value="${i}">${i}</option>`);
+    }
+    
+    return `
+        <select id="${startId}" required style="flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: white; font-size: 14px;">
+            <option value="">Start Ayah</option>
+            ${options.join('')}
+        </select>
+        <span style="font-weight: 500; color: #333;">to</span>
+        <select id="${endId}" required style="flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: white; font-size: 14px;">
+            <option value="">End Ayah</option>
+            ${options.join('')}
+        </select>
+    `;
+}
+
+// Helper function to populate past sessions dropdowns
+function populatePastSessionsDropdowns() {
+    const targetUser = getCurrentStudentId();
+    console.log('Populating past sessions dropdowns for user:', targetUser);
+    
+    if (!targetUser) {
+        console.log('No target user found');
+        return;
+    }
+    
+    if (!sampleData.content[targetUser]) {
+        console.log('No content data found for user:', targetUser);
+        return;
+    }
+    
+    const userData = sampleData.content[targetUser];
+    console.log('User data:', userData);
+    console.log('Hifz items:', userData.hifz);
+    console.log('Revision items:', userData.revision);
+    
+    // Populate hifz dropdown
+    const hifzDropdown = document.getElementById('sessionHifzSurah');
+    if (hifzDropdown) {
+        console.log('Found hifz dropdown, populating with', userData.hifz.length, 'items');
+        hifzDropdown.innerHTML = '<option value="">Select Hifz Item</option>';
+        userData.hifz.forEach((item, index) => {
+            const option = document.createElement('option');
+            option.value = `${item.surah} ${item.ayahRange}`;
+            option.textContent = formatContentItem(item, currentLanguage === 'ar');
+            hifzDropdown.appendChild(option);
+            console.log('Added hifz option:', option.textContent);
+        });
+    } else {
+        console.log('Hifz dropdown not found');
+    }
+    
+    // Populate revision dropdown
+    const revisionDropdown = document.getElementById('sessionRevisionSurah');
+    if (revisionDropdown) {
+        console.log('Found revision dropdown, populating with', userData.revision.length, 'items');
+        revisionDropdown.innerHTML = '<option value="">Select Revision Item</option>';
+        userData.revision.forEach((item, index) => {
+            const option = document.createElement('option');
+            option.value = `${item.surah} ${item.ayahRange}`;
+            option.textContent = formatContentItem(item, currentLanguage === 'ar');
+            revisionDropdown.appendChild(option);
+            console.log('Added revision option:', option.textContent);
+        });
+    } else {
+        console.log('Revision dropdown not found');
+    }
+}
+
+// Function to update ayah range dropdowns when surah is selected
+function updateAyahRangeDropdowns(surahSelectId, containerId) {
+    const surahSelect = document.getElementById(surahSelectId);
+    const container = document.getElementById(containerId);
+    
+    if (!surahSelect || !container) return;
+    
+    // Set initial state
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Please select a surah first</p>';
+    
+    surahSelect.addEventListener('change', function() {
+        const surahName = this.value;
+        if (surahName) {
+            container.innerHTML = generateAyahRangeDropdown(surahName, `${surahSelectId.replace('Surah', 'StartAyah')}`, `${surahSelectId.replace('Surah', 'EndAyah')}`);
+        } else {
+            container.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Please select a surah first</p>';
+        }
+    });
+}
+
+// Function to initialize all dropdown functionality
+function initializeDropdowns() {
+    // Update hifz ayah range dropdown
+    updateAyahRangeDropdowns('hifzSurah', 'hifzAyahRangeContainer');
+    
+    // Update revision ayah range dropdown
+    updateAyahRangeDropdowns('revisionSurah', 'revisionAyahRangeContainer');
+    
+    // Populate past sessions dropdowns when session modal opens
+    const sessionModal = document.getElementById('addSessionModal');
+    if (sessionModal) {
+        sessionModal.addEventListener('show.bs.modal', function() {
+            populatePastSessionsDropdowns();
+        });
     }
 }
 
@@ -1679,7 +4010,8 @@ function getCurrentStudentId() {
 
 function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    const locale = currentLanguage === 'ar' ? 'ar-SA' : 'en-US';
+    return date.toLocaleDateString(locale, { 
         year: 'numeric', 
         month: 'short', 
         day: 'numeric' 
@@ -1695,70 +4027,7 @@ function getGradeClass(grade) {
     return 'grade-2';
 }
 
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    
-    // Style the notification
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-        max-width: 300px;
-    `;
-    
-    // Set background color based on type
-    switch (type) {
-        case 'success':
-            notification.style.background = '#27ae60';
-            break;
-        case 'error':
-            notification.style.background = '#e74c3c';
-            break;
-        case 'warning':
-            notification.style.background = '#f39c12';
-            notification.style.color = '#000';
-            break;
-        default:
-            notification.style.background = '#3498db';
-    }
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Add CSS animations for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
+// Notification function removed - no more popups!
 
 // Save all data to Firebase
 async function saveAllDataToStorage() {
@@ -1766,23 +4035,40 @@ async function saveAllDataToStorage() {
         // Add timestamp to track when data was last saved
         sampleData.lastSaved = new Date().toISOString();
         
-        // Save to Firebase
-        await setDoc(doc(db, 'quranData', 'main'), {
-            students: sampleData.students,
-            teachers: sampleData.teachers,
-            content: sampleData.content,
-            lastSaved: sampleData.lastSaved
-        });
+        // Save to Firebase if available
+        if (window.firebaseService && window.firebaseService.initialized) {
+            try {
+                // Save students
+                for (const [id, studentData] of Object.entries(sampleData.students)) {
+                    await window.firebaseService.createStudent(studentData);
+                }
+                
+                // Save teachers
+                for (const [id, teacherData] of Object.entries(sampleData.teachers)) {
+                    await window.firebaseService.createTeacher(teacherData);
+                }
         
         console.log('All data saved to Firebase:', sampleData);
         
         // Show a subtle notification that data was saved (only for admin users)
         if (currentUserType === 'admin') {
-            showNotification('Data saved to cloud successfully!', 'success');
+            console.log('Data saved to cloud successfully!', 'success');
+        }
+            } catch (firebaseError) {
+                console.error('Error saving to Firebase:', firebaseError);
+        console.log('Error saving to cloud', 'error');
+            }
+        } else {
+            // Fallback to localStorage
+            localStorage.setItem('quranStudents', JSON.stringify(sampleData.students));
+            localStorage.setItem('quranTeachers', JSON.stringify(sampleData.teachers));
+            localStorage.setItem('quranContent', JSON.stringify(sampleData.content));
+            localStorage.setItem('sampleData', JSON.stringify(sampleData));
+            console.log('Data saved to localStorage');
         }
     } catch (e) {
-        console.error('Error saving data to Firebase:', e);
-        showNotification('Error saving to cloud', 'error');
+        console.error('Error saving data:', e);
+        console.log('Error saving data', 'error');
     }
 }
 
@@ -1791,34 +4077,41 @@ async function saveAllDataToStorage() {
 // Load data from Firebase
 async function loadDataFromStorage() {
     try {
-        const docRef = doc(db, 'quranData', 'main');
-        const docSnap = await getDoc(docRef);
+        // First try to load from localStorage as fallback
+        loadAllDataFromStorage();
         
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // Merge all data, not just content
-            if (data.students) {
-                sampleData.students = { ...sampleData.students, ...data.students };
-            }
-            if (data.teachers) {
-                sampleData.teachers = { ...sampleData.teachers, ...data.teachers };
-            }
-            if (data.content) {
-                // Merge content for all students (including newly created ones)
-                Object.keys(data.content).forEach(studentId => {
-                    if (!sampleData.content[studentId]) {
-                        sampleData.content[studentId] = { hifz: [], revision: [], sessions: [] };
+        // Then try Firebase if available
+        if (window.firebaseService && window.firebaseService.initialized) {
+            try {
+                const students = await window.firebaseService.getAllStudents();
+                const teachers = await window.firebaseService.getAllTeachers();
+                
+                if (students && Object.keys(students).length > 0) {
+                    // Only load from Firebase if localStorage is empty or has fewer students
+                    const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+                    if (Object.keys(localStudents).length === 0 || Object.keys(students).length > Object.keys(localStudents).length) {
+                        sampleData.students = { ...sampleData.students, ...students };
                     }
-                    sampleData.content[studentId] = data.content[studentId];
-                });
+                }
+                if (teachers && Object.keys(teachers).length > 0) {
+                    // Only load from Firebase if localStorage is empty or has fewer teachers
+                    const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+                    if (Object.keys(localTeachers).length === 0 || Object.keys(teachers).length > Object.keys(localTeachers).length) {
+                        sampleData.teachers = { ...sampleData.teachers, ...teachers };
+                    }
             }
             
             console.log('Data loaded from Firebase:', sampleData);
+            } catch (firebaseError) {
+                console.error('Error loading from Firebase:', firebaseError);
+                console.log('Using localStorage data as fallback');
+            }
+        } else {
+            console.log('Firebase not available, using localStorage data');
         }
     } catch (e) {
-        console.error('Error loading data from Firebase:', e);
-        showNotification('Error loading from cloud', 'error');
+        console.error('Error loading data:', e);
+        console.log('Using localStorage data as fallback');
     }
 }
 
@@ -1889,7 +4182,7 @@ function showAdminDashboard() {
             </div>
             
             <div class="admin-actions" style="margin-top: 20px; text-align: center;">
-                <button class="btn btn-secondary" onclick="logout()">
+                <button class="btn btn-secondary" onclick="showLogoutConfirmation()">
                     ${getTranslation('admin.back_to_login')}
                 </button>
             </div>
@@ -2029,7 +4322,7 @@ function confirmDeleteStudent() {
         // Refresh admin dashboard
         showAdminDashboard();
         
-        showNotification(`Student ${student.name} deleted successfully!`, 'success');
+        console.log(`Student ${student.name} deleted successfully!`, 'success');
     });
 }
 
@@ -2150,7 +4443,7 @@ function confirmDeleteTeacher() {
         // Refresh admin dashboard
         showAdminDashboard();
         
-        showNotification(`Teacher ${teacher.name} deleted successfully!`, 'success');
+        console.log(`Teacher ${teacher.name} deleted successfully!`, 'success');
     });
 }
 
@@ -2165,7 +4458,7 @@ function handleCreateAccount(event) {
     const teacherName = document.getElementById('teacherName').value.trim();
     
     if (!firstName || !lastName || !className) {
-        showNotification('Please fill in all required fields', 'error');
+        console.log('Please fill in all required fields', 'error');
         return;
     }
     
@@ -2298,7 +4591,7 @@ function handleCreateAccount(event) {
     
     showDetailedModal('Account Created', accountDetails);
     
-    showNotification(`${accountType} account created successfully! ID: ${newId}`, 'success');
+    console.log(`${accountType} account created successfully! ID: ${newId}`, 'success');
     
     // Refresh admin dashboard
     showAdminDashboard();
@@ -2391,7 +4684,7 @@ function assignStudentToTeacher() {
     const studentId = document.getElementById('assignStudent').value;
     
     if (!teacherId || !studentId) {
-        showNotification('Please select both a teacher and a student', 'error');
+        console.log('Please select both a teacher and a student', 'error');
         return;
     }
     
@@ -2411,7 +4704,7 @@ function assignStudentToTeacher() {
     loadUnassignedStudents();
     loadCurrentAssignments();
     
-    showNotification(`Student assigned to teacher successfully!`, 'success');
+    console.log(`Student assigned to teacher successfully!`, 'success');
 }
 
 // Load current assignments
@@ -2449,7 +4742,8 @@ function loadCurrentAssignments() {
 
 // Remove student assignment
 function removeStudentAssignment(teacherId, studentId) {
-    if (confirm('Are you sure you want to remove this assignment?')) {
+    // Remove student assignment
+    {
         // Remove student from teacher's list
         const teacher = sampleData.teachers[teacherId];
         teacher.students = teacher.students.filter(id => id !== studentId);
@@ -2464,7 +4758,7 @@ function removeStudentAssignment(teacherId, studentId) {
         loadUnassignedStudents();
         loadCurrentAssignments();
         
-        showNotification('Student assignment removed successfully!', 'success');
+        console.log('Student assignment removed successfully!', 'success');
     }
 }
 
@@ -2507,7 +4801,7 @@ function deleteAllTeachers() {
         // Refresh admin dashboard
         showAdminDashboard();
         
-        showNotification('All teachers deleted successfully!', 'success');
+        console.log('All teachers deleted successfully!', 'success');
     });
 }
 
@@ -2553,7 +4847,7 @@ function deleteAllStudents() {
         // Refresh admin dashboard
         showAdminDashboard();
         
-        showNotification('All students deleted successfully!', 'success');
+        console.log('All students deleted successfully!', 'success');
     });
 }
 
@@ -2650,7 +4944,90 @@ window.deleteAllTeachers = deleteAllTeachers;
 window.deleteAllStudents = deleteAllStudents;
 window.showSystemStats = showSystemStats;
 window.logout = handleLogout;
+window.showLogoutConfirmation = showLogoutConfirmation;
 window.skipToDashboard = skipToDashboard;
 window.confirmLogout = confirmLogout;
 window.updateClassOptions = updateClassOptions;
 
+// Load all data from storage
+function loadAllDataFromStorage() {
+    try {
+        const savedStudents = localStorage.getItem('quranStudents');
+        const savedTeachers = localStorage.getItem('quranTeachers');
+        const savedContent = localStorage.getItem('quranContent');
+        
+        if (savedStudents) {
+            const students = JSON.parse(savedStudents);
+            Object.assign(sampleData.students, students);
+        }
+        
+        if (savedTeachers) {
+            const teachers = JSON.parse(savedTeachers);
+            Object.assign(sampleData.teachers, teachers);
+        }
+        
+        if (savedContent) {
+            const content = JSON.parse(savedContent);
+            Object.assign(sampleData.content, content);
+        }
+        
+        // Run migration after loading data from localStorage
+        migrateOldData();
+        fixAyahRanges();
+        forceFixAllData();
+        forceConvertSampleData();
+        // forceAddEndAyah(); // DISABLED - was overwriting user input
+        
+        console.log('Data loaded from localStorage successfully');
+    } catch (error) {
+        console.log('No saved data found or error loading data - this is normal for first-time users');
+        // Silent error handling - no notification on page load
+    }
+}
+
+// Save all data to storage
+function saveAllDataToStorage() {
+    try {
+        localStorage.setItem('quranStudents', JSON.stringify(sampleData.students));
+        localStorage.setItem('quranTeachers', JSON.stringify(sampleData.teachers));
+        localStorage.setItem('quranContent', JSON.stringify(sampleData.content));
+        console.log('Data saved to localStorage successfully');
+    } catch (error) {
+        console.error('Error saving data to localStorage:', error);
+    }
+}
+
+// Duplicate DOMContentLoaded listener removed - using the one above
+
+// Check for existing user session
+function checkExistingSession() {
+    const savedUser = localStorage.getItem('quranUser');
+    const savedUserType = localStorage.getItem('quranUserType');
+    
+    if (savedUser && savedUserType) {
+        console.log('Found existing session:', savedUser, savedUserType);
+        
+        currentUser = savedUser;
+        currentUserType = savedUserType;
+        
+        let userData;
+        if (currentUserType === 'admin') {
+            userData = sampleData.admin[savedUser];
+        } else if (currentUserType === 'student') {
+            userData = sampleData.students[savedUser];
+        } else if (currentUserType === 'teacher') {
+            userData = sampleData.teachers[savedUser];
+        }
+        
+        if (userData) {
+            loginSuccess(userData);
+        } else {
+            // Clear invalid session
+            localStorage.removeItem('quranUser');
+            localStorage.removeItem('quranUserType');
+        }
+    }
+}
+
+// Set up all event listeners
+// Duplicate setupEventListeners function removed - using the one above
