@@ -313,6 +313,18 @@ class SignupManager {
             this.students = { ...this.students, ...sampleData.students };
             this.teachers = { ...this.teachers, ...sampleData.teachers };
         }
+        
+        // Always ensure ADMINYNG9 is available
+        this.admin = {
+            'ADMINYNG9': { 
+                name: 'System Administrator', 
+                role: 'admin',
+                id: 'ADMINYNG9',
+                type: 'admin',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }
+        };
     }
 
     toggleLanguage() {
@@ -1140,6 +1152,7 @@ class SignupManager {
             localStorage.setItem('quranUserType', 'admin');
             // Clear the form to prevent resubmission
             document.getElementById('userCode').value = '';
+            // Redirect to main dashboard instead of index.html
             window.location.href = 'index.html';
             return;
         }

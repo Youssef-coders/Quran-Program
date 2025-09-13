@@ -2048,6 +2048,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load data first, then check for existing session
     loadDataFromStorage().then(() => {
         console.log('Data loaded, now checking for existing session');
+        console.log('Admin data available:', sampleData.admin);
         // Small delay to ensure DOM is fully ready
         setTimeout(() => {
             checkExistingSession();
@@ -3997,6 +3998,62 @@ function initializeDropdowns() {
     }
 }
 
+// Firebase sync functions
+async function syncDeleteStudentToFirebase(studentId) {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            await window.firebaseService.deleteStudent(studentId);
+            console.log('Student deleted from Firebase:', studentId);
+        } catch (error) {
+            console.error('Error deleting student from Firebase:', error);
+        }
+    }
+}
+
+async function syncCreateStudentToFirebase(studentData) {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            await window.firebaseService.createStudent(studentData);
+            console.log('Student created in Firebase:', studentData.id);
+        } catch (error) {
+            console.error('Error creating student in Firebase:', error);
+        }
+    }
+}
+
+async function syncUpdateStudentToFirebase(studentId, studentData) {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            await window.firebaseService.updateStudent(studentId, studentData);
+            console.log('Student updated in Firebase:', studentId);
+        } catch (error) {
+            console.error('Error updating student in Firebase:', error);
+        }
+    }
+}
+
+async function syncCreateTeacherToFirebase(teacherData) {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            await window.firebaseService.createTeacher(teacherData);
+            console.log('Teacher created in Firebase:', teacherData.id);
+        } catch (error) {
+            console.error('Error creating teacher in Firebase:', error);
+        }
+    }
+}
+
+async function syncDeleteTeacherToFirebase(teacherId) {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            await window.firebaseService.deleteTeacher(teacherId);
+            console.log('Teacher deleted from Firebase:', teacherId);
+        } catch (error) {
+            console.error('Error deleting teacher from Firebase:', error);
+        }
+    }
+}
+
 // Utility functions
 function getCurrentStudentId() {
     // If teacher is editing a student, return that student's ID
@@ -4097,19 +4154,15 @@ async function loadDataFromStorage() {
                 const teachers = await window.firebaseService.getAllTeachers();
                 
                 if (students && Object.keys(students).length > 0) {
-                    // Only load from Firebase if localStorage is empty or has fewer students
-                    const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
-                    if (Object.keys(localStudents).length === 0 || Object.keys(students).length > Object.keys(localStudents).length) {
-                        sampleData.students = { ...sampleData.students, ...students };
-                    }
+                    // Always prioritize Firebase data over localStorage
+                    console.log('Loading students from Firebase:', Object.keys(students).length);
+                    sampleData.students = { ...sampleData.students, ...students };
                 }
                 if (teachers && Object.keys(teachers).length > 0) {
-                    // Only load from Firebase if localStorage is empty or has fewer teachers
-                    const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
-                    if (Object.keys(localTeachers).length === 0 || Object.keys(teachers).length > Object.keys(localTeachers).length) {
-                        sampleData.teachers = { ...sampleData.teachers, ...teachers };
-                    }
-            }
+                    // Always prioritize Firebase data over localStorage
+                    console.log('Loading teachers from Firebase:', Object.keys(teachers).length);
+                    sampleData.teachers = { ...sampleData.teachers, ...teachers };
+                }
             
             console.log('Data loaded from Firebase:', sampleData);
             } catch (firebaseError) {
@@ -4323,8 +4376,11 @@ function confirmDeleteStudent() {
             }
         });
         
-        // Save changes
+        // Save changes to localStorage
         saveAllDataToStorage();
+        
+        // Sync to Firebase
+        syncDeleteStudentToFirebase(studentId);
         
         // Close modals
         closeModal('deleteStudentModal');
@@ -4447,6 +4503,9 @@ function confirmDeleteTeacher() {
         // Save changes
         saveAllDataToStorage();
         
+        // Sync to Firebase
+        syncDeleteTeacherToFirebase(teacherId);
+        
         // Close modals
         closeModal('deleteTeacherModal');
         closeModal('confirmationModal');
@@ -4564,6 +4623,13 @@ function handleCreateAccount(event) {
     
     // Save to localStorage
     saveAllDataToStorage();
+    
+    // Sync to Firebase
+    if (accountType === 'student') {
+        syncCreateStudentToFirebase(sampleData.students[newId]);
+    } else if (accountType === 'teacher') {
+        syncCreateTeacherToFirebase(sampleData.teachers[newId]);
+    }
     
     // Close modal and reset form
     closeModal('createAccountModal');
@@ -5024,6 +5090,7 @@ function checkExistingSession() {
         let userData;
         if (currentUserType === 'admin') {
             userData = sampleData.admin[savedUser];
+            console.log('Admin user data lookup:', savedUser, userData);
         } else if (currentUserType === 'student') {
             userData = sampleData.students[savedUser];
         } else if (currentUserType === 'teacher') {
@@ -5032,8 +5099,19 @@ function checkExistingSession() {
         
         if (userData) {
             loginSuccess(userData);
+        } else if (currentUserType === 'admin' && savedUser === 'ADMINYNG9') {
+            // Fallback for ADMINYNG9 if not found in sampleData
+            console.log('Creating fallback admin data for ADMINYNG9');
+            const fallbackAdminData = {
+                name: 'System Administrator',
+                role: 'admin',
+                id: 'ADMINYNG9',
+                type: 'admin'
+            };
+            loginSuccess(fallbackAdminData);
         } else {
             // Clear invalid session
+            console.log('No user data found, clearing session');
             localStorage.removeItem('quranUser');
             localStorage.removeItem('quranUserType');
         }
