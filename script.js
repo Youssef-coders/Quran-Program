@@ -2808,6 +2808,13 @@ function showTeacherControls() {
     console.log('showTeacherControls called - currentUserType:', currentUserType);
     console.log('editingStudent:', editingStudent);
     
+    // Only show controls for teachers
+    if (currentUserType !== 'teacher') {
+        console.log('Not a teacher, hiding controls');
+        hideTeacherControls();
+        return;
+    }
+    
     // Check if buttons exist before trying to show them
     if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
         console.error('Add buttons not found when trying to show teacher controls!');
