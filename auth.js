@@ -17,32 +17,18 @@ class AuthManager {
         const logoutBtn = document.getElementById('logoutBtn');
         const userCodeInput = document.getElementById('userCode');
 
-        if (loginBtn) {
-            loginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+        // Login button handled by main script.js
+        // Removed duplicate event listener to prevent conflicts
 
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+        // Login form handled by main script.js
+        // Removed duplicate event listener to prevent conflicts
 
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.handleLogout());
         }
 
-        if (userCodeInput) {
-            userCodeInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.handleLogin();
-                }
-            });
-        }
+        // Enter key handled by main script.js
+        // Removed duplicate event listener to prevent conflicts
     }
 
     async handleLogin() {
@@ -111,21 +97,8 @@ class AuthManager {
             storedTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
         }
         
-        const sampleUsers = [
-            // Students
-            { code: 'SAA7CF1', name: 'Ahmed Ali', type: 'student', grade: '7', class: '7CF1' },
-            { code: 'SMH8CF2', name: 'Mohammed Hassan', type: 'student', grade: '8', class: '8CF2' },
-            { code: 'SFF9AM1', name: 'Fatima Farah', type: 'student', grade: '9', class: '9AM1' },
-            { code: 'SAK10BR2', name: 'Aisha Khalid', type: 'student', grade: '10', class: '10BR2' },
-            
-            // Teachers
-            { code: 'T001', name: 'Dr. Omar Ibrahim', type: 'teacher', subject: 'Quran Studies' },
-            { code: 'T002', name: 'Ustadha Khadija', type: 'teacher', subject: 'Tajweed' },
-            { code: 'T003', name: 'Sheikh Abdullah', type: 'teacher', subject: 'Memorization' }
-        ];
-        
-        // Convert stored users to the expected format
-        const allUsers = [...sampleUsers];
+        // Start with empty array - only use Firebase data
+        const allUsers = [];
         
         // Add stored students
         Object.values(storedStudents).forEach(student => {

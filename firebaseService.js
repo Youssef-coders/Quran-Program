@@ -9,12 +9,39 @@ class FirebaseService {
 
     async init() {
         try {
-            // Check if Firebase is loaded
+            console.log('=== FIREBASE SERVICE INITIALIZATION ===');
+            console.log('Firebase global exists:', typeof firebase !== 'undefined');
+            
+            // Wait for Firebase to be available
+            let attempts = 0;
+            while (typeof firebase === 'undefined' && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            console.log('Firebase check after waiting:', typeof firebase !== 'undefined');
+            console.log('Attempts made:', attempts);
+            
             if (typeof firebase !== 'undefined') {
-                this.db = firebase.firestore();
-                this.auth = firebase.auth();
+                console.log('Firebase is available, initializing...');
+                // Initialize Firebase with your config
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBSOZYCUMqO9KEr9a93GaanxuIelJIIIGM",
+                    authDomain: "quran-tracker-6a536.firebaseapp.com",
+                    projectId: "quran-tracker-6a536",
+                    storageBucket: "quran-tracker-6a536.firebasestorage.app",
+                    messagingSenderId: "988749694504",
+                    appId: "1:988749694504:web:91af1972179d797409171d"
+                };
+                
+                console.log('Firebase config:', firebaseConfig);
+                const app = firebase.initializeApp(firebaseConfig);
+                this.db = firebase.firestore(app);
+                this.auth = firebase.auth(app);
                 this.initialized = true;
                 console.log('✅ Firebase initialized successfully');
+                console.log('Database instance:', this.db);
+                console.log('Auth instance:', this.auth);
             } else {
                 console.warn('⚠️ Firebase not loaded, falling back to localStorage');
                 this.initialized = false;
@@ -32,7 +59,7 @@ class FirebaseService {
         }
 
         try {
-            const docRef = await this.db.collection('students').doc(studentData.id).set({
+            await this.db.collection('students').doc(studentData.id).set({
                 ...studentData,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -99,6 +126,36 @@ class FirebaseService {
         }
     }
 
+    async deleteStudent(studentId) {
+        if (!this.initialized) {
+            return this.fallbackDeleteStudent(studentId);
+        }
+
+        try {
+            await this.db.collection('students').doc(studentId).delete();
+            console.log('✅ Student deleted from Firebase:', studentId);
+            return true;
+        } catch (error) {
+            console.error('❌ Error deleting student from Firebase:', error);
+            return this.fallbackDeleteStudent(studentId);
+        }
+    }
+
+    async deleteStudentContent(studentId) {
+        if (!this.initialized) {
+            return this.fallbackDeleteStudentContent(studentId);
+        }
+
+        try {
+            await this.db.collection('content').doc(studentId).delete();
+            console.log('✅ Student content deleted from Firebase:', studentId);
+            return true;
+        } catch (error) {
+            console.error('❌ Error deleting student content from Firebase:', error);
+            return this.fallbackDeleteStudentContent(studentId);
+        }
+    }
+
     // Teacher Management
     async createTeacher(teacherData) {
         if (!this.initialized) {
@@ -120,6 +177,23 @@ class FirebaseService {
         }
     }
 
+    async getTeacher(teacherId) {
+        if (!this.initialized) {
+            return this.fallbackGetTeacher(teacherId);
+        }
+
+        try {
+            const doc = await this.db.collection('teachers').doc(teacherId).get();
+            if (doc.exists) {
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error('❌ Error getting teacher from Firebase:', error);
+            return this.fallbackGetTeacher(teacherId);
+        }
+    }
+
     async getAllTeachers() {
         if (!this.initialized) {
             return this.fallbackGetAllTeachers();
@@ -135,6 +209,56 @@ class FirebaseService {
         } catch (error) {
             console.error('❌ Error getting teachers from Firebase:', error);
             return this.fallbackGetAllTeachers();
+        }
+    }
+
+    // Content Management
+    async getAllContent() {
+        if (!this.initialized) {
+            return this.fallbackGetAllContent();
+        }
+
+        try {
+            const snapshot = await this.db.collection('content').get();
+            const content = {};
+            snapshot.forEach(doc => {
+                content[doc.id] = { id: doc.id, ...doc.data() };
+            });
+            console.log('✅ Content loaded from Firebase:', Object.keys(content).length);
+            return content;
+        } catch (error) {
+            console.error('❌ Error loading content from Firebase:', error);
+            return this.fallbackGetAllContent();
+        }
+    }
+
+    async saveContent(studentId, contentData) {
+        if (!this.initialized) {
+            return this.fallbackSaveContent(studentId, contentData);
+        }
+
+        try {
+            await this.db.collection('content').doc(studentId).set(contentData);
+            console.log('✅ Content saved to Firebase for student:', studentId);
+            return true;
+        } catch (error) {
+            console.error('❌ Error saving content to Firebase:', error);
+            return this.fallbackSaveContent(studentId, contentData);
+        }
+    }
+
+    async deleteTeacher(teacherId) {
+        if (!this.initialized) {
+            return this.fallbackDeleteTeacher(teacherId);
+        }
+
+        try {
+            await this.db.collection('teachers').doc(teacherId).delete();
+            console.log('✅ Teacher deleted from Firebase:', teacherId);
+            return true;
+        } catch (error) {
+            console.error('❌ Error deleting teacher from Firebase:', error);
+            return this.fallbackDeleteTeacher(teacherId);
         }
     }
 
@@ -220,6 +344,26 @@ class FirebaseService {
         return false;
     }
 
+    fallbackDeleteStudent(studentId) {
+        const students = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+        if (students[studentId]) {
+            delete students[studentId];
+            localStorage.setItem('quranStudents', JSON.stringify(students));
+            return true;
+        }
+        return false;
+    }
+
+    fallbackDeleteStudentContent(studentId) {
+        const content = JSON.parse(localStorage.getItem('quranContent') || '{}');
+        if (content[studentId]) {
+            delete content[studentId];
+            localStorage.setItem('quranContent', JSON.stringify(content));
+            return true;
+        }
+        return false;
+    }
+
     fallbackCreateTeacher(teacherData) {
         const teachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
         teachers[teacherData.id] = teacherData;
@@ -228,8 +372,35 @@ class FirebaseService {
         return teacherData;
     }
 
+    fallbackGetTeacher(teacherId) {
+        const teachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+        return teachers[teacherId] || null;
+    }
+
     fallbackGetAllTeachers() {
         return JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+    }
+
+    fallbackGetAllContent() {
+        return JSON.parse(localStorage.getItem('quranContent') || '{}');
+    }
+
+    fallbackSaveContent(studentId, contentData) {
+        const content = JSON.parse(localStorage.getItem('quranContent') || '{}');
+        content[studentId] = contentData;
+        localStorage.setItem('quranContent', JSON.stringify(content));
+        console.log('✅ Content saved to localStorage for student:', studentId);
+        return true;
+    }
+
+    fallbackDeleteTeacher(teacherId) {
+        const teachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+        if (teachers[teacherId]) {
+            delete teachers[teacherId];
+            localStorage.setItem('quranTeachers', JSON.stringify(teachers));
+            return true;
+        }
+        return false;
     }
 
     fallbackLogEmail(emailData) {
@@ -248,6 +419,43 @@ class FirebaseService {
         const students = JSON.parse(localStorage.getItem('quranStudents') || '{}');
         const teachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
         return students.hasOwnProperty(id) || teachers.hasOwnProperty(id);
+    }
+
+    // Clear all data from Firebase
+    async clearAllData() {
+        if (!this.initialized) {
+            console.warn('⚠️ Firebase not initialized, cannot clear data');
+            return;
+        }
+        
+        try {
+            console.log('🗑️ Clearing all data from Firebase...');
+            
+            // Get all collections and delete them
+            const collections = ['students', 'teachers', 'content', 'emailLogs', 'smsLogs'];
+            
+            for (const collectionName of collections) {
+                const collection = this.db.collection(collectionName);
+                const snapshot = await collection.get();
+                
+                if (!snapshot.empty) {
+                    const batch = this.db.batch();
+                    snapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    console.log(`✅ Cleared ${collectionName} collection (${snapshot.docs.length} documents)`);
+                } else {
+                    console.log(`ℹ️ ${collectionName} collection is already empty`);
+                }
+            }
+            
+            console.log('✅ All Firebase data cleared successfully');
+            return true;
+        } catch (error) {
+            console.error('❌ Error clearing Firebase data:', error);
+            return false;
+        }
     }
 
     // Utility method to sync localStorage to Firebase (for migration)

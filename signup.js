@@ -2,6 +2,9 @@
 class SignupManager {
     constructor() {
         this.currentLanguage = 'en';
+        this.isCreatingAccount = false;
+        this.boundHandleSignup = this.handleSignup.bind(this);
+        this.eventListenersSetup = false;
         this.translations = {
             en: {
                 // Auth page
@@ -160,11 +163,8 @@ class SignupManager {
     }
     
     setupFormValidation() {
-        // Add any form validation setup here
-        const signupForm = document.getElementById('signupForm');
-        if (signupForm) {
-            signupForm.addEventListener('submit', (e) => this.handleSignup(e));
-        }
+        // Form validation setup - event listener is handled in setupEventListeners()
+        console.log('Form validation setup complete');
     }
 
     setupGradeChangeListener() {
@@ -243,6 +243,14 @@ class SignupManager {
     }
 
     setupEventListeners() {
+        // Prevent multiple setup
+        if (this.eventListenersSetup) {
+            console.log('Event listeners already setup, skipping...');
+            return;
+        }
+        
+        console.log('Setting up event listeners...');
+        
         // Language toggle
         const languageToggle = document.getElementById('languageToggle');
         if (languageToggle) {
@@ -280,9 +288,21 @@ class SignupManager {
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
         
+        // Add login functionality to signup page
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
-                console.log('Login form submit event triggered');
+                console.log('Login form submit event triggered on signup page');
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleLogin(e);
+            });
+        }
+        
+        // Add login button click handler
+        const loginButton = document.getElementById('loginBtn');
+        if (loginButton) {
+            loginButton.addEventListener('click', (e) => {
+                console.log('Login button clicked on signup page');
                 e.preventDefault();
                 e.stopPropagation();
                 this.handleLogin(e);
@@ -290,7 +310,10 @@ class SignupManager {
         }
         
         if (signupForm) {
-            signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+            // Remove any existing event listener first to prevent duplicates
+            signupForm.removeEventListener('submit', this.boundHandleSignup);
+            signupForm.addEventListener('submit', this.boundHandleSignup);
+            console.log('Signup form event listener added');
         }
 
         // Grade selection
@@ -298,6 +321,10 @@ class SignupManager {
         if (gradeSelect) {
             gradeSelect.addEventListener('change', () => this.updateClassOptions());
         }
+        
+        // Mark as setup
+        this.eventListenersSetup = true;
+        console.log('Event listeners setup complete');
     }
 
     loadExistingData() {
@@ -428,11 +455,18 @@ class SignupManager {
     }
 
     showSuccess(id) {
+        console.log('showSuccess called with ID:', id);
         this.hideLoading();
         
         const generatedIdElement = document.getElementById('generatedId');
         const successMessageElement = document.getElementById('successMessage');
         const signupFormElement = document.getElementById('signupForm');
+        
+        console.log('Elements found:', {
+            generatedIdElement: !!generatedIdElement,
+            successMessageElement: !!successMessageElement,
+            signupFormElement: !!signupFormElement
+        });
         
         if (generatedIdElement) {
             generatedIdElement.textContent = id;
@@ -756,17 +790,29 @@ class SignupManager {
         let attempts = 0;
         const maxAttempts = 10;
         
-        while (await this.idExists(finalId) && attempts < maxAttempts) {
+        console.log(`Checking for ID collisions starting with: ${baseId}`);
+        
+        // First check if base ID exists
+        let exists = await this.idExists(finalId);
+        console.log(`Base ID ${finalId} exists: ${exists}`);
+        
+        while (exists && attempts < maxAttempts) {
             const randomDigit = Math.floor(Math.random() * 10);
             finalId = baseId + randomDigit;
             attempts++;
+            console.log(`Attempt ${attempts}: checking ${finalId}`);
+            exists = await this.idExists(finalId);
+            console.log(`ID ${finalId} exists: ${exists}`);
         }
         
         // If still collision after max attempts, use timestamp
-        if (await this.idExists(finalId)) {
-            finalId = baseId + Date.now().toString().slice(-2);
+        if (exists) {
+            const timestamp = Date.now().toString().slice(-2);
+            finalId = baseId + timestamp;
+            console.log(`Max attempts reached, using timestamp: ${finalId}`);
         }
         
+        console.log(`Final generated ID: ${finalId}`);
         return finalId;
     }
 
@@ -830,12 +876,57 @@ class SignupManager {
         return subjectCodes[subject] || 'GN';
     }
 
-    async idExists(id) {
-        if (window.firebaseService) {
-            return await window.firebaseService.checkIdExists(id);
-        } else {
-            return this.students.hasOwnProperty(id) || this.teachers.hasOwnProperty(id);
+    refreshLocalData() {
+        console.log('Refreshing local data from storage...');
+        try {
+            // Load from localStorage
+            const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+            const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+            
+            // Update local objects
+            this.students = localStudents;
+            this.teachers = localTeachers;
+            
+            console.log('Local data refreshed:', {
+                students: Object.keys(this.students).length,
+                teachers: Object.keys(this.teachers).length
+            });
+        } catch (error) {
+            console.error('Error refreshing local data:', error);
         }
+    }
+
+    async idExists(id) {
+        // Check both Firebase and local storage
+        let existsInFirebase = false;
+        let existsInLocal = false;
+        
+        // Check Firebase if available
+        if (window.firebaseService) {
+            try {
+                existsInFirebase = await window.firebaseService.checkIdExists(id);
+            } catch (error) {
+                console.log('Firebase ID check failed, using local check only:', error);
+            }
+        }
+        
+        // Check local storage
+        existsInLocal = this.students.hasOwnProperty(id) || this.teachers.hasOwnProperty(id);
+        
+        // Also check localStorage directly as backup
+        const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+        const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+        const existsInLocalStorage = localStudents.hasOwnProperty(id) || localTeachers.hasOwnProperty(id);
+        
+        const exists = existsInFirebase || existsInLocal || existsInLocalStorage;
+        console.log(`ID ${id} exists check:`, {
+            firebase: existsInFirebase,
+            local: existsInLocal,
+            localStorage: existsInLocalStorage,
+            final: exists
+        });
+        
+        return exists;
     }
 
     validateForm(formData) {
@@ -921,6 +1012,25 @@ class SignupManager {
     async handleSignup(e) {
         e.preventDefault();
         
+        console.log('=== SIGNUP FORM SUBMITTED ===');
+        console.log('isCreatingAccount flag:', this.isCreatingAccount);
+        
+        // Prevent multiple submissions
+        if (this.isCreatingAccount) {
+            console.log('❌ Account creation already in progress, ignoring duplicate submission');
+            return;
+        }
+        
+        this.isCreatingAccount = true;
+        console.log('✅ Account creation started, flag set to true');
+        
+        // Remove event listener temporarily to prevent multiple submissions
+        const signupForm = document.getElementById('signupForm');
+        if (signupForm) {
+            signupForm.removeEventListener('submit', this.boundHandleSignup);
+            console.log('Event listener removed temporarily');
+        }
+        
         // Show loading overlay
         this.showLoading();
         
@@ -929,6 +1039,12 @@ class SignupManager {
         const originalText = submitBtn.textContent;
         submitBtn.textContent = 'Creating Account...';
         submitBtn.disabled = true;
+        
+        console.log('Submit button state:', {
+            disabled: submitBtn.disabled,
+            text: submitBtn.textContent,
+            originalText: originalText
+        });
         
         try {
             // Get form data
@@ -940,10 +1056,16 @@ class SignupManager {
                 className: document.getElementById('class').value
             };
             
+            console.log('Form data collected:', formData);
+            
             // Validate form
             const errors = this.validateForm(formData);
             if (errors.length > 0) {
                 console.log('Validation errors:', errors.join('\n'));
+                this.hideLoading();
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
                 return;
             }
             
@@ -960,6 +1082,16 @@ class SignupManager {
             }
             
             // Generate ID based on user type
+            console.log('Generating ID with data:', {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                userType: formData.userType,
+                grade: formData.grade,
+                className: formData.className,
+                teacherGrades,
+                teacherClasses
+            });
+            
             const userId = await this.generateId(
                 formData.firstName, 
                 formData.lastName, 
@@ -971,14 +1103,25 @@ class SignupManager {
                 teacherClasses
             );
             
+            console.log('Generated user ID:', userId);
+            
             // Check if user already exists
-            if (this.students[userId] || this.teachers[userId]) {
+            console.log('Checking if user already exists...');
+            
+            // Refresh local data from storage before checking
+            this.refreshLocalData();
+            
+            // Check if the generated ID already exists
+            const idExists = await this.idExists(userId);
+            if (idExists) {
                 this.hideLoading();
-                console.log('Account with this ID already exists');
+                console.log('Account with this ID already exists:', userId);
                 return;
             }
+            console.log('User ID is unique, proceeding with account creation...');
             
             // Create user record
+            console.log('Creating user data object...');
             const userData = {
                 id: userId,
                 name: `${formData.firstName} ${formData.lastName}`,
@@ -987,13 +1130,17 @@ class SignupManager {
                 createdAt: new Date().toISOString(),
                 type: formData.userType
             };
+            console.log('User data object created:', userData);
             
             if (formData.userType === 'student') {
+                console.log('Setting up student data...');
                 userData.class = formData.className;
                 userData.grade = formData.grade;
                 userData.teacher = null; // Will be assigned later
+                console.log('Student data configured:', userData);
             } else {
-                userData.subject = formData.subject;
+                console.log('Setting up teacher data...');
+                userData.subject = 'Quran Studies'; // Default subject for teachers
                 userData.students = []; // Will be assigned later
                 
                 if (formData.grade === 'Teacher') {
@@ -1001,22 +1148,41 @@ class SignupManager {
                     userData.teacherGrades = teacherGrades;
                     userData.teacherClasses = teacherClasses;
                     userData.grade = 'Teacher';
+                    console.log('Multi-grade teacher data configured:', userData);
                 } else {
                     // Single grade teacher
                     userData.class = formData.className;
                     userData.grade = formData.grade;
+                    console.log('Single grade teacher data configured:', userData);
                 }
             }
             
             // Save to Firebase/storage
+            console.log('Starting save process...');
             if (window.firebaseService) {
-                console.log('Saving to Firebase...');
-                if (formData.userType === 'student') {
-                    await window.firebaseService.createStudent(userData);
-                    console.log('Student saved to Firebase:', userId);
-                } else {
-                    await window.firebaseService.createTeacher(userData);
-                    console.log('Teacher saved to Firebase:', userId);
+                console.log('Firebase service available, saving to Firebase...');
+                try {
+                    if (formData.userType === 'student') {
+                        console.log('Creating student in Firebase...');
+                        await window.firebaseService.createStudent(userData);
+                        console.log('Student saved to Firebase successfully:', userId);
+                    } else {
+                        console.log('Creating teacher in Firebase...');
+                        await window.firebaseService.createTeacher(userData);
+                        console.log('Teacher saved to Firebase successfully:', userId);
+                    }
+                } catch (firebaseError) {
+                    console.error('Firebase save failed:', firebaseError);
+                    console.log('Falling back to localStorage...');
+                    if (formData.userType === 'student') {
+                        this.students[userId] = userData;
+                        localStorage.setItem('quranStudents', JSON.stringify(this.students));
+                        console.log('Student saved to localStorage:', userId);
+                    } else {
+                        this.teachers[userId] = userData;
+                        localStorage.setItem('quranTeachers', JSON.stringify(this.teachers));
+                        console.log('Teacher saved to localStorage:', userId);
+                    }
                 }
             } else {
                 // Fallback to localStorage
@@ -1048,17 +1214,27 @@ class SignupManager {
             console.log('🎯 Focus: Display ID prominently to user');
             console.log('Generated ID:', userId);
             
+            console.log('About to show success message...');
             // Show success message with ID on the same page
             this.showSuccess(userId);
+            console.log('Success message should be displayed now');
             
         } catch (error) {
             console.error('Signup error:', error);
             this.hideLoading();
             console.log('Account creation failed');
         } finally {
-            // Reset button state
+            // Reset button state and flag
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
+            this.isCreatingAccount = false;
+            
+            // Re-add event listener
+            const signupForm = document.getElementById('signupForm');
+            if (signupForm) {
+                signupForm.addEventListener('submit', this.boundHandleSignup);
+                console.log('Event listener re-added');
+            }
         }
     }
 
@@ -1194,7 +1370,13 @@ class SignupManager {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.signupManager = new SignupManager();
+    // Only initialize if not already initialized
+    if (!window.signupManager) {
+        console.log('Initializing SignupManager from signup.js...');
+        window.signupManager = new SignupManager();
+    } else {
+        console.log('SignupManager already exists, skipping initialization from signup.js');
+    }
 });
 
 // Make updateClassOptions available globally for the onchange event

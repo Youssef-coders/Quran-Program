@@ -230,10 +230,9 @@ function migrateOldData() {
     
     console.log(`Migration completed. Migrated ${migrationCount} sessions.`);
     
-    // Save migrated data
+    // Migration completed - data will be loaded from Firebase
     if (migrationCount > 0) {
-        saveAllDataToStorage();
-        console.log('Migrated data saved to localStorage');
+        console.log('Migration completed - data will be loaded from Firebase');
     }
 }
 
@@ -243,6 +242,63 @@ function forceResetData() {
     localStorage.clear();
     saveAllDataToStorage();
     console.log('Data reset complete. Please refresh the page.');
+}
+
+// Complete database clear function
+async function clearCompleteDatabase() {
+    console.log('=== CLEARING COMPLETE DATABASE ===');
+    
+    try {
+        // Clear Firebase if available
+        if (window.firebaseService && window.firebaseService.initialized) {
+            console.log('Clearing Firebase database...');
+            try {
+                await window.firebaseService.clearAllData();
+                console.log('Firebase database cleared successfully');
+            } catch (error) {
+                console.error('Firebase clear failed, continuing with localStorage clear:', error);
+            }
+        } else {
+            console.log('Firebase not available, skipping Firebase clear');
+        }
+        
+        // Clear all localStorage keys used by the system
+        const keysToClear = [
+            'quranStudents',
+            'quranTeachers', 
+            'quranContent',
+            'quranSessions',
+            'quranProgress',
+            'sampleData',
+            'quranLanguage',
+            'currentUser',
+            'currentUserType',
+            'selectedStudent'
+        ];
+        
+        keysToClear.forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`Cleared localStorage key: ${key}`);
+        });
+        
+        // Reset all global data objects
+        sampleData.students = {};
+        sampleData.teachers = {};
+        sampleData.content = {};
+        sampleData.admin = null;
+        
+        // Reset global variables
+        currentUser = null;
+        currentUserType = null;
+        selectedStudent = null;
+        
+        console.log('Complete database clear successful!');
+        return true;
+        
+    } catch (error) {
+        console.error('Error clearing database:', error);
+        return false;
+    }
 }
 
 // Aggressive fix for ayah ranges - directly modify existing data
@@ -305,8 +361,7 @@ function fixAyahRanges() {
     });
     
     if (fixedCount > 0) {
-        saveAllDataToStorage();
-        console.log(`Fixed ${fixedCount} ayah ranges. Data saved.`);
+        console.log(`Fixed ${fixedCount} ayah ranges. Data will be loaded from Firebase.`);
     } else {
         console.log('No ayah ranges needed fixing.');
     }
@@ -444,15 +499,7 @@ function forceFixAllData() {
     });
     
     if (fixedCount > 0) {
-        // Save the fixed data
-        saveAllDataToStorage();
-        console.log(`Fixed ${fixedCount} items. Data saved.`);
-        
-        // Force reload the content to show changes
-        if (currentUser && currentUserType) {
-            console.log('Reloading content after data fix...');
-            loadStudentContent();
-        }
+        console.log(`Fixed ${fixedCount} items. Data will be loaded from Firebase.`);
     } else {
         console.log('No items needed fixing.');
     }
@@ -508,8 +555,7 @@ function forceConvertSampleData() {
         }
     });
     
-    saveAllDataToStorage();
-    console.log('Sample data converted and saved.');
+    console.log('Sample data converted. Data will be loaded from Firebase.');
 }
 
 // AGGRESSIVE FIX: Force add endAyah to all existing data
@@ -608,8 +654,7 @@ function forceAddEndAyah() {
     });
     
     if (fixedCount > 0) {
-        saveAllDataToStorage();
-        console.log(`Added endAyah to ${fixedCount} items. Data saved.`);
+        console.log(`Added endAyah to ${fixedCount} items. Data will be loaded from Firebase.`);
     } else {
         console.log('No items needed endAyah added.');
     }
@@ -660,8 +705,7 @@ function createTestDataWithRanges() {
         }
     ];
     
-    saveAllDataToStorage();
-    console.log('Test data created with proper ayah ranges.');
+    console.log('Test data created with proper ayah ranges. Data will be loaded from Firebase.');
 }
 
 // Debug function to check current data structure
@@ -701,199 +745,9 @@ const sampleData = {
             updatedAt: new Date().toISOString()
         }
     },
-    students: {
-        'SYN1AM1': { 
-            id: 'SYN1AM1', 
-            name: 'Youssef Nafei', 
-            firstName: 'Youssef', 
-            lastName: 'Nafei', 
-            class: '9AM1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SAA2AM1': { 
-            id: 'SAA2AM1', 
-            name: 'Ahmed Ali', 
-            firstName: 'Ahmed', 
-            lastName: 'Ali', 
-            class: '9AM1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SSM3AM1': { 
-            id: 'SSM3AM1', 
-            name: 'Sara Mohammed', 
-            firstName: 'Sara', 
-            lastName: 'Mohammed', 
-            class: '9AM1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SFK1BR1': { 
-            id: 'SFK1BR1', 
-            name: 'Fatima Khalid', 
-            firstName: 'Fatima', 
-            lastName: 'Khalid', 
-            class: '9BR1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SOM2BR1': { 
-            id: 'SOM2BR1', 
-            name: 'Omar Hassan', 
-            firstName: 'Omar', 
-            lastName: 'Hassan', 
-            class: '9BR1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SNA1AM1': { 
-            id: 'SNA1AM1', 
-            name: 'Nour Ahmed', 
-            firstName: 'Nour', 
-            lastName: 'Ahmed', 
-            class: '10AM1', 
-            grade: '10', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SMA2AM1': { 
-            id: 'SMA2AM1', 
-            name: 'Mohammed Ali', 
-            firstName: 'Mohammed', 
-            lastName: 'Ali', 
-            class: '10AM1', 
-            grade: '10', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SZA1BR1': { 
-            id: 'SZA1BR1', 
-            name: 'Zainab Ahmed', 
-            firstName: 'Zainab', 
-            lastName: 'Ahmed', 
-            class: '10BR1', 
-            grade: '10', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SAA8BA1': { 
-            id: 'SAA8BA1', 
-            name: 'Ali Ahmed', 
-            firstName: 'Ali', 
-            lastName: 'Ahmed', 
-            class: '8Ba1', 
-            grade: '8', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SMM7BA2': { 
-            id: 'SMM7BA2', 
-            name: 'Mariam Hassan', 
-            firstName: 'Mariam', 
-            lastName: 'Hassan', 
-            class: '7Ba2', 
-            grade: '7', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SOO6BA3': { 
-            id: 'SOO6BA3', 
-            name: 'Omar Ibrahim', 
-            firstName: 'Omar', 
-            lastName: 'Ibrahim', 
-            class: '6Ba3', 
-            grade: '6', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        },
-        'SFF5BA4': { 
-            id: 'SFF5BA4', 
-            name: 'Fatima Omar', 
-            firstName: 'Fatima', 
-            lastName: 'Omar', 
-            class: '5Ba4', 
-            grade: '5', 
-            teacher: null, 
-            type: 'student',
-            createdAt: new Date().toISOString()
-        }
-    },
-    teachers: {
-        'TMA9AM1': { 
-            id: 'TMA9AM1', 
-            name: 'Teacher Mohammed', 
-            firstName: 'Mohammed', 
-            lastName: 'Ahmed', 
-            class: '9AM1', 
-            grade: '9', 
-            teacher: null, 
-            type: 'teacher',
-            students: [],
-            createdAt: new Date().toISOString()
-        }
-    },
-    content: {
-        'SMA2AM1': {
-            hifz: [
-                { surah: 'Yunus', ayahRange: '1-6', startAyah: 1, endAyah: 6 },
-                { surah: 'Al-Ma\'idah', ayahRange: '14-16', startAyah: 14, endAyah: 16 }
-            ],
-            revision: [
-                { surah: 'Al-Fatihah', ayahRange: '1-7', startAyah: 1, endAyah: 7 }
-            ],
-            sessions: [
-                {
-                    date: '2025-09-13',
-                    hifz: {
-                        surah: 'An Nazi\'at',
-                        ayahRange: '2-19',
-                        startAyah: 2,
-                        endAyah: 19
-                    },
-                    revision: {
-                        surah: 'Yunus',
-                        ayahRange: '7-7',
-                        startAyah: 7,
-                        endAyah: 7
-                    },
-                    score: 9
-                },
-                {
-                    date: '2025-09-18',
-                    hifz: {
-                        surah: 'Al-Ma\'idah',
-                        ayahRange: '14-16',
-                        startAyah: 14,
-                        endAyah: 16
-                    },
-                    revision: {
-                        surah: 'Yunus',
-                        ayahRange: '7-7',
-                        startAyah: 7,
-                        endAyah: 7
-                    },
-                    score: 9
-                }
-            ]
-        }
-    }
+    students: {},
+    teachers: {},
+    content: {}
 };
 
 // Language translations
@@ -971,6 +825,9 @@ const translations = {
         'admin.impact': 'Impact',
         'admin.delete_all_teachers': 'Delete All Teachers',
         'admin.delete_all_students': 'Delete All Students',
+        
+        // Options button
+        'options.title': 'Options',
         
         // Teacher Dashboard
         'teacher.select_class': 'Select a Class',
@@ -1191,6 +1048,9 @@ const translations = {
         'admin.impact': 'التأثير',
         'admin.delete_all_teachers': 'حذف جميع المعلمين',
         'admin.delete_all_students': 'حذف جميع الطلاب',
+        
+        // Options button
+        'options.title': 'خيارات',
         
         // Teacher Dashboard
         'teacher.select_class': 'اختر الفصل',
@@ -1461,6 +1321,7 @@ const translations = {
 // Global variables
 let currentUser = null;
 let currentUserType = null;
+let dataJustCleared = false; // Flag to prevent reloading after deletion
 let currentTeacher = null; // Track the original teacher when editing students
 let editingStudent = null; // Track which student teacher is editing
 let currentLanguage = 'en'; // Current language: 'en' or 'ar'
@@ -1647,15 +1508,12 @@ function updateModalTexts() {
         if (revisionLabel) revisionLabel.textContent = getTranslation('session.revision_surahs');
         
         // Update session form Surah dropdowns
-        const sessionHifzSurah = addSessionModal.querySelector('#sessionHifzSurah');
-        const sessionHifzStartAyah = addSessionModal.querySelector('#sessionHifzStartAyah');
-        const sessionHifzEndAyah = addSessionModal.querySelector('#sessionHifzEndAyah');
-        const sessionRevisionSurah = addSessionModal.querySelector('#sessionRevisionSurah');
-        const sessionRevisionStartAyah = addSessionModal.querySelector('#sessionRevisionStartAyah');
-        const sessionRevisionEndAyah = addSessionModal.querySelector('#sessionRevisionEndAyah');
+        // Update session form surah options for all existing selects
+        const sessionHifzSelects = addSessionModal.querySelectorAll('.session-hifz-surah');
+        const sessionRevisionSelects = addSessionModal.querySelectorAll('.session-revision-surah');
         
-        if (sessionHifzSurah) updateSurahOptions(sessionHifzSurah);
-        if (sessionRevisionSurah) updateSurahOptions(sessionRevisionSurah);
+        sessionHifzSelects.forEach(select => updateSurahOptions(select));
+        sessionRevisionSelects.forEach(select => updateSurahOptions(select));
         
         if (gradeLabel) gradeLabel.textContent = getTranslation('modal.score');
         if (addBtn) addBtn.textContent = getTranslation('modal.add');
@@ -1710,6 +1568,19 @@ function updateAdminTexts() {
 function updateSurahOptions(selectElement) {
     if (!selectElement) return;
     
+    console.log('=== UPDATE SURAH OPTIONS ===');
+    console.log('Select element:', selectElement);
+    console.log('Classes:', selectElement.className);
+    console.log('Sample data content:', sampleData.content);
+    console.log('Content keys:', Object.keys(sampleData.content));
+    
+    // If this is a session form select, populate it with actual content from cards
+    if (selectElement.classList.contains('session-hifz-surah') || selectElement.classList.contains('session-revision-surah')) {
+        console.log('Session form select detected, populating with content options');
+        populateSessionContentOptions(selectElement);
+        return;
+    }
+    
     const options = selectElement.querySelectorAll('option');
     options.forEach(option => {
         if (option.value && option.value !== '') {
@@ -1723,6 +1594,857 @@ function updateSurahOptions(selectElement) {
         }
     });
 }
+
+function populateSurahOptions(selectElement) {
+    if (!selectElement) return;
+    
+    // Clear existing options except the first one
+    const firstOption = selectElement.querySelector('option[value=""]');
+    selectElement.innerHTML = '';
+    if (firstOption) {
+        selectElement.appendChild(firstOption);
+    }
+    
+    // Add all surah options
+    const surahs = Object.keys(surahAyahCounts);
+    surahs.forEach(surah => {
+        const option = document.createElement('option');
+        option.value = surah;
+        
+        // Get Arabic translation
+        const surahKey = surah.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '');
+        const arabicName = getTranslation(`surah.${surahKey}`);
+        
+        if (arabicName && arabicName !== `surah.${surahKey}`) {
+            option.textContent = currentLanguage === 'ar' ? 
+                arabicName : 
+                `${surah} (${arabicName})`;
+        } else {
+            option.textContent = surah;
+        }
+        
+        selectElement.appendChild(option);
+    });
+}
+
+function populateSessionContentOptions(selectElement) {
+    if (!selectElement) return;
+    
+    console.log('=== POPULATING SESSION CONTENT OPTIONS ===');
+    console.log('Select element:', selectElement);
+    console.log('Current user type:', currentUserType);
+    console.log('Current user:', currentUser);
+    console.log('Editing student:', editingStudent);
+    
+    // Store the current value to restore it
+    const currentValue = selectElement.value;
+    console.log('Current value before population:', currentValue);
+    
+    // Get the current student's content
+    const targetUser = getCurrentStudentId();
+    console.log('Target user:', targetUser);
+    
+    // Get content from the actual dashboard cards instead of sample data
+    const realContent = getRealDashboardContent(targetUser);
+    console.log('Real dashboard content:', realContent);
+    
+    if (!targetUser || !realContent) {
+        console.log('No student selected or no content available, using all available content');
+        // If no student selected, show all available content from all students
+        populateAllContentOptions(selectElement);
+        
+        // Restore the value after population
+        if (currentValue) {
+            setTimeout(() => {
+                if (selectElement.querySelector(`option[value="${currentValue}"]`)) {
+                    selectElement.value = currentValue;
+                    console.log('Restored value after population:', selectElement.value);
+                }
+            }, 100);
+        }
+        return;
+    }
+    
+    const isHifz = selectElement.classList.contains('session-hifz-surah');
+    const contentItems = isHifz ? realContent.hifz : realContent.revision;
+    
+    console.log('Is hifz:', isHifz);
+    console.log('Content items from cards:', contentItems);
+    
+    // Clear existing options except the first one
+    const firstOption = selectElement.querySelector('option[value=""]');
+    selectElement.innerHTML = '';
+    if (firstOption) {
+        selectElement.appendChild(firstOption);
+    }
+    
+    // Add content items as options
+    if (contentItems && contentItems.length > 0) {
+        contentItems.forEach((item, index) => {
+            const option = document.createElement('option');
+            option.value = `${item.surah} ${item.ayahRange}`;
+            option.textContent = formatContentItem(item, currentLanguage === 'ar');
+            selectElement.appendChild(option);
+        });
+        console.log(`Populated ${isHifz ? 'hifz' : 'revision'} dropdown with ${contentItems.length} items from dashboard cards`);
+        
+        // Restore the value after population
+        if (currentValue) {
+            setTimeout(() => {
+                if (selectElement.querySelector(`option[value="${currentValue}"]`)) {
+                    selectElement.value = currentValue;
+                    console.log('Restored value after population:', selectElement.value);
+                    
+                    // Trigger the toggle function to update the button
+                    if (isHifz) {
+                        toggleHifzAddButton(selectElement);
+                    } else {
+                        toggleRevisionAddButton(selectElement);
+                    }
+                }
+            }, 100);
+        }
+    } else {
+        console.log(`No ${isHifz ? 'hifz' : 'revision'} content available in dashboard cards for student ${targetUser}`);
+        // Fallback to all content
+        populateAllContentOptions(selectElement);
+        
+        // Restore the value after population
+        if (currentValue) {
+            setTimeout(() => {
+                if (selectElement.querySelector(`option[value="${currentValue}"]`)) {
+                    selectElement.value = currentValue;
+                    console.log('Restored value after population:', selectElement.value);
+                }
+            }, 100);
+        }
+    }
+}
+
+function getRealDashboardContent(studentId) {
+    console.log('=== GETTING REAL DASHBOARD CONTENT ===');
+    console.log('Student ID:', studentId);
+    
+    if (!studentId) {
+        console.log('No student ID provided');
+        return null;
+    }
+    
+    // First, try to get content from the dashboard cards by reading their HTML
+    const hifzContent = extractContentFromCard('hifz');
+    const revisionContent = extractContentFromCard('revision');
+    
+    console.log('Hifz content from cards:', hifzContent);
+    console.log('Revision content from cards:', revisionContent);
+    
+    // If we found content in the cards, use that
+    if (hifzContent.length > 0 || revisionContent.length > 0) {
+        return {
+            hifz: hifzContent,
+            revision: revisionContent
+        };
+    }
+    
+    // Fallback to sampleData if cards are empty
+    console.log('No content found in cards, falling back to sampleData');
+    if (sampleData.content && sampleData.content[studentId]) {
+        return sampleData.content[studentId];
+    }
+    
+    console.log('No content found anywhere for student:', studentId);
+    return null;
+}
+
+function extractContentFromCard(type) {
+    console.log(`=== EXTRACTING ${type.toUpperCase()} CONTENT FROM CARD ===`);
+    
+    // Look for the content in the dashboard cards
+    const cardSelector = type === 'hifz' ? '.hifz-card' : '.revision-card';
+    const card = document.querySelector(cardSelector);
+    
+    if (!card) {
+        console.log(`No ${type} card found with selector:`, cardSelector);
+        // Try alternative selectors
+        const altSelectors = [
+            `#${type}Card`,
+            `.${type}-content`,
+            `[data-type="${type}"]`,
+            `.card:has([data-translate*="${type}"])`
+        ];
+        
+        for (const selector of altSelectors) {
+            const altCard = document.querySelector(selector);
+            if (altCard) {
+                console.log(`Found ${type} card with alternative selector:`, selector);
+                return parseCardContent(altCard, type);
+            }
+        }
+        
+        console.log(`No ${type} card found with any selector`);
+        return [];
+    }
+    
+    return parseCardContent(card, type);
+}
+
+function parseCardContent(cardElement, type) {
+    console.log(`=== PARSING ${type.toUpperCase()} CARD CONTENT ===`);
+    console.log('Card element:', cardElement);
+    
+    const content = [];
+    
+    // Look for content items in various formats
+    const contentSelectors = [
+        '.content-item',
+        '.surah-item',
+        '.ayah-item',
+        'li',
+        'p',
+        '.item'
+    ];
+    
+    for (const selector of contentSelectors) {
+        const items = cardElement.querySelectorAll(selector);
+        if (items.length > 0) {
+            console.log(`Found ${items.length} items with selector:`, selector);
+            
+            items.forEach(item => {
+                const text = item.textContent.trim();
+                if (text) {
+                    const parsed = parseContentText(text);
+                    if (parsed) {
+                        content.push(parsed);
+                    }
+                }
+            });
+            
+            if (content.length > 0) {
+                break; // Found content, no need to try other selectors
+            }
+        }
+    }
+    
+    // If no structured content found, try to parse the entire card text
+    if (content.length === 0) {
+        console.log('No structured content found, parsing entire card text');
+        const cardText = cardElement.textContent.trim();
+        const lines = cardText.split('\n').map(line => line.trim()).filter(line => line);
+        
+        lines.forEach(line => {
+            const parsed = parseContentText(line);
+            if (parsed) {
+                content.push(parsed);
+            }
+        });
+    }
+    
+    console.log(`Extracted ${content.length} ${type} items:`, content);
+    return content;
+}
+
+function parseContentText(text) {
+    console.log('Parsing content text:', text);
+    
+    // Skip headers, labels, and empty text
+    if (!text || text.length < 3) return null;
+    if (text.toLowerCase().includes('hifz') || text.toLowerCase().includes('revision')) return null;
+    if (text.toLowerCase().includes('surah') && text.length < 10) return null;
+    
+    // Try to extract surah name and ayah range
+    // Format examples: "Al Fatiha 1-7", "Yunus: 7-9", "Al Baqarah (1-5)"
+    const patterns = [
+        /^(.+?)\s+(\d+[-–]\d+)$/,           // "Al Fatiha 1-7"
+        /^(.+?):\s*(\d+[-–]\d+)$/,         // "Yunus: 7-9"
+        /^(.+?)\s*\((\d+[-–]\d+)\)$/,      // "Al Baqarah (1-5)"
+        /^(.+?)\s+(\d+)$/,                 // "Al Fatiha 7" (single ayah)
+    ];
+    
+    for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match) {
+            const surah = match[1].trim();
+            const ayahRange = match[2];
+            
+            console.log('Parsed:', { surah, ayahRange });
+            
+            // Parse ayah range
+            const ayahParts = ayahRange.split(/[-–]/);
+            const startAyah = parseInt(ayahParts[0]);
+            const endAyah = ayahParts[1] ? parseInt(ayahParts[1]) : startAyah;
+            
+            return {
+                surah: surah,
+                ayahRange: ayahRange,
+                startAyah: startAyah,
+                endAyah: endAyah
+            };
+        }
+    }
+    
+    console.log('Could not parse content text:', text);
+    return null;
+}
+
+function populateAllContentOptions(selectElement) {
+    console.log('Populating with all available content...');
+    const isHifz = selectElement.classList.contains('session-hifz-surah');
+    const allContent = [];
+    
+    // First try to get content from all dashboard cards
+    const hifzFromCards = extractContentFromCard('hifz');
+    const revisionFromCards = extractContentFromCard('revision');
+    
+    if (isHifz && hifzFromCards.length > 0) {
+        allContent.push(...hifzFromCards);
+    } else if (!isHifz && revisionFromCards.length > 0) {
+        allContent.push(...revisionFromCards);
+    } else {
+        // Fallback to sampleData
+        Object.keys(sampleData.content).forEach(studentId => {
+            const studentData = sampleData.content[studentId];
+            if (studentData) {
+                const contentItems = isHifz ? studentData.hifz : studentData.revision;
+                if (contentItems && contentItems.length > 0) {
+                    allContent.push(...contentItems);
+                }
+            }
+        });
+    }
+    
+    console.log(`Found ${allContent.length} total ${isHifz ? 'hifz' : 'revision'} items`);
+    
+    // Add all content items as options
+    allContent.forEach((item, index) => {
+        const option = document.createElement('option');
+        option.value = `${item.surah} ${item.ayahRange}`;
+        option.textContent = formatContentItem(item, currentLanguage === 'ar');
+        selectElement.appendChild(option);
+    });
+}
+
+function setupSessionDropdownListeners() {
+    console.log('=== SETTING UP SESSION DROPDOWN LISTENERS ===');
+    
+    // Function to populate a dropdown when it's clicked
+    function populateOnClick(event) {
+        const selectElement = event.target;
+        console.log('Session dropdown clicked:', selectElement.className);
+        
+        // Store current value to restore it after population
+        const currentValue = selectElement.value;
+        
+        // Only populate if it's empty (just has the default option)
+        if (selectElement.options.length <= 1) {
+            console.log('Dropdown is empty, populating...');
+            populateSessionContentOptions(selectElement);
+            
+            // Restore the value after population
+            setTimeout(() => {
+                if (currentValue && selectElement.querySelector(`option[value="${currentValue}"]`)) {
+                    selectElement.value = currentValue;
+                }
+            }, 50);
+        } else {
+            console.log('Dropdown already populated with', selectElement.options.length, 'options');
+        }
+    }
+    
+    // Add listeners to existing dropdowns
+    const hifzSelects = document.querySelectorAll('.session-hifz-surah');
+    const revisionSelects = document.querySelectorAll('.session-revision-surah');
+    
+    console.log('Found hifz selects:', hifzSelects.length);
+    console.log('Found revision selects:', revisionSelects.length);
+    
+    hifzSelects.forEach(select => {
+        select.addEventListener('click', populateOnClick);
+        select.addEventListener('focus', populateOnClick);
+        console.log('Added listeners to hifz select');
+    });
+    
+    revisionSelects.forEach(select => {
+        select.addEventListener('click', populateOnClick);
+        select.addEventListener('focus', populateOnClick);
+        console.log('Added listeners to revision select');
+    });
+    
+    // Also populate them immediately if content is available
+    if (Object.keys(sampleData.content).length > 0) {
+        console.log('Content available, populating dropdowns immediately...');
+        hifzSelects.forEach(select => populateSessionContentOptions(select));
+        revisionSelects.forEach(select => populateSessionContentOptions(select));
+    }
+}
+
+// Global function to populate session dropdowns (can be called from anywhere)
+function populateSessionDropdowns() {
+    console.log('=== MANUALLY POPULATING SESSION DROPDOWNS ===');
+    
+    const hifzSelects = document.querySelectorAll('.session-hifz-surah');
+    const revisionSelects = document.querySelectorAll('.session-revision-surah');
+    
+    console.log('Found hifz selects:', hifzSelects.length);
+    console.log('Found revision selects:', revisionSelects.length);
+    console.log('Sample data content:', sampleData.content);
+    console.log('Content keys:', Object.keys(sampleData.content));
+    
+    hifzSelects.forEach(select => {
+        console.log('Populating hifz select:', select);
+        populateSessionContentOptions(select);
+    });
+    
+    revisionSelects.forEach(select => {
+        console.log('Populating revision select:', select);
+        populateSessionContentOptions(select);
+    });
+}
+
+// Make it globally accessible
+window.populateSessionDropdowns = populateSessionDropdowns;
+
+function setupAutomaticDropdownPopulation() {
+    console.log('=== SETTING UP AUTOMATIC DROPDOWN POPULATION ===');
+    
+    // Method 1: MutationObserver to detect when session modal becomes visible
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const target = mutation.target;
+                if (target.id === 'addSessionModal') {
+                    const isVisible = target.style.display === 'block' || 
+                                    target.style.display === 'flex' || 
+                                    (target.style.display !== 'none' && target.offsetParent !== null);
+                    
+                    if (isVisible) {
+                        console.log('Session modal detected as visible, populating dropdowns...');
+                        setTimeout(() => {
+                            populateSessionDropdowns();
+                        }, 100);
+                    }
+                }
+            }
+            
+            // Also check for class changes that might indicate modal visibility
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const target = mutation.target;
+                if (target.id === 'addSessionModal' && target.classList.contains('show')) {
+                    console.log('Session modal detected as shown via class, populating dropdowns...');
+                    setTimeout(() => {
+                        populateSessionDropdowns();
+                    }, 100);
+                }
+            }
+        });
+    });
+    
+    // Observe the session modal for changes
+    const sessionModal = document.getElementById('addSessionModal');
+    if (sessionModal) {
+        observer.observe(sessionModal, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+        console.log('MutationObserver set up for session modal');
+    } else {
+        console.log('Session modal not found, will try again later...');
+        setTimeout(setupAutomaticDropdownPopulation, 2000);
+    }
+    
+    // Method 2: Event listener for modal clicks
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        
+        // Check if clicked element or its parents might open the session modal
+        const clickedText = target.textContent?.toLowerCase() || '';
+        const clickedId = target.id?.toLowerCase() || '';
+        const clickedClass = target.className?.toLowerCase() || '';
+        
+        if (clickedText.includes('session') || 
+            clickedText.includes('add') || 
+            clickedId.includes('session') || 
+            clickedClass.includes('session')) {
+            
+            console.log('Potential session modal trigger clicked, will populate dropdowns...');
+            setTimeout(() => {
+                populateSessionDropdowns();
+            }, 500);
+        }
+    });
+    
+    // Method 3: Periodic check for modal visibility
+    setInterval(() => {
+        const sessionModal = document.getElementById('addSessionModal');
+        if (sessionModal) {
+            const isVisible = sessionModal.style.display === 'block' || 
+                            sessionModal.style.display === 'flex' || 
+                            (sessionModal.style.display !== 'none' && sessionModal.offsetParent !== null);
+            
+            if (isVisible) {
+                const hifzSelects = document.querySelectorAll('.session-hifz-surah');
+                const revisionSelects = document.querySelectorAll('.session-revision-surah');
+                
+                // Check if dropdowns are empty and need population
+                let needsPopulation = false;
+                hifzSelects.forEach(select => {
+                    if (select.options.length <= 1) needsPopulation = true;
+                });
+                revisionSelects.forEach(select => {
+                    if (select.options.length <= 1) needsPopulation = true;
+                });
+                
+                if (needsPopulation) {
+                    console.log('Session modal is visible and dropdowns need population...');
+                    populateSessionDropdowns();
+                }
+            }
+        }
+    }, 2000); // Check every 2 seconds
+}
+
+// Individual student deletion (not entire database)
+async function deleteIndividualStudent(studentId) {
+    console.log('=== DELETING INDIVIDUAL STUDENT ===');
+    console.log('Student ID:', studentId);
+    
+    if (!studentId) {
+        console.error('No student ID provided for deletion');
+        return false;
+    }
+    
+    try {
+        showLoading('Deleting student...');
+        
+        // Delete from Firebase
+        if (window.firebaseService && window.firebaseService.initialized) {
+            console.log('Deleting student from Firebase:', studentId);
+            await window.firebaseService.deleteStudent(studentId);
+            await window.firebaseService.deleteStudentContent(studentId);
+        }
+        
+        // Delete from local data
+        if (sampleData.students && sampleData.students[studentId]) {
+            delete sampleData.students[studentId];
+            console.log('Deleted student from sampleData.students');
+        }
+        
+        if (sampleData.content && sampleData.content[studentId]) {
+            delete sampleData.content[studentId];
+            console.log('Deleted student content from sampleData.content');
+        }
+        
+        // Remove from teacher assignments
+        if (sampleData.teachers) {
+            Object.keys(sampleData.teachers).forEach(teacherId => {
+                const teacher = sampleData.teachers[teacherId];
+                if (teacher.students && teacher.students.includes(studentId)) {
+                    teacher.students = teacher.students.filter(id => id !== studentId);
+                    console.log(`Removed student ${studentId} from teacher ${teacherId}`);
+                }
+            });
+        }
+        
+        // Update localStorage
+        localStorage.setItem('quranStudents', JSON.stringify(sampleData.students || {}));
+        localStorage.setItem('quranContent', JSON.stringify(sampleData.content || {}));
+        localStorage.setItem('quranTeachers', JSON.stringify(sampleData.teachers || {}));
+        
+        hideLoading();
+        console.log('✅ Individual student deleted successfully:', studentId);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error deleting individual student:', error);
+        hideLoading();
+        return false;
+    }
+}
+
+// Make it globally accessible
+window.deleteIndividualStudent = deleteIndividualStudent;
+
+// Override any existing problematic deletion functions
+function overrideProblematicDeletionFunctions() {
+    console.log('=== OVERRIDING PROBLEMATIC DELETION FUNCTIONS ===');
+    
+    // Override common deletion function names that might be calling complete database clear
+    const commonDeletionNames = [
+        'confirmDeleteStudent',
+        'deleteStudent', 
+        'removeStudent',
+        'deleteSelectedStudent',
+        'handleDeleteStudent'
+    ];
+    
+    commonDeletionNames.forEach(functionName => {
+        if (window[functionName]) {
+            console.log(`Overriding existing function: ${functionName}`);
+            const originalFunction = window[functionName];
+            
+            window[functionName] = async function(studentId, ...args) {
+                console.log(`${functionName} called with studentId:`, studentId);
+                console.log('Redirecting to deleteIndividualStudent instead');
+                return await deleteIndividualStudent(studentId);
+            };
+        } else {
+            // Create the function if it doesn't exist
+            window[functionName] = async function(studentId, ...args) {
+                console.log(`${functionName} called with studentId:`, studentId);
+                console.log('Using deleteIndividualStudent');
+                return await deleteIndividualStudent(studentId);
+            };
+        }
+    });
+    
+    // Also override any function that might be calling complete database clear
+    if (window.clearCompleteDatabase) {
+        console.log('Overriding clearCompleteDatabase to prevent accidental calls');
+        const originalClearFunction = window.clearCompleteDatabase;
+        
+        window.clearCompleteDatabase = function() {
+            console.warn('⚠️ clearCompleteDatabase was called - this should only be used for complete resets');
+            console.warn('If this was meant to delete a single student, use deleteIndividualStudent instead');
+            
+            // Ask for confirmation before clearing everything
+            if (confirm('Are you sure you want to clear the ENTIRE database? This will delete ALL students, teachers, and content!')) {
+                return originalClearFunction.apply(this, arguments);
+            } else {
+                console.log('Database clear cancelled by user');
+                return false;
+            }
+        };
+    }
+}
+
+// Call the override function
+overrideProblematicDeletionFunctions();
+
+// Session item management functions
+function addHifzItem() {
+    console.log('Adding hifz item...');
+    const container = document.getElementById('hifzItemsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'session-item-row';
+    newRow.innerHTML = `
+        <select class="session-hifz-surah" required onchange="toggleHifzAddButton(this)">
+            <option value="">Select Hifz Item</option>
+        </select>
+        <button type="button" class="btn btn-small btn-secondary" onclick="addHifzItem()" style="display: none;">+</button>
+        <button type="button" class="btn btn-small remove" onclick="removeHifzItem(this)">-</button>
+    `;
+    
+    // Populate the new select with content options
+    const select = newRow.querySelector('.session-hifz-surah');
+    
+    // Add event listeners to prevent dropdown from reverting
+    select.addEventListener('click', function(event) {
+        event.stopPropagation();
+        if (event.target.options.length <= 1) {
+            console.log('New hifz dropdown clicked, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    select.addEventListener('focus', function(event) {
+        event.stopPropagation();
+        if (event.target.options.length <= 1) {
+            console.log('New hifz dropdown focused, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    // Populate immediately if content is available
+    setTimeout(() => {
+        populateSessionContentOptions(select);
+    }, 100);
+    
+    container.appendChild(newRow);
+}
+
+function removeHifzItem(button) {
+    const row = button.parentElement;
+    const container = document.getElementById('hifzItemsContainer');
+    
+    // Don't remove if it's the only row
+    if (container.children.length > 1) {
+        row.remove();
+    }
+}
+
+function addRevisionItem() {
+    console.log('Adding revision item...');
+    const container = document.getElementById('revisionItemsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'session-item-row';
+    newRow.innerHTML = `
+        <select class="session-revision-surah" required onchange="toggleRevisionAddButton(this)">
+            <option value="">Select Revision Item</option>
+        </select>
+        <button type="button" class="btn btn-small btn-secondary" onclick="addRevisionItem()" style="display: none;">+</button>
+        <button type="button" class="btn btn-small remove" onclick="removeRevisionItem(this)">-</button>
+    `;
+    
+    // Populate the new select with content options
+    const select = newRow.querySelector('.session-revision-surah');
+    
+    // Add event listeners to prevent dropdown from reverting
+    select.addEventListener('click', function(event) {
+        event.stopPropagation();
+        if (event.target.options.length <= 1) {
+            console.log('New revision dropdown clicked, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    select.addEventListener('focus', function(event) {
+        event.stopPropagation();
+        if (event.target.options.length <= 1) {
+            console.log('New revision dropdown focused, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    // Populate immediately if content is available
+    setTimeout(() => {
+        populateSessionContentOptions(select);
+    }, 100);
+    
+    container.appendChild(newRow);
+}
+
+function removeRevisionItem(button) {
+    const row = button.parentElement;
+    const container = document.getElementById('revisionItemsContainer');
+    
+    // Don't remove if it's the only row
+    if (container.children.length > 1) {
+        row.remove();
+    }
+}
+
+function toggleHifzAddButton(selectElement) {
+    console.log('=== TOGGLE HIFZ ADD BUTTON ===');
+    console.log('Select element:', selectElement);
+    console.log('Select value:', selectElement.value);
+    
+    const row = selectElement.closest('.session-item-row');
+    console.log('Row found:', row);
+    
+    // Find the add button more aggressively
+    const addButton = row.querySelector('button[onclick*="addHifzItem"]') || 
+                      row.querySelector('button[onclick="addHifzItem()"]') ||
+                      row.querySelector('.btn-small.btn-secondary');
+    
+    console.log('Add button found:', addButton);
+    
+    if (addButton) {
+        if (selectElement.value) {
+            console.log('Showing add button with + symbol');
+            addButton.style.display = 'inline-block';
+            addButton.style.visibility = 'visible';
+            addButton.style.opacity = '1';
+            
+            // Force the button text to be + multiple ways
+            addButton.textContent = '+';
+            addButton.innerHTML = '+';
+            addButton.setAttribute('textContent', '+');
+            addButton.setAttribute('innerHTML', '+');
+            
+            // Also set the onclick to make sure it calls the right function
+            addButton.setAttribute('onclick', 'addHifzItem()');
+            
+            console.log('Button after changes - textContent:', addButton.textContent, 'innerHTML:', addButton.innerHTML);
+        } else {
+            console.log('Hiding add button');
+            addButton.style.display = 'none';
+        }
+    } else {
+        console.log('No add button found!');
+    }
+}
+
+function toggleRevisionAddButton(selectElement) {
+    console.log('=== TOGGLE REVISION ADD BUTTON ===');
+    console.log('Select element:', selectElement);
+    console.log('Select value:', selectElement.value);
+    
+    const row = selectElement.closest('.session-item-row');
+    console.log('Row found:', row);
+    
+    // Find the add button more aggressively
+    const addButton = row.querySelector('button[onclick*="addRevisionItem"]') || 
+                      row.querySelector('button[onclick="addRevisionItem()"]') ||
+                      row.querySelector('.btn-small.btn-secondary');
+    
+    console.log('Add button found:', addButton);
+    
+    if (addButton) {
+        if (selectElement.value) {
+            console.log('Showing add button with + symbol');
+            addButton.style.display = 'inline-block';
+            addButton.style.visibility = 'visible';
+            addButton.style.opacity = '1';
+            
+            // Force the button text to be + multiple ways
+            addButton.textContent = '+';
+            addButton.innerHTML = '+';
+            addButton.setAttribute('textContent', '+');
+            addButton.setAttribute('innerHTML', '+');
+            
+            // Also set the onclick to make sure it calls the right function
+            addButton.setAttribute('onclick', 'addRevisionItem()');
+            
+            console.log('Button after changes - textContent:', addButton.textContent, 'innerHTML:', addButton.innerHTML);
+        } else {
+            console.log('Hiding add button');
+            addButton.style.display = 'none';
+        }
+    } else {
+        console.log('No add button found!');
+    }
+}
+
+// Make functions globally accessible and override any existing ones
+window.addHifzItem = addHifzItem;
+window.removeHifzItem = removeHifzItem;
+window.addRevisionItem = addRevisionItem;
+window.removeRevisionItem = removeRevisionItem;
+window.toggleHifzAddButton = toggleHifzAddButton;
+window.toggleRevisionAddButton = toggleRevisionAddButton;
+
+// Override any existing functions that might be causing issues
+setTimeout(() => {
+    console.log('=== OVERRIDING EXISTING FUNCTIONS ===');
+    
+    // Override toggle functions more aggressively
+    if (window.toggleHifzAddButton !== toggleHifzAddButton) {
+        console.log('Overriding existing toggleHifzAddButton');
+        window.toggleHifzAddButton = toggleHifzAddButton;
+    }
+    
+    if (window.toggleRevisionAddButton !== toggleRevisionAddButton) {
+        console.log('Overriding existing toggleRevisionAddButton');
+        window.toggleRevisionAddButton = toggleRevisionAddButton;
+    }
+    
+    // Also override any functions that might be resetting dropdowns
+    const originalSetTimeout = window.setTimeout;
+    window.setTimeout = function(callback, delay) {
+        if (typeof callback === 'function') {
+            const wrappedCallback = function() {
+                try {
+                    return callback.apply(this, arguments);
+                } catch (error) {
+                    console.log('Error in setTimeout callback:', error);
+                    return callback.apply(this, arguments);
+                }
+            };
+            return originalSetTimeout.call(this, wrappedCallback, delay);
+        }
+        return originalSetTimeout.apply(this, arguments);
+    };
+    
+    console.log('Function overrides completed');
+}, 1000);
 
 // Surah ayah counts (number of verses in each Surah)
 const surahAyahCounts = {
@@ -2000,54 +2722,224 @@ function toggleLanguage() {
     setLanguage(newLang);
 }
 
+// Session item management functions
+function toggleHifzAddButton(element) {
+    const row = element.closest('.session-item-row');
+    const addButton = row.querySelector('button[onclick="addHifzItem()"]');
+    const surahSelect = row.querySelector('.session-hifz-surah');
+    
+    if (surahSelect.value) {
+        addButton.style.display = 'block';
+    } else {
+        addButton.style.display = 'none';
+    }
+}
+
+function toggleRevisionAddButton(element) {
+    const row = element.closest('.session-item-row');
+    const addButton = row.querySelector('button[onclick="addRevisionItem()"]');
+    const surahSelect = row.querySelector('.session-revision-surah');
+    
+    if (surahSelect.value) {
+        addButton.style.display = 'block';
+    } else {
+        addButton.style.display = 'none';
+    }
+}
+
+function addHifzItem() {
+    const container = document.getElementById('hifzItemsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'session-item-row';
+    newRow.innerHTML = `
+        <select class="session-hifz-surah" required onchange="toggleHifzAddButton(this)">
+            <option value="">Select Hifz Item</option>
+        </select>
+        <button type="button" class="btn btn-small btn-secondary" onclick="addHifzItem()" style="display: none;">+</button>
+        <button type="button" class="btn btn-small remove" onclick="removeHifzItem(this)">-</button>
+    `;
+    
+    // Populate the new select with surah options
+    const select = newRow.querySelector('.session-hifz-surah');
+    updateSurahOptions(select);
+    
+    // Add event listeners to the new select
+    select.addEventListener('click', function(event) {
+        if (event.target.options.length <= 1) {
+            console.log('New hifz dropdown clicked, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    select.addEventListener('focus', function(event) {
+        if (event.target.options.length <= 1) {
+            console.log('New hifz dropdown focused, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    // Populate immediately if content is available
+    if (Object.keys(sampleData.content).length > 0) {
+        populateSessionContentOptions(select);
+    }
+    
+    container.appendChild(newRow);
+}
+
+function removeHifzItem(button) {
+    const row = button.parentElement;
+    const container = document.getElementById('hifzItemsContainer');
+    
+    // Don't remove if it's the only row
+    if (container.children.length > 1) {
+        row.remove();
+    }
+}
+
+function addRevisionItem() {
+    const container = document.getElementById('revisionItemsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'session-item-row';
+    newRow.innerHTML = `
+        <select class="session-revision-surah" required onchange="toggleRevisionAddButton(this)">
+            <option value="">Select Revision Item</option>
+        </select>
+        <button type="button" class="btn btn-small btn-secondary" onclick="addRevisionItem()" style="display: none;">+</button>
+        <button type="button" class="btn btn-small remove" onclick="removeRevisionItem(this)">-</button>
+    `;
+    
+    // Populate the new select with surah options
+    const select = newRow.querySelector('.session-revision-surah');
+    updateSurahOptions(select);
+    
+    // Add event listeners to the new select
+    select.addEventListener('click', function(event) {
+        if (event.target.options.length <= 1) {
+            console.log('New revision dropdown clicked, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    select.addEventListener('focus', function(event) {
+        if (event.target.options.length <= 1) {
+            console.log('New revision dropdown focused, populating...');
+            populateSessionContentOptions(event.target);
+        }
+    });
+    
+    // Populate immediately if content is available
+    if (Object.keys(sampleData.content).length > 0) {
+        populateSessionContentOptions(select);
+    }
+    
+    container.appendChild(newRow);
+}
+
+function removeRevisionItem(button) {
+    const row = button.parentElement;
+    const container = document.getElementById('revisionItemsContainer');
+    
+    // Don't remove if it's the only row
+    if (container.children.length > 1) {
+        row.remove();
+    }
+}
+
 // Make language functions globally accessible
 window.toggleLanguage = toggleLanguage;
 window.setLanguage = setLanguage;
 window.getTranslation = getTranslation;
 window.forceResetData = forceResetData;
+window.clearCompleteDatabase = clearCompleteDatabase;
 window.debugDataStructure = debugDataStructure;
 window.fixAyahRanges = fixAyahRanges;
 window.forceFixAllData = forceFixAllData;
 window.forceConvertSampleData = forceConvertSampleData;
 window.forceAddEndAyah = forceAddEndAyah;
 window.createTestDataWithRanges = createTestDataWithRanges;
+window.addHifzItem = addHifzItem;
+window.removeHifzItem = removeHifzItem;
+window.addRevisionItem = addRevisionItem;
+window.removeRevisionItem = removeRevisionItem;
+window.toggleHifzAddButton = toggleHifzAddButton;
+window.toggleRevisionAddButton = toggleRevisionAddButton;
+window.populateSurahOptions = populateSurahOptions;
+window.handleLogin = handleLogin;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('MRIS Quran Program initialized');
+    console.log('=== MRIS QURAN PROGRAM INITIALIZED ===');
+    console.log('DOM Content Loaded event fired');
+    console.log('Current page URL:', window.location.href);
+    console.log('Current page pathname:', window.location.pathname);
     
-    // Migrate old data format if needed
-    migrateOldData();
-    
-    // Force migration on every page load to ensure data is properly formatted
-    setTimeout(() => {
-        console.log('Running additional migration check...');
-        migrateOldData();
-        fixAyahRanges();
-        forceFixAllData();
-        forceConvertSampleData();
-        // forceAddEndAyah(); // DISABLED - was overwriting user input
-        createTestDataWithRanges();
-        
-        // Force reload content after fixing data
-        if (currentUser && currentUserType) {
-            loadStudentContent();
-        }
-    }, 1000);
+    // Migrations are now handled before Firebase loading
     
     // Load saved language preference
     const savedLanguage = localStorage.getItem('quranLanguage') || 'en';
     setLanguage(savedLanguage);
     
+    // Ensure admin user exists
+    if (!sampleData.admin || Object.keys(sampleData.admin).length === 0) {
+        console.log('No admin users found, creating admin...');
+        sampleData.admin = {
+            'ADMINYNG9': {
+                name: 'System Administrator',
+                role: 'admin',
+                id: 'ADMINYNG9',
+                type: 'admin',
+                email: 'admin@mris.com'
+            }
+        };
+        console.log('Admin created:', sampleData.admin);
+    }
+    
+    // Create teacher account for TYA9BR1 (real teacher)
+    if (!sampleData.teachers || !sampleData.teachers['TYA9BR1']) {
+        console.log('Creating teacher account TYA9BR1...');
+        if (!sampleData.teachers) {
+            sampleData.teachers = {};
+        }
+        sampleData.teachers['TYA9BR1'] = {
+            name: 'Teacher TYA9BR1',
+            role: 'teacher',
+            id: 'TYA9BR1',
+            type: 'teacher',
+            email: 'teacher@mris.com',
+            students: []
+        };
+        console.log('Teacher created:', sampleData.teachers['TYA9BR1']);
+    }
+    
     // Initialize dropdown functionality
     initializeDropdowns();
+    
+    // Add event listeners to session dropdowns to populate them when clicked
+    setupSessionDropdownListeners();
+    
+    // Try to populate session dropdowns immediately
+    setTimeout(() => {
+        console.log('Attempting to populate session dropdowns after page load...');
+        populateSessionDropdowns();
+    }, 1000);
+    
+    // Set up automatic dropdown population when session modal opens
+    setupAutomaticDropdownPopulation();
+    
+    // Override any problematic deletion functions
+    overrideProblematicDeletionFunctions();
+    
+    // Hide options button by default (will be shown for teachers only)
+    updateOptionsButtonVisibility();
     
     // Get button elements after DOM is loaded
     window.addHifzBtn = document.getElementById('addHifzBtn');
     window.addRevisionBtn = document.getElementById('addRevisionBtn');
     window.addSessionBtn = document.getElementById('addSessionBtn');
     
-    console.log('Add buttons found:', { addHifzBtn: window.addHifzBtn, addRevisionBtn: window.addRevisionBtn, addSessionBtn: window.addSessionBtn });
+    console.log('Add buttons found:', { 
+        addHifzBtn: window.addHifzBtn, 
+        addRevisionBtn: window.addRevisionBtn, 
+        addSessionBtn: window.addSessionBtn 
+    });
     
     // Verify buttons exist before setting up event listeners
     if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
@@ -2055,9 +2947,27 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('addHifzBtn:', window.addHifzBtn);
         console.error('addRevisionBtn:', window.addRevisionBtn);
         console.error('addSessionBtn:', window.addSessionBtn);
+        
+        // Try to find them again after a short delay
+        setTimeout(() => {
+            window.addHifzBtn = document.getElementById('addHifzBtn');
+            window.addRevisionBtn = document.getElementById('addRevisionBtn');
+            window.addSessionBtn = document.getElementById('addSessionBtn');
+            console.log('Retry - Add buttons found:', { 
+                addHifzBtn: window.addHifzBtn, 
+                addRevisionBtn: window.addRevisionBtn, 
+                addSessionBtn: window.addSessionBtn 
+            });
+        }, 100);
     }
     
-    // Load data from Firebase only, then check for existing session
+    // Run migrations first, then load from Firebase
+    console.log('Running migrations first...');
+    
+    // Skip migrations - load directly from Firebase
+    console.log('Skipping migrations - loading directly from Firebase');
+    
+    // Now load from Firebase (this will overwrite any local data)
     loadDataFromStorage().then(() => {
         console.log('Data loaded from Firebase, now checking for existing session');
         console.log('Admin data available:', sampleData.admin);
@@ -2075,14 +2985,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setupEventListeners(window.addHifzBtn, window.addRevisionBtn, window.addSessionBtn);
     
+    // Test: Add a simple click handler to see if events work at all
+    const testBtn = document.getElementById('loginBtn');
+    if (testBtn) {
+        console.log('Adding test click handler to login button');
+        testBtn.addEventListener('click', function() {
+            console.log('TEST: Login button clicked - events are working!');
+            console.log('TEST: Calling handleLogin directly...');
+            handleLogin();
+        });
+    }
+    
+    // Test: Make sure handleLogin is accessible
+    console.log('handleLogin function available:', typeof handleLogin);
+    console.log('window.handleLogin available:', typeof window.handleLogin);
+    
     // Set up periodic refresh for students to see teacher updates
     setInterval(refreshStudentData, 5000); // Refresh every 5 seconds
 });
 
 // Setup event listeners
 function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
+    console.log('=== SETTING UP EVENT LISTENERS ===');
+    
     // Login form
     const loginForm = document.getElementById('loginForm');
+    console.log('Login form element:', loginForm);
     if (loginForm) {
         console.log('Login form found, adding event listener');
         loginForm.addEventListener('submit', function(e) {
@@ -2092,6 +3020,38 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
         console.log('Login form event listener added');
     } else {
         console.error('Login form not found');
+    }
+    
+    // Login button click
+    const loginBtn = document.getElementById('loginBtn');
+    console.log('Login button element:', loginBtn);
+    if (loginBtn) {
+        console.log('Login button found, adding click event listener');
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Login button clicked');
+            handleLogin(e);
+        });
+        console.log('Login button event listener added');
+    } else {
+        console.error('Login button not found');
+    }
+    
+    // Enter key on user code input
+    const userCodeInput = document.getElementById('userCode');
+    console.log('User code input element:', userCodeInput);
+    if (userCodeInput) {
+        console.log('User code input found, adding keypress event listener');
+        userCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log('Enter key pressed on user code input');
+                handleLogin(e);
+            }
+        });
+        console.log('User code input event listener added');
+    } else {
+        console.error('User code input not found');
     }
     
     // Logout button - show confirmation modal first
@@ -2256,6 +3216,7 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
 
 // Handle login
 function handleLogin(event) {
+    console.log('=== HANDLE LOGIN CALLED ===');
     console.log('handleLogin called with event:', event);
     if (event) {
         event.preventDefault();
@@ -2263,6 +3224,9 @@ function handleLogin(event) {
     }
     
     console.log('Login attempt started');
+    
+    // Get login button reference
+    const loginBtn = document.getElementById('loginBtn');
     
     // Check if user is already logged in
     const savedUser = localStorage.getItem('quranUser');
@@ -2303,35 +3267,93 @@ function handleLogin(event) {
         loginBtn.disabled = true;
     }
     
+    // Show loading screen
+    showLoading('Logging in...');
+    
     try {
         // Check if user exists
         console.log('Checking admin users:', Object.keys(sampleData.admin));
+        console.log('Admin user details:', sampleData.admin);
+        console.log('Looking for user code:', userCode);
+        console.log('Admin user keys:', Object.keys(sampleData.admin));
+        Object.keys(sampleData.admin).forEach(key => {
+            console.log('Admin key:', key, 'matches?', key === userCode);
+        });
         console.log('Checking students:', Object.keys(sampleData.students));
         console.log('Checking teachers:', Object.keys(sampleData.teachers));
         
         if (sampleData.admin[userCode]) {
             console.log('Admin user found:', userCode);
-            currentUser = userCode;
-            currentUserType = 'admin';
-            // Admin login - no popup, direct login
-            loginSuccess(sampleData.admin[userCode]);
+            // Verify admin still exists in Firebase
+            verifyUserExistsInFirebase(userCode, 'admin').then(exists => {
+                if (exists) {
+                    currentUser = userCode;
+                    currentUserType = 'admin';
+                    loginSuccess(sampleData.admin[userCode]);
+                } else {
+                    console.log('This admin account has been deleted and cannot log in.', 'error');
+                    hideLoading();
+                    // Reset button state
+                    if (loginBtn) {
+                        loginBtn.textContent = getTranslation('login.button');
+                        loginBtn.disabled = false;
+                    }
+                }
+            }).catch(error => {
+                console.error('Error verifying admin user:', error);
+                hideLoading();
+                // Reset button state
+                if (loginBtn) {
+                    loginBtn.textContent = getTranslation('login.button');
+                    loginBtn.disabled = false;
+                }
+            });
         } else if (sampleData.students[userCode]) {
             console.log('Student user found:', userCode);
-            currentUser = userCode;
-            currentUserType = 'student';
-            loginSuccess(sampleData.students[userCode]);
+            // Verify student still exists in Firebase
+            verifyUserExistsInFirebase(userCode, 'student').then(exists => {
+                if (exists) {
+                    currentUser = userCode;
+                    currentUserType = 'student';
+                    loginSuccess(sampleData.students[userCode]);
+                } else {
+                    console.log('This student account has been deleted and cannot log in.', 'error');
+                    hideLoading();
+                    // Reset button state
+                    if (loginBtn) {
+                        loginBtn.textContent = getTranslation('login.button');
+                        loginBtn.disabled = false;
+                    }
+                }
+            }).catch(error => {
+                console.error('Error verifying student user:', error);
+                hideLoading();
+                // Reset button state
+                if (loginBtn) {
+                    loginBtn.textContent = getTranslation('login.button');
+                    loginBtn.disabled = false;
+                }
+            });
         } else if (sampleData.teachers[userCode]) {
             console.log('Teacher user found:', userCode);
+            // For now, skip Firebase verification for teachers to allow login
+            // TODO: Implement proper teacher verification when teachers are created in Firebase
             currentUser = userCode;
             currentUserType = 'teacher';
             console.log('About to call loginSuccess for teacher:', userCode);
             loginSuccess(sampleData.teachers[userCode]);
         } else {
             console.log('User not found:', userCode);
+            hideLoading();
+            // Reset button state
+            if (loginBtn) {
+                loginBtn.textContent = getTranslation('login.button');
+                loginBtn.disabled = false;
+            }
         }
     } catch (error) {
         console.error('Login error:', error);
-    } finally {
+        hideLoading();
         // Reset button state
         if (loginBtn) {
             loginBtn.textContent = getTranslation('login.button');
@@ -2343,6 +3365,9 @@ function handleLogin(event) {
 // Handle successful login
 function loginSuccess(user) {
     console.log('Login successful for user:', user.name, 'Type:', currentUserType);
+    
+    // Hide loading screen
+    hideLoading();
     
     // Get DOM elements
     const loginSection = document.getElementById('loginSection');
@@ -2361,8 +3386,12 @@ function loginSuccess(user) {
     localStorage.setItem('quranUserType', currentUserType);
     
     // Hide login, show dashboard
-    loginSection.style.display = 'none';
-    dashboardSection.style.display = 'block';
+    if (loginSection) {
+        loginSection.style.display = 'none';
+    }
+    if (dashboardSection) {
+        dashboardSection.style.display = 'block';
+    }
     
     // Add a small delay to ensure DOM is ready
     setTimeout(() => {
@@ -2388,12 +3417,18 @@ function loginSuccess(user) {
         if (userClassSpan) userClassSpan.textContent = getTranslation('header.administrator');
         if (userTeacherSpan) userTeacherSpan.textContent = '';
         
+        // Update options button visibility
+        updateOptionsButtonVisibility();
+        
         // Show admin dashboard immediately
         showAdminDashboard();
     } else if (currentUserType === 'student') {
         if (userNameSpan) userNameSpan.textContent = user.name;
         if (userClassSpan) userClassSpan.textContent = user.class;
         if (userTeacherSpan) userTeacherSpan.textContent = user.teacher;
+        
+        // Update options button visibility
+        updateOptionsButtonVisibility();
         
         // Load student content
         loadStudentContent();
@@ -2404,6 +3439,9 @@ function loginSuccess(user) {
         if (userNameSpan) userNameSpan.textContent = user.name;
         if (userClassSpan) userClassSpan.textContent = getTranslation('header.teacher');
         if (userTeacherSpan) userTeacherSpan.textContent = '';
+        
+        // Update options button visibility
+        updateOptionsButtonVisibility();
         
         // Add teacher-mode class to body
         document.body.classList.add('teacher-mode');
@@ -2626,12 +3664,26 @@ function loadSessionsList(sessions) {
         
         // Format hifz and revision content
         const isArabic = currentLanguage === 'ar';
-        const hifzDisplay = session.hifz && typeof session.hifz === 'object' 
-            ? formatContentItem(session.hifz, isArabic)
-            : translateSessionContent(session.hifz);
-        const revisionDisplay = session.revision && typeof session.revision === 'object'
-            ? formatContentItem(session.revision, isArabic)
-            : translateSessionContent(session.revision);
+        
+        // Handle multiple hifz items
+        let hifzDisplay;
+        if (Array.isArray(session.hifz)) {
+            hifzDisplay = session.hifz.map(item => formatContentItem(item, isArabic)).join(', ');
+        } else if (session.hifz && typeof session.hifz === 'object') {
+            hifzDisplay = formatContentItem(session.hifz, isArabic);
+        } else {
+            hifzDisplay = translateSessionContent(session.hifz);
+        }
+        
+        // Handle multiple revision items
+        let revisionDisplay;
+        if (Array.isArray(session.revision)) {
+            revisionDisplay = session.revision.map(item => formatContentItem(item, isArabic)).join(', ');
+        } else if (session.revision && typeof session.revision === 'object') {
+            revisionDisplay = formatContentItem(session.revision, isArabic);
+        } else {
+            revisionDisplay = translateSessionContent(session.revision);
+        }
         
         // Only show delete button for teachers
         if (currentUserType === 'teacher') {
@@ -2797,10 +3849,8 @@ function selectStudent(studentCode) {
     // Show add buttons for teachers - FORCE them to be visible
     showTeacherControls();
     
-    // Force display of add buttons
-    if (window.addHifzBtn) window.addHifzBtn.style.display = 'block';
-    if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'block';
-    if (window.addSessionBtn) window.addSessionBtn.style.display = 'block';
+    // Ensure buttons are properly set up
+    ensureAddButtonsSetup();
 }
 
 // Show teacher controls
@@ -2830,19 +3880,23 @@ function showTeacherControls() {
     }
     
     // Force display of add buttons for teachers
-    window.addHifzBtn.style.setProperty('display', 'block', 'important');
-    window.addRevisionBtn.style.setProperty('display', 'block', 'important');
-    window.addSessionBtn.style.setProperty('display', 'block', 'important');
+    if (window.addHifzBtn) {
+        window.addHifzBtn.style.setProperty('display', 'block', 'important');
+        window.addHifzBtn.style.setProperty('visibility', 'visible', 'important');
+        window.addHifzBtn.style.setProperty('opacity', '1', 'important');
+    }
     
-    // Also remove any inline style that might be hiding them
-    window.addHifzBtn.removeAttribute('style');
-    window.addRevisionBtn.removeAttribute('style');
-    window.addSessionBtn.removeAttribute('style');
+    if (window.addRevisionBtn) {
+        window.addRevisionBtn.style.setProperty('display', 'block', 'important');
+        window.addRevisionBtn.style.setProperty('visibility', 'visible', 'important');
+        window.addRevisionBtn.style.setProperty('opacity', '1', 'important');
+    }
     
-    // Set display again after removing inline styles
-    window.addHifzBtn.style.display = 'block';
-    window.addRevisionBtn.style.display = 'block';
-    window.addSessionBtn.style.display = 'block';
+    if (window.addSessionBtn) {
+        window.addSessionBtn.style.setProperty('display', 'block', 'important');
+        window.addSessionBtn.style.setProperty('visibility', 'visible', 'important');
+        window.addSessionBtn.style.setProperty('opacity', '1', 'important');
+    }
     
     console.log('Add buttons display set to block');
     console.log('addHifzBtn display:', window.addHifzBtn.style.display);
@@ -2855,6 +3909,27 @@ function hideTeacherControls() {
     if (window.addHifzBtn) window.addHifzBtn.style.display = 'none';
     if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'none';
     if (window.addSessionBtn) window.addSessionBtn.style.display = 'none';
+}
+
+// Ensure add buttons are properly set up
+function ensureAddButtonsSetup() {
+    console.log('Ensuring add buttons are properly set up...');
+    
+    // Re-find buttons if they don't exist
+    if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
+        console.log('Re-finding add buttons...');
+        window.addHifzBtn = document.getElementById('addHifzBtn');
+        window.addRevisionBtn = document.getElementById('addRevisionBtn');
+        window.addSessionBtn = document.getElementById('addSessionBtn');
+    }
+    
+    // Set up event listeners if not already set up
+    if (window.addHifzBtn && window.addRevisionBtn && window.addSessionBtn) {
+        console.log('Setting up add button event listeners...');
+        setupEventListeners(window.addHifzBtn, window.addRevisionBtn, window.addSessionBtn);
+    } else {
+        console.error('Cannot set up add buttons - buttons not found');
+    }
 }
 
 
@@ -3043,41 +4118,56 @@ function handleAddSession(event) {
     event.preventDefault();
     
     const date = document.getElementById('sessionDate').value;
-    const hifzSelection = document.getElementById('sessionHifzSurah').value;
-    const revisionSelection = document.getElementById('sessionRevisionSurah').value;
     const score = document.getElementById('sessionScore').value;
     
-    // Parse hifz and revision selections
-    // Format: "البقرة 2 - 16" or "Al-Baqarah 2 - 16" -> extract surah and ayah range
-    const hifzMatch = hifzSelection.match(/^(.+?)\s+(\d+(?:\s*-\s*\d+)?)$/);
-    const revisionMatch = revisionSelection.match(/^(.+?)\s+(\d+(?:\s*-\s*\d+)?)$/);
+    // Collect all hifz items
+    const hifzItems = [];
+    const hifzRows = document.querySelectorAll('#hifzItemsContainer .session-item-row');
+    hifzRows.forEach(row => {
+        const surahSelect = row.querySelector('.session-hifz-surah');
+        
+        if (surahSelect.value) {
+            // Parse the value to extract surah and ayah range
+            const valueParts = surahSelect.value.split(' ');
+            if (valueParts.length >= 2) {
+                const surah = valueParts.slice(0, -1).join(' '); // Everything except last part
+                const ayahRange = valueParts[valueParts.length - 1]; // Last part is ayah range
+                hifzItems.push({
+                    surah: surah,
+                    ayahRange: ayahRange
+                });
+            }
+        }
+    });
     
-    console.log('=== SESSION PARSING DEBUG ===');
-    console.log('Hifz selection:', hifzSelection);
-    console.log('Hifz match result:', hifzMatch);
-    console.log('Revision selection:', revisionSelection);
-    console.log('Revision match result:', revisionMatch);
-    
-    if (!hifzMatch || !revisionMatch) {
-        console.log('Invalid hifz or revision selection format', 'error');
-        return;
-    }
-    
-    const hifzSurah = hifzMatch[1].trim();
-    const hifzAyahRange = hifzMatch[2].trim();
-    const revisionSurah = revisionMatch[1].trim();
-    const revisionAyahRange = revisionMatch[2].trim();
+    // Collect all revision items
+    const revisionItems = [];
+    const revisionRows = document.querySelectorAll('#revisionItemsContainer .session-item-row');
+    revisionRows.forEach(row => {
+        const surahSelect = row.querySelector('.session-revision-surah');
+        
+        if (surahSelect.value) {
+            // Parse the value to extract surah and ayah range
+            const valueParts = surahSelect.value.split(' ');
+            if (valueParts.length >= 2) {
+                const surah = valueParts.slice(0, -1).join(' '); // Everything except last part
+                const ayahRange = valueParts[valueParts.length - 1]; // Last part is ayah range
+                revisionItems.push({
+                    surah: surah,
+                    ayahRange: ayahRange
+                });
+            }
+        }
+    });
     
     console.log('=== SESSION DEBUG ===');
-    console.log('Hifz selection:', hifzSelection);
-    console.log('Parsed hifz surah:', hifzSurah);
-    console.log('Parsed hifz ayah range:', hifzAyahRange);
-    console.log('Revision selection:', revisionSelection);
-    console.log('Parsed revision surah:', revisionSurah);
-    console.log('Parsed revision ayah range:', revisionAyahRange);
+    console.log('Date:', date);
+    console.log('Score:', score);
+    console.log('Hifz items:', hifzItems);
+    console.log('Revision items:', revisionItems);
     
-    if (!date || !hifzSelection || !revisionSelection || !score) {
-        console.log(getTranslation('notification.fill_all_fields'), 'error');
+    if (!date || hifzItems.length === 0 || revisionItems.length === 0 || !score) {
+        console.log('Please fill in all required fields and add at least one hifz and revision item', 'error');
         return;
     }
     
@@ -3094,36 +4184,73 @@ function handleAddSession(event) {
         sampleData.content[targetUser].sessions = [];
     }
     
-    // Parse ayah ranges to get start and end ayahs
-    const hifzAyahParts = hifzAyahRange.split(/\s*-\s*/);
-    const revisionAyahParts = revisionAyahRange.split(/\s*-\s*/);
+    // Process hifz items
+    const processedHifzItems = hifzItems.map(item => {
+        const ayahParts = item.ayahRange.split(/\s*-\s*/);
+        const startAyah = parseInt(ayahParts[0]);
+        const endAyah = ayahParts[1] ? parseInt(ayahParts[1]) : startAyah;
+        
+        return {
+            surah: item.surah,
+            ayahRange: item.ayahRange,
+            startAyah: startAyah,
+            endAyah: endAyah
+        };
+    });
     
-    const hifzStartAyah = parseInt(hifzAyahParts[0]);
-    const hifzEndAyah = hifzAyahParts[1] ? parseInt(hifzAyahParts[1]) : hifzStartAyah;
+    // Process revision items
+    const processedRevisionItems = revisionItems.map(item => {
+        const ayahParts = item.ayahRange.split(/\s*-\s*/);
+        const startAyah = parseInt(ayahParts[0]);
+        const endAyah = ayahParts[1] ? parseInt(ayahParts[1]) : startAyah;
+        
+        return {
+            surah: item.surah,
+            ayahRange: item.ayahRange,
+            startAyah: startAyah,
+            endAyah: endAyah
+        };
+    });
     
-    const revisionStartAyah = parseInt(revisionAyahParts[0]);
-    const revisionEndAyah = revisionAyahParts[1] ? parseInt(revisionAyahParts[1]) : revisionStartAyah;
-    
-    console.log('Parsed ayah values:');
-    console.log('Hifz start:', hifzStartAyah, 'end:', hifzEndAyah);
-    console.log('Revision start:', revisionStartAyah, 'end:', revisionEndAyah);
-    
+    // Add to sessions
     sampleData.content[targetUser].sessions.push({
         date: date,
-        hifz: {
-            surah: hifzSurah,
-            ayahRange: hifzAyahRange,
-            startAyah: hifzStartAyah,
-            endAyah: hifzEndAyah
-        },
-        revision: {
-            surah: revisionSurah,
-            ayahRange: revisionAyahRange,
-            startAyah: revisionStartAyah,
-            endAyah: revisionEndAyah
-        },
+        hifz: processedHifzItems,
+        revision: processedRevisionItems,
         score: score
     });
+    
+    // Also add to hifz and revision arrays for dropdown population
+    if (!sampleData.content[targetUser].hifz) {
+        sampleData.content[targetUser].hifz = [];
+    }
+    if (!sampleData.content[targetUser].revision) {
+        sampleData.content[targetUser].revision = [];
+    }
+    
+    // Add new hifz items to the hifz array (avoid duplicates)
+    processedHifzItems.forEach(newItem => {
+        const exists = sampleData.content[targetUser].hifz.some(existingItem => 
+            existingItem.surah === newItem.surah && existingItem.ayahRange === newItem.ayahRange
+        );
+        if (!exists) {
+            sampleData.content[targetUser].hifz.push(newItem);
+        }
+    });
+    
+    // Add new revision items to the revision array (avoid duplicates)
+    processedRevisionItems.forEach(newItem => {
+        const exists = sampleData.content[targetUser].revision.some(existingItem => 
+            existingItem.surah === newItem.surah && existingItem.ayahRange === newItem.ayahRange
+        );
+        if (!exists) {
+            sampleData.content[targetUser].revision.push(newItem);
+        }
+    });
+    
+    console.log('Updated content for student:', targetUser);
+    console.log('Hifz items:', sampleData.content[targetUser].hifz);
+    console.log('Revision items:', sampleData.content[targetUser].revision);
     
     // Reload content
     loadStudentContent();
@@ -3133,9 +4260,81 @@ function handleAddSession(event) {
     
     // Close modal and reset form
     closeModal('addSessionModal');
-    document.getElementById('addSessionForm').reset();
+    resetSessionForm();
     
     console.log(getTranslation('notification.session_added'), 'success');
+}
+
+// Reset session form to initial state
+function resetSessionForm() {
+    const form = document.getElementById('addSessionForm');
+    form.reset();
+    
+    // Reset hifz items to single row
+    const hifzContainer = document.getElementById('hifzItemsContainer');
+    hifzContainer.innerHTML = `
+        <div class="session-item-row">
+            <select class="session-hifz-surah" required onchange="toggleHifzAddButton(this)">
+                <option value="">Select Hifz Item</option>
+            </select>
+            <button type="button" class="btn btn-small btn-secondary" onclick="addHifzItem()" style="display: none;">+</button>
+        </div>
+    `;
+    
+    // Reset revision items to single row
+    const revisionContainer = document.getElementById('revisionItemsContainer');
+    revisionContainer.innerHTML = `
+        <div class="session-item-row">
+            <select class="session-revision-surah" required onchange="toggleRevisionAddButton(this)">
+                <option value="">Select Revision Item</option>
+            </select>
+            <button type="button" class="btn btn-small btn-secondary" onclick="addRevisionItem()" style="display: none;">+</button>
+        </div>
+    `;
+    
+    // Populate the selects with surah options
+    const hifzSelect = hifzContainer.querySelector('.session-hifz-surah');
+    const revisionSelect = revisionContainer.querySelector('.session-revision-surah');
+    
+    updateSurahOptions(hifzSelect);
+    updateSurahOptions(revisionSelect);
+    
+    // Add event listeners to the reset selects
+    if (hifzSelect) {
+        hifzSelect.addEventListener('click', function(event) {
+            if (event.target.options.length <= 1) {
+                console.log('Reset hifz dropdown clicked, populating...');
+                populateSessionContentOptions(event.target);
+            }
+        });
+        hifzSelect.addEventListener('focus', function(event) {
+            if (event.target.options.length <= 1) {
+                console.log('Reset hifz dropdown focused, populating...');
+                populateSessionContentOptions(event.target);
+            }
+        });
+    }
+    
+    if (revisionSelect) {
+        revisionSelect.addEventListener('click', function(event) {
+            if (event.target.options.length <= 1) {
+                console.log('Reset revision dropdown clicked, populating...');
+                populateSessionContentOptions(event.target);
+            }
+        });
+        revisionSelect.addEventListener('focus', function(event) {
+            if (event.target.options.length <= 1) {
+                console.log('Reset revision dropdown focused, populating...');
+                populateSessionContentOptions(event.target);
+            }
+        });
+    }
+    
+    // Populate immediately if content is available
+    if (Object.keys(sampleData.content).length > 0) {
+        if (hifzSelect) populateSessionContentOptions(hifzSelect);
+        if (revisionSelect) populateSessionContentOptions(revisionSelect);
+    }
 }
 
 // Handle logout function
@@ -3158,6 +4357,9 @@ function handleLogout() {
     currentUser = null;
     currentUserType = null;
     currentTeacher = null;
+    
+    // Hide options button on logout
+    updateOptionsButtonVisibility();
     
     // Reset language to default
     setLanguage('en');
@@ -4019,14 +5221,64 @@ function initializeDropdowns() {
 
 // Firebase sync functions
 async function syncDeleteStudentToFirebase(studentId) {
+    console.log('=== SYNC DELETE TO FIREBASE ===');
+    console.log('Firebase service exists:', !!window.firebaseService);
+    console.log('Firebase service initialized:', window.firebaseService?.initialized);
+    
     if (window.firebaseService && window.firebaseService.initialized) {
         try {
+            console.log('Attempting to delete student from Firebase:', studentId);
             await window.firebaseService.deleteStudent(studentId);
             console.log('Student deleted from Firebase:', studentId);
         } catch (error) {
             console.error('Error deleting student from Firebase:', error);
         }
+    } else {
+        console.log('Firebase service not available for deletion');
     }
+}
+
+async function deleteStudentContentFromFirebase(studentId) {
+    console.log('=== DELETING STUDENT CONTENT FROM FIREBASE ===');
+    console.log('Student ID:', studentId);
+    
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            // Delete content from Firebase
+            await window.firebaseService.deleteStudentContent(studentId);
+            console.log('Student content deleted from Firebase:', studentId);
+        } catch (error) {
+            console.error('Error deleting student content from Firebase:', error);
+        }
+    } else {
+        console.log('Firebase service not available for content deletion');
+    }
+}
+
+async function verifyUserExistsInFirebase(userId, userType) {
+    console.log('=== VERIFYING USER EXISTS IN FIREBASE ===');
+    console.log('User ID:', userId, 'Type:', userType);
+    
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            if (userType === 'student') {
+                const student = await window.firebaseService.getStudent(userId);
+                return student !== null;
+            } else if (userType === 'teacher') {
+                const teacher = await window.firebaseService.getTeacher(userId);
+                return teacher !== null;
+            } else if (userType === 'admin') {
+                // Admin always exists (ADMINYNG9)
+                return userId === 'ADMINYNG9';
+            }
+        } catch (error) {
+            console.error('Error verifying user in Firebase:', error);
+            return false;
+        }
+    }
+    
+    // If Firebase not available, allow login (fallback)
+    return true;
 }
 
 async function syncCreateStudentToFirebase(studentData) {
@@ -4123,14 +5375,26 @@ async function saveAllDataToStorage() {
         // Save to Firebase if available
         if (window.firebaseService && window.firebaseService.initialized) {
             try {
+                console.log('=== SAVING TO FIREBASE ===');
+                console.log('Students to save:', Object.keys(sampleData.students));
+                console.log('Teachers to save:', Object.keys(sampleData.teachers));
+                
                 // Save students
                 for (const [id, studentData] of Object.entries(sampleData.students)) {
+                    console.log('Saving student to Firebase:', id, studentData);
                     await window.firebaseService.createStudent(studentData);
                 }
                 
                 // Save teachers
                 for (const [id, teacherData] of Object.entries(sampleData.teachers)) {
+                    console.log('Saving teacher to Firebase:', id, teacherData);
                     await window.firebaseService.createTeacher(teacherData);
+                }
+                
+                // Save content
+                for (const [id, contentData] of Object.entries(sampleData.content)) {
+                    console.log('Saving content to Firebase:', id, contentData);
+                    await window.firebaseService.saveContent(id, contentData);
                 }
         
         console.log('All data saved to Firebase:', sampleData);
@@ -4145,6 +5409,7 @@ async function saveAllDataToStorage() {
             }
         } else {
             console.log('Firebase not available, data not saved');
+            console.log('Firebase service:', window.firebaseService);
         }
     } catch (e) {
         console.error('Error saving data:', e);
@@ -4157,16 +5422,26 @@ async function saveAllDataToStorage() {
 // Load data from Firebase
 async function loadDataFromStorage() {
     try {
+        console.log('=== LOADING DATA FROM STORAGE ===');
+        console.log('Firebase service exists:', !!window.firebaseService);
+        console.log('Firebase service initialized:', window.firebaseService?.initialized);
+        
         // Clear any existing data to ensure clean state
         sampleData.students = {};
         sampleData.teachers = {};
+        sampleData.content = {};
         
-        // Load from Firebase only
-        if (window.firebaseService && window.firebaseService.initialized) {
+        // Load from Firebase only (unless data was just cleared)
+        if (!dataJustCleared && window.firebaseService && window.firebaseService.initialized) {
             try {
                 console.log('Loading data from Firebase...');
                 const students = await window.firebaseService.getAllStudents();
                 const teachers = await window.firebaseService.getAllTeachers();
+                const content = await window.firebaseService.getAllContent();
+                
+                console.log('Raw students from Firebase:', students);
+                console.log('Raw teachers from Firebase:', teachers);
+                console.log('Raw content from Firebase:', content);
                 
                 if (students && Object.keys(students).length > 0) {
                     console.log('Loading students from Firebase:', Object.keys(students).length);
@@ -4176,16 +5451,25 @@ async function loadDataFromStorage() {
                     console.log('Loading teachers from Firebase:', Object.keys(teachers).length);
                     sampleData.teachers = teachers;
                 }
+                if (content && Object.keys(content).length > 0) {
+                    console.log('Loading content from Firebase:', Object.keys(content).length);
+                    sampleData.content = content;
+                }
             
             console.log('Data loaded from Firebase:', sampleData);
             console.log('Students after Firebase load:', Object.keys(sampleData.students));
             console.log('Teachers after Firebase load:', Object.keys(sampleData.teachers));
+            console.log('Content after Firebase load:', Object.keys(sampleData.content));
             } catch (firebaseError) {
                 console.error('Error loading from Firebase:', firebaseError);
                 console.log('Firebase error, using empty data');
             }
+        } else if (dataJustCleared) {
+            console.log('Data was just cleared, skipping Firebase reload');
+            dataJustCleared = false; // Reset flag
         } else {
             console.log('Firebase not available, using empty data');
+            console.log('Firebase service:', window.firebaseService);
         }
     } catch (e) {
         console.error('Error loading data:', e);
@@ -4212,8 +5496,15 @@ function showAdminDashboard() {
     }
     
     // Hide all content cards
-    document.querySelector('.top-cards').style.display = 'none';
-    document.querySelector('.past-sessions-card').style.display = 'none';
+    const topCards = document.querySelector('.top-cards');
+    const pastSessionsCard = document.querySelector('.past-sessions-card');
+    
+    if (topCards) {
+        topCards.style.display = 'none';
+    }
+    if (pastSessionsCard) {
+        pastSessionsCard.style.display = 'none';
+    }
     
     // Show admin content
     const adminContent = document.createElement('div');
@@ -4277,13 +5568,17 @@ function showAdminDashboard() {
 // Show create account modal
 function showCreateAccountModal() {
     const modal = document.getElementById('createAccountModal');
-    modal.style.display = 'block';
+    if (modal) {
+        modal.style.display = 'block';
+    }
 }
 
 // Show assign students modal
 function showAssignStudentsModal() {
     const modal = document.getElementById('assignStudentsModal');
-    modal.style.display = 'block';
+    if (modal) {
+        modal.style.display = 'block';
+    }
     
     // Populate teacher dropdown
     populateTeacherDropdown();
@@ -4295,14 +5590,22 @@ function showAssignStudentsModal() {
 // Show delete student modal
 function showDeleteStudentModal() {
     const modal = document.getElementById('deleteStudentModal');
-    modal.style.display = 'block';
+    if (modal) {
+        modal.style.display = 'block';
+    }
     
     // Populate student dropdown
     populateDeleteStudentDropdown();
     
     // Reset preview
-    document.getElementById('studentPreview').style.display = 'none';
-    document.getElementById('confirmDeleteBtn').disabled = true;
+    const studentPreview = document.getElementById('studentPreview');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (studentPreview) {
+        studentPreview.style.display = 'none';
+    }
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.disabled = true;
+    }
 }
 
 // Populate delete student dropdown
@@ -4324,8 +5627,14 @@ function populateDeleteStudentDropdown() {
         if (selectedStudentId) {
             showStudentPreview(selectedStudentId);
         } else {
-            document.getElementById('studentPreview').style.display = 'none';
-            document.getElementById('confirmDeleteBtn').disabled = true;
+            const studentPreview = document.getElementById('studentPreview');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            if (studentPreview) {
+                studentPreview.style.display = 'none';
+            }
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.disabled = true;
+            }
         }
     };
 }
@@ -4343,8 +5652,14 @@ function showStudentPreview(studentId) {
         `${content.hifz.length} hifz + ${content.revision.length} revision + ${content.sessions.length} sessions`;
     
     // Show preview and enable delete button
-    document.getElementById('studentPreview').style.display = 'block';
-    document.getElementById('confirmDeleteBtn').disabled = false;
+    const studentPreview = document.getElementById('studentPreview');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (studentPreview) {
+        studentPreview.style.display = 'block';
+    }
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.disabled = false;
+    }
 }
 
 // Confirm delete student
@@ -4377,44 +5692,63 @@ function confirmDeleteStudent() {
         </div>
     `;
     
-    showConfirmationModal('Delete Student', confirmContent, () => {
-        // Remove student from data
-        delete sampleData.students[studentId];
-        delete sampleData.content[studentId];
+    showConfirmationModal('Delete Student', confirmContent, async () => {
+        console.log('=== DELETING STUDENT FROM FIREBASE ===');
+        console.log('Student ID to delete:', studentId);
+        console.log('Firebase service initialized:', window.firebaseService?.initialized);
         
-        // Remove from teacher assignments
-        Object.keys(sampleData.teachers).forEach(teacherId => {
-            const teacher = sampleData.teachers[teacherId];
-            if (teacher.students) {
-                teacher.students = teacher.students.filter(id => id !== studentId);
+        // Show loading screen
+        showLoading('Deleting student...');
+        
+        try {
+            // Use complete database clear for thorough deletion
+            console.log('Using complete database clear for student deletion...');
+            await clearCompleteDatabase();
+            
+            // Recreate admin account if it existed
+            if (sampleData.admin) {
+                const adminData = sampleData.admin;
+                sampleData.admin = adminData;
+                localStorage.setItem('sampleData', JSON.stringify(sampleData));
+                console.log('Admin account restored after clear');
             }
-        });
-        
-        // Sync to Firebase
-        syncDeleteStudentToFirebase(studentId);
-        
-        // Close modals
-        closeModal('deleteStudentModal');
-        closeModal('confirmationModal');
-        
-        // Refresh admin dashboard
-        showAdminDashboard();
-        
-        console.log(`Student ${student.name} deleted successfully!`, 'success');
+            
+            // Close modals
+            closeModal('deleteStudentModal');
+            closeModal('confirmationModal');
+            
+            // Refresh admin dashboard
+            showAdminDashboard();
+            
+            console.log(`Student ${student.name} deleted successfully!`, 'success');
+        } catch (error) {
+            console.error('Error deleting student:', error);
+            alert('Error deleting student. Please try again.');
+        } finally {
+            hideLoading();
+        }
     });
 }
 
 // Show delete teacher modal
 function showDeleteTeacherModal() {
     const modal = document.getElementById('deleteTeacherModal');
-    modal.style.display = 'block';
+    if (modal) {
+        modal.style.display = 'block';
+    }
     
     // Populate teacher dropdown
     populateDeleteTeacherDropdown();
     
     // Reset preview
-    document.getElementById('teacherPreview').style.display = 'none';
-    document.getElementById('confirmDeleteTeacherBtn').disabled = true;
+    const teacherPreview = document.getElementById('teacherPreview');
+    const confirmDeleteTeacherBtn = document.getElementById('confirmDeleteTeacherBtn');
+    if (teacherPreview) {
+        teacherPreview.style.display = 'none';
+    }
+    if (confirmDeleteTeacherBtn) {
+        confirmDeleteTeacherBtn.disabled = true;
+    }
 }
 
 // Populate delete teacher dropdown
@@ -4436,8 +5770,14 @@ function populateDeleteTeacherDropdown() {
         if (selectedTeacherId) {
             showTeacherPreview(selectedTeacherId);
         } else {
-            document.getElementById('teacherPreview').style.display = 'none';
-            document.getElementById('confirmDeleteTeacherBtn').disabled = true;
+            const teacherPreview = document.getElementById('teacherPreview');
+            const confirmDeleteTeacherBtn = document.getElementById('confirmDeleteTeacherBtn');
+            if (teacherPreview) {
+                teacherPreview.style.display = 'none';
+            }
+            if (confirmDeleteTeacherBtn) {
+                confirmDeleteTeacherBtn.disabled = true;
+            }
         }
     };
 }
@@ -4463,8 +5803,14 @@ function showTeacherPreview(teacherId) {
     document.getElementById('previewTeacherImpact').textContent = impact;
     
     // Show preview and enable delete button
-    document.getElementById('teacherPreview').style.display = 'block';
-    document.getElementById('confirmDeleteTeacherBtn').disabled = false;
+    const teacherPreview = document.getElementById('teacherPreview');
+    const confirmDeleteTeacherBtn = document.getElementById('confirmDeleteTeacherBtn');
+    if (teacherPreview) {
+        teacherPreview.style.display = 'block';
+    }
+    if (confirmDeleteTeacherBtn) {
+        confirmDeleteTeacherBtn.disabled = false;
+    }
 }
 
 // Confirm delete teacher
@@ -4500,7 +5846,7 @@ function confirmDeleteTeacher() {
         </div>
     `;
     
-    showConfirmationModal('Delete Teacher', confirmContent, () => {
+    showConfirmationModal('Delete Teacher', confirmContent, async () => {
         // Remove teacher from data
         delete sampleData.teachers[teacherId];
         
@@ -4511,11 +5857,18 @@ function confirmDeleteTeacher() {
             }
         });
         
-        // Save changes
-        saveAllDataToStorage();
+        // Clear entire Firebase database when deleting teacher
+        console.log('=== DELETING TEACHER AND CLEARING FIREBASE ===');
+        console.log('Teacher ID to delete:', teacherId);
         
-        // Sync to Firebase
-        syncDeleteTeacherToFirebase(teacherId);
+        // Clear entire Firebase database
+        await clearFirebaseDatabase();
+        
+        // Clear local data completely
+        sampleData.students = {};
+        sampleData.teachers = {};
+        sampleData.content = {};
+        dataJustCleared = true; // Set flag to prevent reloading
         
         // Close modals
         closeModal('deleteTeacherModal');
@@ -4542,6 +5895,9 @@ function handleCreateAccount(event) {
         console.log('Please fill in all required fields', 'error');
         return;
     }
+    
+    // Show loading screen
+    showLoading('Creating account...');
     
     // Generate ID based on account type
     let newId;
@@ -4683,6 +6039,9 @@ function handleCreateAccount(event) {
     
     // Refresh admin dashboard
     showAdminDashboard();
+    
+    // Hide loading screen
+    hideLoading();
 }
 
 // Update class options based on selected grade
@@ -4874,22 +6233,35 @@ function deleteAllTeachers() {
         </div>
     `;
     
-    showConfirmationModal('Delete All Teachers', confirmContent, () => {
-        // Remove all teachers
-        sampleData.teachers = {};
-        
-        // Update all students to have no teacher
-        Object.keys(sampleData.students).forEach(studentId => {
-            sampleData.students[studentId].teacher = 'Unassigned';
-        });
-        
-        // Save to localStorage
-        saveAllDataToStorage();
-        
-        // Refresh admin dashboard
-        showAdminDashboard();
-        
-        console.log('All teachers deleted successfully!', 'success');
+    showConfirmationModal('Delete All Teachers', confirmContent, async () => {
+        try {
+            console.log('=== DELETING ALL TEACHERS ===');
+            
+            // Show loading screen
+            showLoading('Deleting all teachers...');
+            
+            // Use complete database clear for thorough deletion
+            console.log('Using complete database clear for all teachers deletion...');
+            await clearCompleteDatabase();
+            
+            // Recreate admin account if it existed
+            if (sampleData.admin) {
+                const adminData = sampleData.admin;
+                sampleData.admin = adminData;
+                localStorage.setItem('sampleData', JSON.stringify(sampleData));
+                console.log('Admin account restored after clear');
+            }
+            
+            // Refresh admin dashboard
+            showAdminDashboard();
+            
+            console.log('All teachers deleted successfully!', 'success');
+        } catch (error) {
+            console.error('Error deleting all teachers:', error);
+            alert('Error deleting teachers. Please try again.');
+        } finally {
+            hideLoading();
+        }
     });
 }
 
@@ -4917,25 +6289,35 @@ function deleteAllStudents() {
         </div>
     `;
     
-    showConfirmationModal('Delete All Students', confirmContent, () => {
-        // Remove all students
-        sampleData.students = {};
-        
-        // Remove all content
-        sampleData.content = {};
-        
-        // Clear teacher assignments
-        Object.keys(sampleData.teachers).forEach(teacherId => {
-            sampleData.teachers[teacherId].students = [];
-        });
-        
-        // Save to localStorage
-        saveAllDataToStorage();
-        
-        // Refresh admin dashboard
-        showAdminDashboard();
-        
-        console.log('All students deleted successfully!', 'success');
+    showConfirmationModal('Delete All Students', confirmContent, async () => {
+        try {
+            console.log('=== DELETING ALL STUDENTS ===');
+            
+            // Show loading screen
+            showLoading('Deleting all students...');
+            
+            // Use complete database clear for thorough deletion
+            console.log('Using complete database clear for all students deletion...');
+            await clearCompleteDatabase();
+            
+            // Recreate admin account if it existed
+            if (sampleData.admin) {
+                const adminData = sampleData.admin;
+                sampleData.admin = adminData;
+                localStorage.setItem('sampleData', JSON.stringify(sampleData));
+                console.log('Admin account restored after clear');
+            }
+            
+            // Refresh admin dashboard
+            showAdminDashboard();
+            
+            console.log('All students deleted successfully!', 'success');
+        } catch (error) {
+            console.error('Error deleting all students:', error);
+            alert('Error deleting students. Please try again.');
+        } finally {
+            hideLoading();
+        }
     });
 }
 
@@ -5036,6 +6418,7 @@ window.showLogoutConfirmation = showLogoutConfirmation;
 window.skipToDashboard = skipToDashboard;
 window.confirmLogout = confirmLogout;
 window.updateClassOptions = updateClassOptions;
+window.clearFirebaseDatabase = clearFirebaseDatabase;
 
 // Load all data from storage
 // Firebase-only data loading - localStorage removed
@@ -5043,6 +6426,70 @@ window.updateClassOptions = updateClassOptions;
 // Firebase-only data saving - localStorage removed
 
 // Duplicate DOMContentLoaded listener removed - using the one above
+
+// Logout confirmation function
+function confirmLogout() {
+    showLogoutConfirmation();
+}
+
+// Clear Firebase database (for testing)
+async function clearFirebaseDatabase() {
+    if (window.firebaseService && window.firebaseService.initialized) {
+        try {
+            console.log('Clearing Firebase database...');
+            
+            // Get all students and delete them
+            const students = await window.firebaseService.getAllStudents();
+            for (const studentId of Object.keys(students)) {
+                await window.firebaseService.deleteStudent(studentId);
+                console.log('Deleted student:', studentId);
+            }
+            
+            // Get all teachers and delete them
+            const teachers = await window.firebaseService.getAllTeachers();
+            for (const teacherId of Object.keys(teachers)) {
+                await window.firebaseService.deleteTeacher(teacherId);
+                console.log('Deleted teacher:', teacherId);
+            }
+            
+            console.log('Firebase database cleared!');
+        } catch (error) {
+            console.error('Error clearing Firebase database:', error);
+        }
+    }
+}
+
+// Helper function to control options button visibility based on user type
+function updateOptionsButtonVisibility() {
+    const optionsBtn = document.getElementById('testModalBtn');
+    if (!optionsBtn) return;
+    
+    if (currentUserType === 'teacher') {
+        optionsBtn.style.display = 'inline-block';
+    } else {
+        optionsBtn.style.display = 'none';
+    }
+}
+
+// Loading screen functions
+function showLoading(message = 'Loading...') {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.querySelector('.loading-text');
+    
+    if (loadingOverlay) {
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+        loadingOverlay.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
+}
 
 // Check for existing user session
 function checkExistingSession() {
@@ -5088,3 +6535,4 @@ function checkExistingSession() {
 
 // Set up all event listeners
 // Duplicate setupEventListeners function removed - using the one above
+

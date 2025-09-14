@@ -366,7 +366,6 @@
                             <option value="7">Grade 7</option>
                             <option value="8">Grade 8</option>
                             <option value="9">Grade 9</option>
-                            <option value="10">Grade 10</option>
                             <option value="Teacher">Teacher</option>
                         </select>
                     </div>
@@ -400,10 +399,6 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" name="teacherGrades" value="9">
                                 <span>Grade 9</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="10">
-                                <span>Grade 10</span>
                             </label>
                         </div>
                     </div>
@@ -453,9 +448,16 @@
     <script>
         // Initialize the signup manager when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing SignupManager...');
-            window.signupManager = new SignupManager();
-            console.log('SignupManager initialized:', window.signupManager);
+            console.log('DOM loaded, checking for existing SignupManager...');
+            
+            // Only initialize if not already initialized
+            if (!window.signupManager) {
+                console.log('Initializing SignupManager...');
+                window.signupManager = new SignupManager();
+                console.log('SignupManager initialized:', window.signupManager);
+            } else {
+                console.log('SignupManager already exists, skipping initialization');
+            }
             
             // Add language toggle functionality
             const languageToggle = document.getElementById('languageToggle');
