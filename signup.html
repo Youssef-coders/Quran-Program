@@ -45,42 +45,7 @@
             font-size: 16px;
         }
 
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
 
-        .auth-btn {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            background: transparent;
-            color: #667eea;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .auth-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .auth-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .form-section {
-            display: none;
-        }
-
-        .form-section.active {
-            display: block;
-        }
 
         .form-group {
             margin-bottom: 20px;
@@ -134,15 +99,25 @@
         }
 
         .back-link {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 20px;
+            padding: 12px 20px;
+            background: #f8f9fa;
             color: #667eea;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
         .back-link:hover {
-            text-decoration: underline;
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            text-decoration: none;
         }
 
         .success-message {
@@ -304,21 +279,6 @@
                 <p data-translate="auth.subtitle">Join the MRIS Quran memorization program</p>
             </div>
 
-            <div class="auth-buttons">
-                <button id="loginBtn" class="auth-btn active" data-translate="auth.login">Login</button>
-                <button id="signupBtn" class="auth-btn" data-translate="auth.signup">Sign Up</button>
-            </div>
-
-            <!-- Login Section -->
-            <div id="loginSection" class="form-section active">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <input type="text" id="userCode" data-translate-placeholder="login.placeholder" placeholder="Enter your unique code" required>
-                    </div>
-                    <button type="submit" class="submit-btn" data-translate="login.button">Login</button>
-                </form>
-            </div>
-
             <!-- Sign Up Section -->
             <div id="signupSection" class="form-section">
                 <!-- Error message removed - no more popups! -->
@@ -343,7 +303,6 @@
                         <select id="userType" name="userType" required>
                             <option value="" data-translate="signup.select_type">Select Type</option>
                             <option value="student" data-translate="signup.student">Student</option>
-                            <option value="teacher" data-translate="signup.teacher">Teacher</option>
                         </select>
                     </div>
 
@@ -377,38 +336,6 @@
                         </select>
                     </div>
 
-                    <div class="form-group" id="teacherGradesGroup" style="display: none;">
-                        <label data-translate="signup.teacher_grades">What grades do you teach?</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="5">
-                                <span>Grade 5</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="6">
-                                <span>Grade 6</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="7">
-                                <span>Grade 7</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="8">
-                                <span>Grade 8</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="teacherGrades" value="9">
-                                <span>Grade 9</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group" id="teacherClassesGroup" style="display: none;">
-                        <label data-translate="signup.teacher_classes">What classes do you teach?</label>
-                        <div class="checkbox-group" id="teacherClassesCheckboxes">
-                            <p data-translate="signup.select_grades_first">Select grades first</p>
-                    </div>
-                    </div>
 
 
 
@@ -416,7 +343,7 @@
                 </form>
             </div>
 
-            <a href="index.html" class="back-link" data-translate="auth.back_to_main">← Back to Main</a>
+            <a href="index.html" class="back-link" data-translate="auth.back_to_main">← Back to Login</a>
         </div>
     </div>
 
@@ -459,16 +386,7 @@
                 console.log('SignupManager already exists, skipping initialization');
             }
             
-            // Add language toggle functionality
-            const languageToggle = document.getElementById('languageToggle');
-            if (languageToggle) {
-                languageToggle.addEventListener('click', function() {
-                    if (window.signupManager) {
-                        window.signupManager.toggleLanguage();
-                    }
-                });
-                console.log('Language toggle event listener added');
-            }
+            // Language toggle functionality is handled by signup.js
         });
         
         function updateClassOptions() {

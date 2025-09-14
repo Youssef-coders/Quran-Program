@@ -777,8 +777,8 @@ const translations = {
         'header.editing_student': 'Editing Student',
         
         // Content
-        'content.next_hifz': 'Next Session\'s Hifz',
-        'content.next_revision': 'Next Session\'s Revision',
+        'content.next_content': 'Next Session\'s Content',
+        'content.next_recitation': 'Recitation and Reading',
         'content.past_sessions': 'Past Sessions',
         'content.no_content': 'No content assigned',
         'content.no_sessions': 'No sessions recorded',
@@ -1000,8 +1000,8 @@ const translations = {
         'header.editing_student': 'تعديل الطالب',
         
         // Content
-        'content.next_hifz': 'حفظ الجلسة القادمة',
-        'content.next_revision': 'مراجعة الجلسة القادمة',
+        'content.next_content': 'مقاطع الجلسة القادمة',
+        'content.next_recitation': 'التسميع و التلاوة',
         'content.past_sessions': 'الجلسات السابقة',
         'content.no_content': 'لا يوجد محتوى مخصص',
         'content.no_sessions': 'لا توجد جلسات مسجلة',
@@ -1326,6 +1326,10 @@ let currentTeacher = null; // Track the original teacher when editing students
 let editingStudent = null; // Track which student teacher is editing
 let currentLanguage = 'en'; // Current language: 'en' or 'ar'
 
+// Undo system
+let actionHistory = [];
+const MAX_HISTORY = 50; // Limit history size
+
 // DOM elements
 const loginSection = document.getElementById('loginSection');
 const dashboardSection = document.getElementById('dashboardSection');
@@ -1383,9 +1387,6 @@ function setLanguage(lang) {
                 loadStudentContent(selectedStudent);
             } else {
                 // Show empty state with translated text
-                const hifzContent = document.getElementById('hifzContent');
-                const revisionContent = document.getElementById('revisionContent');
-                const sessionsList = document.getElementById('sessionsList');
                 
                 if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
                 if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
@@ -1422,8 +1423,8 @@ function updateUITexts() {
     const revisionCard = document.querySelector('.revision-card h3');
     const sessionsCard = document.querySelector('.past-sessions-card h3');
     
-    if (hifzCard) hifzCard.textContent = getTranslation('content.next_hifz');
-    if (revisionCard) revisionCard.textContent = getTranslation('content.next_revision');
+    if (hifzCard) hifzCard.textContent = getTranslation('content.next_content');
+    if (revisionCard) revisionCard.textContent = getTranslation('content.next_recitation');
     if (sessionsCard) sessionsCard.textContent = getTranslation('content.past_sessions');
     
     // Update elements with data-translate attributes
@@ -1730,29 +1731,21 @@ function getRealDashboardContent(studentId) {
         return null;
     }
     
-    // First, try to get content from the dashboard cards by reading their HTML
-    const hifzContent = extractContentFromCard('hifz');
-    const revisionContent = extractContentFromCard('revision');
-    
-    console.log('Hifz content from cards:', hifzContent);
-    console.log('Revision content from cards:', revisionContent);
-    
-    // If we found content in the cards, use that
-    if (hifzContent.length > 0 || revisionContent.length > 0) {
+    // Get content directly from sample data to avoid recursive calls
+    if (sampleData.content && sampleData.content[studentId]) {
+        const content = sampleData.content[studentId];
+        console.log('Content from sample data:', content);
         return {
-            hifz: hifzContent,
-            revision: revisionContent
+            hifz: content.hifz || [],
+            revision: content.revision || []
         };
     }
     
-    // Fallback to sampleData if cards are empty
-    console.log('No content found in cards, falling back to sampleData');
-    if (sampleData.content && sampleData.content[studentId]) {
-        return sampleData.content[studentId];
-    }
-    
-    console.log('No content found anywhere for student:', studentId);
-    return null;
+    console.log('No content found for student:', studentId);
+    return {
+        hifz: [],
+        revision: []
+    };
 }
 
 function extractContentFromCard(type) {
@@ -2983,7 +2976,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     });
     
-    setupEventListeners(window.addHifzBtn, window.addRevisionBtn, window.addSessionBtn);
+    setupEventListeners();
     
     // Test: Add a simple click handler to see if events work at all
     const testBtn = document.getElementById('loginBtn');
@@ -3005,7 +2998,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Setup event listeners
-function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
+function setupEventListeners() {
     console.log('=== SETTING UP EVENT LISTENERS ===');
     
     // Login form
@@ -3015,6 +3008,7 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
         console.log('Login form found, adding event listener');
         loginForm.addEventListener('submit', function(e) {
             console.log('Form submit event triggered');
+            e.preventDefault(); // Prevent default form submission
             handleLogin(e);
         });
         console.log('Login form event listener added');
@@ -3054,7 +3048,88 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
         console.error('User code input not found');
     }
     
+    // Dashboard buttons (only set up if they exist)
+    setupDashboardButtons();
+    
+    // Ctrl+Z keyboard listener for undo
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'z') {
+            e.preventDefault();
+            console.log('Ctrl+Z pressed - attempting undo');
+            undoLastAction();
+        }
+    });
+}
+
+// Setup dashboard-specific event listeners
+function setupDashboardButtons() {
+    // Add Hifz button
+    const addHifzBtn = document.getElementById('addHifzBtn');
+    if (addHifzBtn) {
+        // Desktop click event
+        addHifzBtn.addEventListener('click', () => {
+            console.log('Add Hifz button clicked!');
+            console.log('Modal element:', document.getElementById('addHifzModal'));
+            showModal('addHifzModal');
+        });
+        
+        // Mobile touch event
+        addHifzBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Hifz button touched!');
+            console.log('Modal element:', document.getElementById('addHifzModal'));
+            showModal('addHifzModal');
+        });
+        
+        console.log('Add Hifz button event listeners added (click + touch)');
+    } else {
+        console.error('Add Hifz button not found!');
+    }
+    
+    // Add Revision button
+    const addRevisionBtn = document.getElementById('addRevisionBtn');
+    if (addRevisionBtn) {
+        // Desktop click event
+        addRevisionBtn.addEventListener('click', () => {
+            console.log('Add Revision button clicked!');
+            showModal('addRevisionModal');
+        });
+        
+        // Mobile touch event
+        addRevisionBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Revision button touched!');
+            showModal('addRevisionModal');
+        });
+        
+        console.log('Add Revision button event listeners added (click + touch)');
+    } else {
+        console.error('Add Revision button not found!');
+    }
+    
+    // Add Session button
+    const addSessionBtn = document.getElementById('addSessionBtn');
+    if (addSessionBtn) {
+        // Desktop click event
+        addSessionBtn.addEventListener('click', () => {
+            console.log('Add Session button clicked!');
+            showModal('addSessionModal');
+        });
+        
+        // Mobile touch event
+        addSessionBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            console.log('Add Session button touched!');
+            showModal('addSessionModal');
+        });
+        
+        console.log('Add Session button event listeners added (click + touch)');
+    } else {
+        console.error('Add Session button not found!');
+    }
+    
     // Logout button - show confirmation modal first
+    const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -3109,65 +3184,7 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
         });
     }
     
-    // Add content buttons with mobile touch support
-    if (addHifzBtn) {
-        // Desktop click event
-        addHifzBtn.addEventListener('click', () => {
-            console.log('Add Hifz button clicked!');
-            console.log('Modal element:', document.getElementById('addHifzModal'));
-            showModal('addHifzModal');
-        });
-        
-        // Mobile touch event
-        addHifzBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent double-firing
-            console.log('Add Hifz button touched!');
-            console.log('Modal element:', document.getElementById('addHifzModal'));
-            showModal('addHifzModal');
-        });
-        
-        console.log('Add Hifz button event listeners added (click + touch)');
-    } else {
-        console.error('Add Hifz button not found!');
-    }
-    
-    if (addRevisionBtn) {
-        // Desktop click event
-        addRevisionBtn.addEventListener('click', () => {
-            console.log('Add Revision button clicked!');
-            showModal('addRevisionModal');
-        });
-        
-        // Mobile touch event
-        addRevisionBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent double-firing
-            console.log('Add Revision button touched!');
-            showModal('addRevisionModal');
-        });
-        
-        console.log('Add Revision button event listeners added (click + touch)');
-    } else {
-        console.error('Add Revision button not found!');
-    }
-    
-    if (addSessionBtn) {
-        // Desktop click event
-        addSessionBtn.addEventListener('click', () => {
-            console.log('Add Session button clicked!');
-            showModal('addSessionModal');
-        });
-        
-        // Mobile touch event
-        addSessionBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent double-firing
-            console.log('Add Session button touched!');
-            showModal('addSessionModal');
-        });
-        
-        console.log('Add Session button event listeners added (click + touch)');
-    } else {
-        console.error('Add Session button not found!');
-    }
+    // Dashboard buttons are now handled in setupDashboardButtons()
     
     // Modal close buttons
     document.querySelectorAll('.modal-close').forEach(closeBtn => {
@@ -3185,6 +3202,11 @@ function setupEventListeners(addHifzBtn, addRevisionBtn, addSessionBtn) {
     // Close modals when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {
+            // Check if modal should not be closed (e.g., during login flow)
+            if (event.target.hasAttribute('data-prevent-close')) {
+                console.log('Outside click on modal prevented due to data-prevent-close attribute');
+                return;
+            }
             closeModal(event.target.id);
         }
     });
@@ -3366,6 +3388,9 @@ function handleLogin(event) {
 function loginSuccess(user) {
     console.log('Login successful for user:', user.name, 'Type:', currentUserType);
     
+    // Set flag to prevent checkExistingSession from interfering
+    window.justLoggedIn = true;
+    
     // Hide loading screen
     hideLoading();
     
@@ -3388,9 +3413,13 @@ function loginSuccess(user) {
     // Hide login, show dashboard
     if (loginSection) {
         loginSection.style.display = 'none';
+        console.log('Login section hidden');
     }
     if (dashboardSection) {
         dashboardSection.style.display = 'block';
+        console.log('Dashboard section shown');
+        console.log('Dashboard section visibility:', dashboardSection.style.display);
+        console.log('Dashboard section computed style:', window.getComputedStyle(dashboardSection).display);
     }
     
     // Add a small delay to ensure DOM is ready
@@ -3446,29 +3475,18 @@ function loginSuccess(user) {
         // Add teacher-mode class to body
         document.body.classList.add('teacher-mode');
         
+        // Ensure cards are properly reset for teacher view
+        resetCardLayout();
+        
         // Load content to show teacher options
         console.log('About to call loadStudentContent for teacher');
         loadStudentContent();
         
-        // Also directly show teacher options modal
+        // Show teacher options modal after a short delay
         setTimeout(() => {
-            console.log('Direct call to showTeacherOptions from teacher login');
-            console.log('Current user type:', currentUserType);
-            console.log('Current user:', currentUser);
-            
-            // Force show the modal
-            const modal = document.getElementById('teacherOptionsModal');
-            console.log('Modal element:', modal);
-            if (modal) {
-                modal.style.display = 'block';
-                modal.classList.add('show');
-                modal.style.visibility = 'visible';
-                modal.style.opacity = '1';
-                modal.style.zIndex = '2000';
-                console.log('Modal should now be visible');
-            } else {
-                console.error('teacherOptionsModal not found!');
-            }
+            console.log('Showing teacher options modal from teacher login');
+            showLoading('Loading teacher options...');
+            showTeacherOptions(true); // Pass true to indicate this is from login
         }, 1000);
     }
     
@@ -3486,15 +3504,36 @@ function loginSuccess(user) {
 
 // Load student content
 function loadStudentContent() {
+    // Track how many times this function is called
+    if (!window.loadStudentContentCallCount) {
+        window.loadStudentContentCallCount = 0;
+    }
+    window.loadStudentContentCallCount++;
+    
+    console.log('=== loadStudentContent called ===');
+    console.log('Call count:', window.loadStudentContentCallCount);
+    console.log('Current user type:', currentUserType);
+    console.log('Current user:', currentUser);
+    
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
     
     // If not a student or teacher, return
-    if (currentUserType !== 'student' && currentUserType !== 'teacher') return;
+    if (currentUserType !== 'student' && currentUserType !== 'teacher') {
+        console.log('Not a student or teacher, returning early');
+        return;
+    }
     
     console.log('Loading content for targetUser:', targetUser);
     console.log('Current user type:', currentUserType);
     console.log('Editing student:', editingStudent);
+    
+    // Check if dashboard containers exist
+    console.log('Dashboard containers found:', {
+        hifzContent: !!hifzContent,
+        revisionContent: !!revisionContent,
+        sessionsList: !!sessionsList
+    });
     
     // For teachers without a selected student, show teacher options
     if (currentUserType === 'teacher' && !targetUser) {
@@ -3509,16 +3548,14 @@ function loadStudentContent() {
             editingHeader.remove();
         }
         
-        // Clear all containers
-        if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
-        if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
-        if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+        // Show pick student message
+        showPickStudentMessage();
         
         // Show teacher options modal
         console.log('About to call showTeacherOptions in 500ms');
         setTimeout(() => {
             console.log('Calling showTeacherOptions now');
-            showTeacherOptions();
+            showTeacherOptions(true); // Pass true to indicate this is from login
         }, 500); // Small delay to ensure UI is ready
         
         return;
@@ -3539,42 +3576,42 @@ function loadStudentContent() {
     console.log('Revision entries:', userData.revision);
     console.log('Sessions entries:', userData.sessions);
     
-    // Get container references
-    const hifzContent = document.getElementById('hifzContent');
-    const revisionContent = document.getElementById('revisionContent');
-    const sessionsList = document.getElementById('sessionsList');
+    // Get container references dynamically (in case global variables are null)
+    const hifzContentElement = document.getElementById('hifzContent');
+    const revisionContentElement = document.getElementById('revisionContent');
+    const sessionsListElement = document.getElementById('sessionsList');
     
     console.log('Container references:', {
-        hifzContent: hifzContent,
-        revisionContent: revisionContent,
-        sessionsList: sessionsList
+        hifzContent: hifzContentElement,
+        revisionContent: revisionContentElement,
+        sessionsList: sessionsListElement
     });
     
     // Clear all containers first to prevent mixing
-    if (hifzContent) hifzContent.innerHTML = '';
-    if (revisionContent) revisionContent.innerHTML = '';
-    if (sessionsList) sessionsList.innerHTML = '';
+    if (hifzContentElement) hifzContentElement.innerHTML = '';
+    if (revisionContentElement) revisionContentElement.innerHTML = '';
+    if (sessionsListElement) sessionsListElement.innerHTML = '';
     
     // Load Hifz content
-    console.log('Loading hifz content, container:', hifzContent);
-    if (hifzContent) {
-    loadContentItems(hifzContent, userData.hifz, 'hifz');
+    console.log('Loading hifz content, container:', hifzContentElement);
+    if (hifzContentElement) {
+        loadContentItems(hifzContentElement, userData.hifz, 'hifz');
     } else {
         console.error('hifzContent container not found!');
     }
     
     // Load Revision content
-    console.log('Loading revision content, container:', revisionContent);
-    if (revisionContent) {
-    loadContentItems(revisionContent, userData.revision, 'revision');
+    console.log('Loading revision content, container:', revisionContentElement);
+    if (revisionContentElement) {
+        loadContentItems(revisionContentElement, userData.revision, 'revision');
     } else {
         console.error('revisionContent container not found!');
     }
     
     // Load Past Sessions
-    console.log('Loading sessions content, container:', sessionsList);
-    if (sessionsList) {
-    loadSessionsList(userData.sessions);
+    console.log('Loading sessions content, container:', sessionsListElement);
+    if (sessionsListElement) {
+        loadSessionsList(userData.sessions);
     } else {
         console.error('sessionsList container not found!');
     }
@@ -3601,7 +3638,7 @@ function loadContentItems(container, items, type) {
     console.log(`Items to load:`, items);
     
     if (!items || items.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.no_content')}</p>`;
+        container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">N/A</p>`;
         return;
     }
     
@@ -3613,17 +3650,26 @@ function loadContentItems(container, items, type) {
         const isArabic = currentLanguage === 'ar';
         const ayahRange = formatContentItem(item, isArabic);
         
-        // Only show delete button for teachers
+        // Show different buttons based on content type and user type
         if (currentUserType === 'teacher') {
-            contentItem.innerHTML = `
-                <h4>${ayahRange}</h4>
-                <button class="delete-btn teacher-delete-btn" onclick="deleteContentItem('${type}', ${index})" style="opacity: 1 !important;">−</button>
-            `;
-            
-            // Add double-click event for deletion (teachers only)
-            contentItem.addEventListener('dblclick', () => {
-                showDeleteButton(contentItem);
-            });
+            if (type === 'hifz') {
+                // For hifz content, show arrow button to move to revision
+                contentItem.innerHTML = `
+                    <button class="move-btn teacher-move-btn" onclick="moveContentToRevision('${type}', ${index})" style="opacity: 1 !important;">→</button>
+                    <h4>${ayahRange}</h4>
+                `;
+            } else {
+                // For revision content, show delete button
+                contentItem.innerHTML = `
+                    <button class="delete-btn teacher-delete-btn" onclick="deleteContentItem('${type}', ${index})" style="opacity: 1 !important;">−</button>
+                    <h4>${ayahRange}</h4>
+                `;
+                
+                // Add double-click event for deletion (teachers only)
+                contentItem.addEventListener('dblclick', () => {
+                    showDeleteButton(contentItem);
+                });
+            }
         } else {
             contentItem.innerHTML = `
                 <h4>${ayahRange}</h4>
@@ -3636,23 +3682,75 @@ function loadContentItems(container, items, type) {
     console.log(`Loaded ${items.length} ${type} items`);
 }
 
+// Move content from hifz to revision
+function moveContentToRevision(type, index) {
+    console.log('=== MOVE CONTENT TO REVISION ===');
+    console.log('Type:', type, 'Index:', index);
+    
+    if (type !== 'hifz') {
+        console.log('Can only move hifz content to revision');
+        return;
+    }
+    
+    const targetUser = getCurrentStudentId();
+    if (!targetUser) {
+        console.log('No student selected');
+        return;
+    }
+    
+    // Get the hifz item
+    const hifzItem = sampleData.content[targetUser].hifz[index];
+    if (!hifzItem) {
+        console.log('Hifz item not found at index:', index);
+        return;
+    }
+    
+    console.log('Moving hifz item to revision:', hifzItem);
+    
+    // Add to revision
+    if (!sampleData.content[targetUser].revision) {
+        sampleData.content[targetUser].revision = [];
+    }
+    sampleData.content[targetUser].revision.push(hifzItem);
+    
+    // Add to undo history
+    addToHistory({
+        type: 'move_to_revision',
+        targetUser: targetUser,
+        item: hifzItem,
+        hifzIndex: index,
+        revisionIndex: sampleData.content[targetUser].revision.length - 1
+    });
+    
+    // Remove from hifz
+    sampleData.content[targetUser].hifz.splice(index, 1);
+    
+    // Reload content to show changes
+    loadStudentContent();
+    
+    // Save changes to Firebase
+    saveAllDataToStorage();
+    
+    console.log('Content moved successfully');
+}
+
 // Load sessions list (assignment-style)
 function loadSessionsList(sessions) {
-    // Get container reference
-    const sessionsList = document.getElementById('sessionsList');
+    // Get container reference dynamically
+    const sessionsListElement = document.getElementById('sessionsList');
     
-    if (!sessionsList) {
+    if (!sessionsListElement) {
         console.error('sessionsList container not found!');
         return;
     }
     
     // Clear container first
-    sessionsList.innerHTML = '';
+    sessionsListElement.innerHTML = '';
     
     console.log('Loading sessions list:', sessions);
     
     if (!sessions || sessions.length === 0) {
-        sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.no_sessions')}</p>`;
+        sessionsListElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">N/A</p>`;
         return;
     }
     
@@ -3689,11 +3787,11 @@ function loadSessionsList(sessions) {
         if (currentUserType === 'teacher') {
             const dateDisplay = currentLanguage === 'ar' ? formatDateArabic(session.date) : formatDate(session.date);
             sessionItem.innerHTML = `
+                <button class="delete-btn teacher-delete-btn" onclick="deleteSession(${index})" style="opacity: 1 !important;">−</button>
                 <div class="session-date">${dateDisplay}</div>
                 <div class="session-hifz">${hifzDisplay}</div>
                 <div class="session-revision">${revisionDisplay}</div>
                 <div class="session-score ${scoreClass}">${session.score}</div>
-                <button class="delete-btn teacher-delete-btn" onclick="deleteSession(${index})" style="opacity: 1 !important;">−</button>
             `;
             
             // Add double-click event for deletion (teachers only)
@@ -3710,7 +3808,7 @@ function loadSessionsList(sessions) {
             `;
         }
         
-        sessionsList.appendChild(sessionItem);
+        sessionsListElement.appendChild(sessionItem);
     });
     
     console.log(`Loaded ${sessions.length} sessions`);
@@ -3739,6 +3837,17 @@ function deleteContentItem(type, index) {
             return;
         }
         
+        // Store item for undo before deleting
+        const deletedItem = sampleData.content[targetUser][type][index];
+        
+        // Add to undo history
+        addToHistory({
+            type: `delete_${type}`,
+            targetUser: targetUser,
+            index: index,
+            item: deletedItem
+        });
+        
         sampleData.content[targetUser][type].splice(index, 1);
         loadStudentContent();
         
@@ -3760,6 +3869,17 @@ function deleteSession(index) {
             console.log(getTranslation('notification.no_student_selected'), 'error');
             return;
         }
+        
+        // Store session for undo before deleting
+        const deletedSession = sampleData.content[targetUser].sessions[index];
+        
+        // Add to undo history
+        addToHistory({
+            type: 'delete_session',
+            targetUser: targetUser,
+            index: index,
+            item: deletedSession
+        });
         
         sampleData.content[targetUser].sessions.splice(index, 1);
         loadStudentContent();
@@ -3843,12 +3963,14 @@ function selectStudent(studentCode) {
     // Ensure teacher-mode class is on body
     document.body.classList.add('teacher-mode');
     
+    // Reset card layout to ensure proper display
+    resetCardLayout();
+    
     // Load student content
+    console.log('About to call loadStudentContent for student');
     loadStudentContent();
     
-    // Show add buttons for teachers - FORCE them to be visible
-    showTeacherControls();
-    
+    // Note: showTeacherControls() is called from loadStudentContent() when appropriate
     // Ensure buttons are properly set up
     ensureAddButtonsSetup();
 }
@@ -3861,6 +3983,13 @@ function showTeacherControls() {
     // Only show controls for teachers
     if (currentUserType !== 'teacher') {
         console.log('Not a teacher, hiding controls');
+        hideTeacherControls();
+        return;
+    }
+    
+    // Only show add buttons if a student is selected for editing
+    if (!editingStudent) {
+        console.log('No student selected for editing, hiding add buttons');
         hideTeacherControls();
         return;
     }
@@ -3926,7 +4055,7 @@ function ensureAddButtonsSetup() {
     // Set up event listeners if not already set up
     if (window.addHifzBtn && window.addRevisionBtn && window.addSessionBtn) {
         console.log('Setting up add button event listeners...');
-        setupEventListeners(window.addHifzBtn, window.addRevisionBtn, window.addSessionBtn);
+        setupEventListeners();
     } else {
         console.error('Cannot set up add buttons - buttons not found');
     }
@@ -3941,8 +4070,8 @@ function skipToDashboard() {
     // Clear editing state
     editingStudent = null;
     
-    // Show empty dashboard with add buttons visible
-    showTeacherControls();
+    // Hide add buttons since no student is selected
+    hideTeacherControls();
     
     // Ensure teacher-mode class is on body
     document.body.classList.add('teacher-mode');
@@ -4030,6 +4159,13 @@ function handleAddHifz(event) {
     
     sampleData.content[targetUser].hifz.push(newEntry);
     
+    // Add to undo history
+    addToHistory({
+        type: 'add_hifz',
+        targetUser: targetUser,
+        index: sampleData.content[targetUser].hifz.length - 1,
+        item: newEntry
+    });
     
     // Save data
     saveAllDataToStorage();
@@ -4037,6 +4173,9 @@ function handleAddHifz(event) {
     
     // Reload content
     console.log('Reloading student content...');
+    console.log('Current editingStudent:', editingStudent);
+    console.log('Current targetUser:', targetUser);
+    console.log('Content after adding:', sampleData.content[targetUser]);
     loadStudentContent();
     
     // Close modal and reset form
@@ -4095,6 +4234,14 @@ function handleAddRevision(event) {
     
     sampleData.content[targetUser].revision.push(newEntry);
     
+    // Add to undo history
+    addToHistory({
+        type: 'add_revision',
+        targetUser: targetUser,
+        index: sampleData.content[targetUser].revision.length - 1,
+        item: newEntry
+    });
+    
     console.log('Added revision entry:', newEntry);
     console.log('Total revision entries for', targetUser, ':', sampleData.content[targetUser].revision.length);
     
@@ -4115,10 +4262,13 @@ function handleAddRevision(event) {
 
 // Handle add session
 function handleAddSession(event) {
+    console.log('=== handleAddSession called ===');
     event.preventDefault();
     
     const date = document.getElementById('sessionDate').value;
     const score = document.getElementById('sessionScore').value;
+    
+    console.log('Session form submitted with date:', date, 'score:', score);
     
     // Collect all hifz items
     const hifzItems = [];
@@ -4166,8 +4316,8 @@ function handleAddSession(event) {
     console.log('Hifz items:', hifzItems);
     console.log('Revision items:', revisionItems);
     
-    if (!date || hifzItems.length === 0 || revisionItems.length === 0 || !score) {
-        console.log('Please fill in all required fields and add at least one hifz and revision item', 'error');
+    if (!date || !score) {
+        console.log('Please fill in all required fields (date and score)', 'error');
         return;
     }
     
@@ -4212,12 +4362,23 @@ function handleAddSession(event) {
         };
     });
     
-    // Add to sessions
-    sampleData.content[targetUser].sessions.push({
+    // Create new session object
+    const newSession = {
         date: date,
         hifz: processedHifzItems,
         revision: processedRevisionItems,
         score: score
+    };
+    
+    // Add to sessions
+    sampleData.content[targetUser].sessions.push(newSession);
+    
+    // Add to undo history
+    addToHistory({
+        type: 'add_session',
+        targetUser: targetUser,
+        index: sampleData.content[targetUser].sessions.length - 1,
+        item: newSession
     });
     
     // Also add to hifz and revision arrays for dropdown population
@@ -4253,6 +4414,7 @@ function handleAddSession(event) {
     console.log('Revision items:', sampleData.content[targetUser].revision);
     
     // Reload content
+    console.log('About to reload content after adding session');
     loadStudentContent();
     
     // Update localStorage to persist changes
@@ -4349,9 +4511,20 @@ function showLogoutConfirmation() {
 function handleLogout() {
     console.log('Logout initiated');
     
+    // Set flag to prevent checkExistingSession from interfering
+    window.justLoggedOut = true;
+    
     // Clear session data
     localStorage.removeItem('quranUser');
     localStorage.removeItem('quranUserType');
+    
+    // Close all open modals
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    });
+    console.log('All modals closed on logout');
     
     // Reset global variables
     currentUser = null;
@@ -4405,7 +4578,17 @@ function handleLogout() {
     
     // Clear form inputs
     const userCodeInput = document.getElementById('userCode');
-    if (userCodeInput) userCodeInput.value = '';
+    if (userCodeInput) {
+        userCodeInput.value = '';
+        userCodeInput.focus(); // Focus on the input for immediate use
+    }
+    
+    // Reset login button state
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.textContent = getTranslation('login.button') || 'Login';
+        loginBtn.disabled = false;
+    }
     
     // Reset main content if it was modified for admin
     const mainContent = document.querySelector('.main-content');
@@ -4416,13 +4599,90 @@ function handleLogout() {
     // Reset display styles
     const topCards = document.querySelector('.top-cards');
     const pastSessionsCard = document.querySelector('.past-sessions-card');
-    if (topCards) topCards.style.display = 'flex';
+    if (topCards) {
+        topCards.style.display = 'grid';
+        topCards.style.gridTemplateColumns = '1fr 1fr';
+        topCards.style.gap = '40px';
+        topCards.style.marginBottom = '50px';
+        topCards.style.width = '100%';
+        topCards.style.boxSizing = 'border-box';
+        topCards.style.direction = 'ltr';
+        topCards.style.minHeight = '450px';
+        topCards.style.alignItems = 'stretch';
+    }
     if (pastSessionsCard) pastSessionsCard.style.display = 'block';
     
-    console.log('Logout completed');
+    // Reset content cards
+    const contentCards = document.querySelectorAll('.content-card');
+    contentCards.forEach(card => {
+        card.style.width = '';
+        card.style.minWidth = '';
+        card.style.maxWidth = '';
+        card.style.flex = '';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.height = '100%';
+        card.style.minHeight = '450px';
+        card.style.direction = 'ltr';
+    });
+    
+    // Clear any error messages or success messages
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    if (errorMessage) errorMessage.style.display = 'none';
+    if (successMessage) successMessage.style.display = 'none';
+    
+    console.log('Logout completed - UI reset and ready for login');
 }
 
 // Logout confirmation functions removed - direct logout now!
+
+// Reset card layout to ensure proper display
+function resetCardLayout() {
+    console.log('Resetting card layout...');
+    
+    // Reset top cards container
+    const topCards = document.querySelector('.top-cards');
+    if (topCards) {
+        topCards.style.display = 'grid';
+        topCards.style.gridTemplateColumns = '1fr 1fr';
+        topCards.style.gap = '40px';
+        topCards.style.marginBottom = '50px';
+        topCards.style.width = '100%';
+        topCards.style.boxSizing = 'border-box';
+        topCards.style.direction = 'ltr';
+        topCards.style.minHeight = '450px';
+        topCards.style.alignItems = 'stretch';
+        console.log('Top cards layout reset');
+    }
+    
+    // Reset individual content cards
+    const contentCards = document.querySelectorAll('.content-card');
+    contentCards.forEach((card, index) => {
+        card.style.width = '';
+        card.style.minWidth = '';
+        card.style.maxWidth = '';
+        card.style.flex = '';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.height = '100%';
+        card.style.minHeight = '450px';
+        card.style.direction = 'ltr';
+        card.style.boxSizing = 'border-box';
+        console.log(`Content card ${index + 1} layout reset`);
+    });
+    
+    // Reset main content container
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.display = 'block';
+        mainContent.style.width = '100%';
+        mainContent.style.boxSizing = 'border-box';
+        console.log('Main content layout reset');
+    }
+    
+    console.log('Card layout reset complete');
+}
 
 // Teacher Dashboard Functions
 function testModal() {
@@ -4441,20 +4701,60 @@ function testModal() {
     }
 }
 
-function showTeacherOptions() {
-    console.log('showTeacherOptions called');
+function showTeacherOptions(isFromLogin = false) {
+    console.log('showTeacherOptions called, isFromLogin:', isFromLogin);
     console.log('Looking for modal with ID: teacherOptionsModal');
     const modal = document.getElementById('teacherOptionsModal');
     console.log('Modal found:', modal);
     if (modal) {
+        // Modify modal based on context
+        if (isFromLogin) {
+            // Hide cancel button and close button for login flow
+            const cancelButton = modal.querySelector('.modal-actions .btn-secondary');
+            const closeButton = modal.querySelector('.modal-close');
+            
+            if (cancelButton) {
+                cancelButton.style.display = 'none';
+            }
+            if (closeButton) {
+                closeButton.style.display = 'none';
+            }
+            
+            // Add data attribute to prevent outside click closing
+            modal.setAttribute('data-prevent-close', 'true');
+        } else {
+            // Show cancel button and close button for normal flow
+            const cancelButton = modal.querySelector('.modal-actions .btn-secondary');
+            const closeButton = modal.querySelector('.modal-close');
+            
+            if (cancelButton) {
+                cancelButton.style.display = 'block';
+            }
+            if (closeButton) {
+                closeButton.style.display = 'block';
+            }
+            
+            // Remove data attribute to allow outside click closing
+            modal.removeAttribute('data-prevent-close');
+        }
+        
         console.log('Modal exists, calling showModal');
         showModal('teacherOptionsModal');
+        
+        // Hide loading screen when modal is shown
+        hideLoading();
     } else {
         console.error('teacherOptionsModal not found in DOM!');
     }
 }
 
 function showClassSelection() {
+    // Remove prevent-close attribute before closing
+    const teacherModal = document.getElementById('teacherOptionsModal');
+    if (teacherModal) {
+        teacherModal.removeAttribute('data-prevent-close');
+    }
+    
     closeModal('teacherOptionsModal');
     populateClassesList();
     showModal('classSelectionModal');
@@ -4475,7 +4775,15 @@ function populateClassesList() {
     classesList.innerHTML = '';
     
     if (classes.size === 0) {
-        classesList.innerHTML = '<p style="text-align: center; color: #666;">No classes found</p>';
+        classesList.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <h4 style="color: var(--primary-color); margin-bottom: 15px;">No Students Available</h4>
+                <p style="color: #666; margin-bottom: 20px;">There are no students available to add to your class.</p>
+                <button class="btn btn-primary" onclick="goBackToLogin()" style="margin-right: 10px;">
+                    Back to Login
+                </button>
+            </div>
+        `;
         return;
     }
     
@@ -4700,27 +5008,69 @@ function addStudentToTeacher(studentId) {
 }
 
 function showAssignedStudents() {
+    // Remove prevent-close attribute before closing
+    const teacherModal = document.getElementById('teacherOptionsModal');
+    if (teacherModal) {
+        teacherModal.removeAttribute('data-prevent-close');
+    }
+    
     closeModal('teacherOptionsModal');
     
+    // Debug logging
+    console.log('showAssignedStudents - currentUser:', currentUser);
+    console.log('showAssignedStudents - students length:', sampleData.teachers[currentUser]?.students?.length);
+    
     if (!sampleData.teachers[currentUser] || !sampleData.teachers[currentUser].students || sampleData.teachers[currentUser].students.length === 0) {
-        // Show empty state
-        const hifzContent = document.getElementById('hifzContent');
-        const revisionContent = document.getElementById('revisionContent');
-        const sessionsList = document.getElementById('sessionsList');
+        console.log('Showing empty state for edit students');
+        // Show empty state with add students option
+        const hifzContentElement = document.getElementById('hifzContent');
+        const revisionContentElement = document.getElementById('revisionContent');
+        const sessionsListElement = document.getElementById('sessionsList');
         
-        if (hifzContent) hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
-        if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
-        if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('teacher.no_students_assigned')}</p>`;
+        if (hifzContentElement) {
+            hifzContentElement.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 15px;">No Students to Edit</h4>
+                    <p style="color: #666; margin-bottom: 20px;">Add students to start editing.</p>
+                    <button class="btn btn-primary" onclick="goToAddStudents()" style="margin-right: 10px;">
+                        Add Students
+                    </button>
+                </div>
+            `;
+            console.log('Empty state HTML set in hifzContent');
+        } else {
+            console.log('hifzContent not found!');
+        }
+        if (revisionContentElement) revisionContentElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">No students assigned</p>`;
+        if (sessionsListElement) sessionsListElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">No students assigned</p>`;
         
-        // Show teacher options button
-        showTeacherControls();
+        // Hide add buttons since no students are assigned
+        hideTeacherControls();
+        
+        // Ensure editingStudent is null to prevent buttons from showing
+        editingStudent = null;
+        
         return;
     }
     
-    // Show assigned students list in a separate container, not in hifz content
-    const hifzContent = document.getElementById('hifzContent');
-    if (hifzContent) {
-        hifzContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
+    console.log('Teacher has students, showing student list');
+    
+    // Clear all content areas to remove any empty state HTML
+    const hifzContentElement = document.getElementById('hifzContent');
+    const revisionContentElement = document.getElementById('revisionContent');
+    const sessionsListElement = document.getElementById('sessionsList');
+    
+    if (hifzContentElement) {
+        hifzContentElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">N/A</p>`;
+        console.log('Cleared hifzContent and set N/A message');
+    }
+    if (revisionContentElement) {
+        revisionContentElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">N/A</p>`;
+        console.log('Cleared revisionContent and set N/A message');
+    }
+    if (sessionsListElement) {
+        sessionsListElement.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">N/A</p>`;
+        console.log('Cleared sessionsList and set N/A message');
     }
     
     // Remove existing container if it exists
@@ -4814,13 +5164,11 @@ function showAssignedStudents() {
         `;
     
     // Clear other content areas
-    const revisionContent = document.getElementById('revisionContent');
-    const sessionsList = document.getElementById('sessionsList');
     if (revisionContent) revisionContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
     if (sessionsList) sessionsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${getTranslation('content.select_student')}</p>`;
     
-    // Show teacher controls
-    showTeacherControls();
+    // Hide add buttons since no student is selected for editing
+    hideTeacherControls();
 }
 
 function closeAssignedStudents() {
@@ -4866,6 +5214,24 @@ function selectStudentForEditing(studentId) {
     
     // Show editing header
     showEditingStudentHeader(studentId);
+    
+    // Explicitly clear any empty state HTML before loading content
+    const hifzContentElement = document.getElementById('hifzContent');
+    const revisionContentElement = document.getElementById('revisionContent');
+    const sessionsListElement = document.getElementById('sessionsList');
+    
+    if (hifzContentElement) {
+        hifzContentElement.innerHTML = '';
+        console.log('Cleared hifzContent before loading student content');
+    }
+    if (revisionContentElement) {
+        revisionContentElement.innerHTML = '';
+        console.log('Cleared revisionContent before loading student content');
+    }
+    if (sessionsListElement) {
+        sessionsListElement.innerHTML = '';
+        console.log('Cleared sessionsList before loading student content');
+    }
     
     // Load the student's content
     loadStudentContent();
@@ -5058,9 +5424,104 @@ function confirmAction(modalId) {
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+        // Check if modal should not be closed (e.g., during login flow)
+        if (modal.hasAttribute('data-prevent-close')) {
+            console.log('Modal close prevented due to data-prevent-close attribute');
+            return;
+        }
+        
         modal.style.display = 'none';
         modal.classList.remove('show');
+        
+        // Special handling for teacher options modal
+        if (modalId === 'teacherOptionsModal') {
+            handleTeacherOptionsModalClose();
+        }
     }
+}
+
+// Handle teacher options modal close
+function handleTeacherOptionsModalClose() {
+    console.log('Teacher options modal closed');
+    
+    // Ensure no student is selected for editing
+    editingStudent = null;
+    
+    // Hide add buttons since no student is selected
+    hideTeacherControls();
+    
+    // Show message to pick a student
+    showPickStudentMessage();
+}
+
+// Show message to pick a student to start editing
+function showPickStudentMessage() {
+    console.log('Showing pick student message');
+    
+    // Clear all content areas and show helpful message
+    if (hifzContent) {
+        hifzContent.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('teacher.welcome_message') || 'Welcome, Teacher!'}</h4>
+                <p style="color: #666; margin-bottom: 20px;">${getTranslation('teacher.pick_student_message') || 'Please select a student to start editing their content.'}</p>
+                <button class="btn btn-primary" onclick="showTeacherOptions()" style="margin-right: 10px;">
+                    ${getTranslation('teacher.edit_students') || 'Edit Students'}
+                </button>
+                <button class="btn btn-secondary" onclick="showClassSelection()">
+                    ${getTranslation('teacher.add_student') || 'Add Student'}
+                </button>
+            </div>
+        `;
+    }
+    
+    if (revisionContent) {
+        revisionContent.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('teacher.no_student_selected') || 'No Student Selected'}</h4>
+                <p style="color: #666;">${getTranslation('teacher.select_student_to_edit') || 'Select a student to view their revision content.'}</p>
+            </div>
+        `;
+    }
+    
+    if (sessionsList) {
+        sessionsList.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <h4 style="color: var(--primary-color); margin-bottom: 15px;">${getTranslation('teacher.no_student_selected') || 'No Student Selected'}</h4>
+                <p style="color: #666;">${getTranslation('teacher.select_student_to_view_sessions') || 'Select a student to view their session history.'}</p>
+            </div>
+        `;
+    }
+}
+
+// Go back to login page
+function goBackToLogin() {
+    console.log('Going back to login page');
+    handleLogout();
+}
+
+// Go back to teacher options modal
+function goBackToTeacherOptions() {
+    console.log('Going back to teacher options modal');
+    
+    // Close any open modals
+    closeModal('classSelectionModal');
+    closeModal('studentSelectionModal');
+    
+    // Show teacher options modal (with normal behavior, not from login)
+    showTeacherOptions(false);
+}
+
+// Go to add students (from edit students empty state)
+function goToAddStudents() {
+    console.log('Going to add students from edit students empty state');
+    
+    // Close any open modals
+    closeModal('classSelectionModal');
+    closeModal('studentSelectionModal');
+    
+    // Show class selection modal for adding students
+    populateClassesList();
+    showModal('classSelectionModal');
 }
 
 // Helper function to get surah number from surah name
@@ -5365,6 +5826,140 @@ function getGradeClass(grade) {
 }
 
 // Notification function removed - no more popups!
+
+// Undo system functions
+function addToHistory(action) {
+    console.log('Adding action to history:', action);
+    actionHistory.push(action);
+    
+    // Limit history size
+    if (actionHistory.length > MAX_HISTORY) {
+        actionHistory.shift(); // Remove oldest action
+    }
+}
+
+function undoLastAction() {
+    if (actionHistory.length === 0) {
+        console.log('No actions to undo');
+        return;
+    }
+    
+    const lastAction = actionHistory.pop();
+    console.log('Undoing action:', lastAction);
+    
+    switch (lastAction.type) {
+        case 'add_hifz':
+            undoAddHifz(lastAction);
+            break;
+        case 'add_revision':
+            undoAddRevision(lastAction);
+            break;
+        case 'add_session':
+            undoAddSession(lastAction);
+            break;
+        case 'delete_hifz':
+            undoDeleteHifz(lastAction);
+            break;
+        case 'delete_revision':
+            undoDeleteRevision(lastAction);
+            break;
+        case 'delete_session':
+            undoDeleteSession(lastAction);
+            break;
+        case 'move_to_revision':
+            undoMoveToRevision(lastAction);
+            break;
+        default:
+            console.log('Unknown action type:', lastAction.type);
+    }
+    
+    // Reload content to show changes
+    loadStudentContent();
+    
+    // Save changes to Firebase
+    saveAllDataToStorage();
+}
+
+// Undo functions for each action type
+function undoAddHifz(action) {
+    const targetUser = action.targetUser;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].hifz) {
+        sampleData.content[targetUser].hifz.splice(index, 1);
+        console.log('Undid add hifz at index:', index);
+    }
+}
+
+function undoAddRevision(action) {
+    const targetUser = action.targetUser;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].revision) {
+        sampleData.content[targetUser].revision.splice(index, 1);
+        console.log('Undid add revision at index:', index);
+    }
+}
+
+function undoAddSession(action) {
+    const targetUser = action.targetUser;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].sessions) {
+        sampleData.content[targetUser].sessions.splice(index, 1);
+        console.log('Undid add session at index:', index);
+    }
+}
+
+function undoDeleteHifz(action) {
+    const targetUser = action.targetUser;
+    const item = action.item;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].hifz) {
+        sampleData.content[targetUser].hifz.splice(index, 0, item);
+        console.log('Undid delete hifz at index:', index);
+    }
+}
+
+function undoDeleteRevision(action) {
+    const targetUser = action.targetUser;
+    const item = action.item;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].revision) {
+        sampleData.content[targetUser].revision.splice(index, 0, item);
+        console.log('Undid delete revision at index:', index);
+    }
+}
+
+function undoDeleteSession(action) {
+    const targetUser = action.targetUser;
+    const item = action.item;
+    const index = action.index;
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].sessions) {
+        sampleData.content[targetUser].sessions.splice(index, 0, item);
+        console.log('Undid delete session at index:', index);
+    }
+}
+
+function undoMoveToRevision(action) {
+    const targetUser = action.targetUser;
+    const item = action.item;
+    const hifzIndex = action.hifzIndex;
+    const revisionIndex = action.revisionIndex;
+    
+    // Move item back from revision to hifz
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].revision) {
+        sampleData.content[targetUser].revision.splice(revisionIndex, 1);
+    }
+    
+    if (sampleData.content[targetUser] && sampleData.content[targetUser].hifz) {
+        sampleData.content[targetUser].hifz.splice(hifzIndex, 0, item);
+        console.log('Undid move to revision');
+    }
+}
 
 // Save all data to Firebase
 async function saveAllDataToStorage() {
@@ -6493,6 +7088,20 @@ function hideLoading() {
 
 // Check for existing user session
 function checkExistingSession() {
+    // Skip if we just completed a login to prevent conflicts
+    if (window.justLoggedIn) {
+        console.log('Skipping checkExistingSession - just completed login');
+        window.justLoggedIn = false;
+        return;
+    }
+    
+    // Skip if we just logged out to prevent conflicts
+    if (window.justLoggedOut) {
+        console.log('Skipping checkExistingSession - just completed logout');
+        window.justLoggedOut = false;
+        return;
+    }
+    
     const savedUser = localStorage.getItem('quranUser');
     const savedUserType = localStorage.getItem('quranUserType');
     

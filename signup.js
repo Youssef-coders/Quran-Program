@@ -1,7 +1,8 @@
 // Sign-up and Authentication Management
 class SignupManager {
     constructor() {
-        this.currentLanguage = 'en';
+        // Load saved language from localStorage or default to 'en'
+        this.currentLanguage = localStorage.getItem('quranLanguage') || 'en';
         this.isCreatingAccount = false;
         this.boundHandleSignup = this.handleSignup.bind(this);
         this.eventListenersSetup = false;
@@ -10,14 +11,7 @@ class SignupManager {
                 // Auth page
                 'auth.title': 'MRIS Quran Program',
                 'auth.subtitle': 'Join the MRIS Quran memorization program',
-                'auth.login': 'Login',
-                'auth.signup': 'Sign Up',
-                'auth.back_to_main': '← Back to Main',
-                
-                // Login
-                'login.placeholder': 'Enter your unique code',
-                'login.button': 'Login',
-                'login.invalid': 'Invalid code. Please try again.',
+                'auth.back_to_main': '← Back to Login',
                 
                 // Sign up
                 'signup.first_name': 'First Name',
@@ -31,8 +25,6 @@ class SignupManager {
                 'signup.class': 'Class',
                 'signup.select_class': 'Select Class',
                 'signup.select_grade_first': 'Select Grade First',
-                'signup.teacher_grades': 'What grades do you teach?',
-                'signup.teacher_classes': 'What classes do you teach?',
                 'signup.multi_select_hint': 'Hold Ctrl/Cmd to select multiple options',
                 'signup.select_grades_first': 'Select grades first',
                 'signup.email': 'Email Address',
@@ -45,7 +37,6 @@ class SignupManager {
                 'signup.user_type': 'Account Type',
                 'signup.select_type': 'Select Type',
                 'signup.student': 'Student',
-                'signup.teacher': 'Teacher',
                 'signup.create_account': 'Create Account',
                 'loading.creating_account': 'Creating Account...',
                 'signup.success_title': 'Account Created Successfully!',
@@ -77,14 +68,7 @@ class SignupManager {
                 // Auth page
                 'auth.title': 'برنامج القرآن الكريم - MRIS',
                 'auth.subtitle': 'انضم إلى برنامج حفظ القرآن الكريم',
-                'auth.login': 'تسجيل الدخول',
-                'auth.signup': 'إنشاء حساب',
-                'auth.back_to_main': '← العودة للرئيسية',
-                
-                // Login
-                'login.placeholder': 'أدخل الرمز الخاص بك',
-                'login.button': 'دخول',
-                'login.invalid': 'رمز غير صحيح. يرجى المحاولة مرة أخرى.',
+                'auth.back_to_main': '← العودة لتسجيل الدخول',
                 
                 // Sign up
                 'signup.first_name': 'الاسم الأول',
@@ -98,8 +82,6 @@ class SignupManager {
                 'signup.class': 'الفصل',
                 'signup.select_class': 'اختر الفصل',
                 'signup.select_grade_first': 'اختر الصف أولاً',
-                'signup.teacher_grades': 'ما هي الصفوف التي تدرسها؟',
-                'signup.teacher_classes': 'ما هي الفصول التي تدرسها؟',
                 'signup.multi_select_hint': 'اضغط Ctrl/Cmd لاختيار عدة خيارات',
                 'signup.select_grades_first': 'اختر الصفوف أولاً',
                 'signup.email': 'البريد الإلكتروني',
@@ -112,7 +94,6 @@ class SignupManager {
                 'signup.user_type': 'نوع الحساب',
                 'signup.select_type': 'اختر النوع',
                 'signup.student': 'طالب',
-                'signup.teacher': 'معلم',
                 'signup.create_account': 'إنشاء الحساب',
                 'loading.creating_account': 'جاري إنشاء الحساب...',
                 'signup.success_title': 'تم إنشاء الحساب بنجاح!',
@@ -175,12 +156,6 @@ class SignupManager {
             });
         }
         
-        // Add teacher grades change listener for checkboxes
-        document.addEventListener('change', (e) => {
-            if (e.target.name === 'teacherGrades') {
-                this.updateTeacherClassOptions();
-            }
-        });
     }
 
     bindUserTypeChange() {
@@ -195,30 +170,13 @@ class SignupManager {
     handleUserTypeChange(userType) {
         const gradeGroup = document.getElementById('gradeGroup');
         const classGroup = document.getElementById('classGroup');
-        const teacherGradesGroup = document.getElementById('teacherGradesGroup');
-        const teacherClassesGroup = document.getElementById('teacherClassesGroup');
         const gradeSelect = document.getElementById('grade');
         const classSelect = document.getElementById('class');
-        const teacherGradesSelect = document.getElementById('teacherGrades');
-        const teacherClassesSelect = document.getElementById('teacherClasses');
 
         if (userType === 'student') {
             // Show grade and class for students
             gradeGroup.style.display = 'block';
             classGroup.style.display = 'block';
-            teacherGradesGroup.style.display = 'none';
-            teacherClassesGroup.style.display = 'none';
-            
-            gradeSelect.required = true;
-            classSelect.required = true;
-            if (teacherGradesSelect) teacherGradesSelect.required = false;
-            if (teacherClassesSelect) teacherClassesSelect.required = false;
-        } else if (userType === 'teacher') {
-            // For teachers, show grade dropdown and class dropdown
-            gradeGroup.style.display = 'block';
-            classGroup.style.display = 'block';
-            teacherGradesGroup.style.display = 'none';
-            teacherClassesGroup.style.display = 'none';
             
             gradeSelect.required = true;
             classSelect.required = true;
@@ -226,14 +184,9 @@ class SignupManager {
             // Hide all for no selection
             gradeGroup.style.display = 'none';
             classGroup.style.display = 'none';
-            teacherGradesGroup.style.display = 'none';
-            teacherClassesGroup.style.display = 'none';
             
             gradeSelect.required = false;
             classSelect.required = false;
-            if (teacherGradesSelect) teacherGradesSelect.required = false;
-            if (teacherClassesSelect) teacherClassesSelect.required = false;
-            if (subjectSelect) subjectSelect.required = false;
         }
     }
 
@@ -272,42 +225,8 @@ class SignupManager {
             }
         });
 
-        // Auth buttons
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        
-        if (loginBtn) {
-            loginBtn.addEventListener('click', () => this.showLogin());
-        }
-        
-        if (signupBtn) {
-            signupBtn.addEventListener('click', () => this.showSignup());
-        }
-
         // Forms
-        const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
-        
-        // Add login functionality to signup page
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                console.log('Login form submit event triggered on signup page');
-                e.preventDefault();
-                e.stopPropagation();
-                this.handleLogin(e);
-            });
-        }
-        
-        // Add login button click handler
-        const loginButton = document.getElementById('loginBtn');
-        if (loginButton) {
-            loginButton.addEventListener('click', (e) => {
-                console.log('Login button clicked on signup page');
-                e.preventDefault();
-                e.stopPropagation();
-                this.handleLogin(e);
-            });
-        }
         
         if (signupForm) {
             // Remove any existing event listener first to prevent duplicates
@@ -330,15 +249,12 @@ class SignupManager {
     loadExistingData() {
         // Load existing users data from localStorage
         const existingStudents = localStorage.getItem('quranStudents');
-        const existingTeachers = localStorage.getItem('quranTeachers');
         
         this.students = existingStudents ? JSON.parse(existingStudents) : {};
-        this.teachers = existingTeachers ? JSON.parse(existingTeachers) : {};
         
         // Also load from the main script's sampleData if available
         if (typeof sampleData !== 'undefined') {
             this.students = { ...this.students, ...sampleData.students };
-            this.teachers = { ...this.teachers, ...sampleData.teachers };
         }
         
         // Always ensure ADMINYNG9 is available
@@ -359,19 +275,24 @@ class SignupManager {
         const newLanguage = this.currentLanguage === 'en' ? 'ar' : 'en';
         console.log('Switching to language:', newLanguage);
         this.setLanguage(newLanguage);
+        console.log('Language set to:', this.currentLanguage);
     }
 
     setLanguage(lang) {
+        console.log('setLanguage called with:', lang);
         this.currentLanguage = lang;
         localStorage.setItem('quranLanguage', lang);
+        console.log('Language saved to localStorage:', localStorage.getItem('quranLanguage'));
         
         // Update document direction
         if (lang === 'ar') {
             document.body.setAttribute('dir', 'rtl');
             document.documentElement.setAttribute('lang', 'ar');
+            console.log('Document set to RTL');
         } else {
             document.body.setAttribute('dir', 'ltr');
             document.documentElement.setAttribute('lang', 'en');
+            console.log('Document set to LTR');
         }
         
         // Update language toggle button
@@ -417,21 +338,6 @@ class SignupManager {
         });
     }
 
-    showLogin() {
-        document.getElementById('loginBtn').classList.add('active');
-        document.getElementById('signupBtn').classList.remove('active');
-        document.getElementById('loginSection').classList.add('active');
-        document.getElementById('signupSection').classList.remove('active');
-        this.hideMessages();
-    }
-
-    showSignup() {
-        document.getElementById('signupBtn').classList.add('active');
-        document.getElementById('loginBtn').classList.remove('active');
-        document.getElementById('signupSection').classList.add('active');
-        document.getElementById('loginSection').classList.remove('active');
-        this.hideMessages();
-    }
 
     hideMessages() {
         document.getElementById('errorMessage').style.display = 'none';
@@ -501,40 +407,15 @@ class SignupManager {
     updateClassOptions() {
         const gradeSelect = document.getElementById('grade');
         const classSelect = document.getElementById('class');
-        const teacherGradesGroup = document.getElementById('teacherGradesGroup');
-        const teacherClassesGroup = document.getElementById('teacherClassesGroup');
         
         if (!gradeSelect || !classSelect) return;
         
         const selectedGrade = gradeSelect.value;
-        const userType = document.getElementById('userType').value;
         
         // Clear existing options
         classSelect.innerHTML = '<option value="" data-translate="signup.select_class">Select Class</option>';
         
-        // Handle teacher grade selection - show multi-select when "Teacher" is selected
-        if (selectedGrade === 'Teacher') {
-            // Show multi-select fields for teachers selecting "Teacher" grade
-            classSelect.parentElement.style.display = 'none';
-            if (teacherGradesGroup) teacherGradesGroup.style.display = 'block';
-            if (teacherClassesGroup) teacherClassesGroup.style.display = 'block';
-            
-            // Update requirements
-            classSelect.required = false;
-            const teacherGradesSelect = document.getElementById('teacherGrades');
-            const teacherClassesSelect = document.getElementById('teacherClasses');
-            if (teacherGradesSelect) teacherGradesSelect.required = true;
-            if (teacherClassesSelect) teacherClassesSelect.required = true;
-            return;
-        } else if (userType === 'teacher') {
-            // Single grade teacher - hide multi-select, show class dropdown
-            classSelect.parentElement.style.display = 'block';
-            if (teacherGradesGroup) teacherGradesGroup.style.display = 'none';
-            if (teacherClassesGroup) teacherClassesGroup.style.display = 'none';
-            classSelect.required = true;
-        }
-        
-        if (!selectedGrade || selectedGrade === 'Teacher') return;
+        if (!selectedGrade) return;
         
         // Grade-specific class options - updated with correct class counts
         const gradeClasses = {
@@ -610,109 +491,8 @@ class SignupManager {
         });
     }
 
-    updateTeacherClassOptions() {
-        const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
-        const teacherClassesContainer = document.getElementById('teacherClassesCheckboxes');
-        
-        if (!teacherClassesContainer) return;
-        
-        const selectedGrades = Array.from(teacherGradesCheckboxes).map(checkbox => checkbox.value);
-        
-        // Clear existing options
-        teacherClassesContainer.innerHTML = '';
-        
-        if (selectedGrades.length === 0) {
-            teacherClassesContainer.innerHTML = '<p data-translate="signup.select_grades_first">Select grades first</p>';
-            return;
-        }
-        
-        // Grade-specific class options - updated with correct class counts
-        const gradeClasses = {
-            '5': [
-                { value: '5Ba1', display: '5Ba1' },
-                { value: '5Ba2', display: '5Ba2' },
-                { value: '5Ba3', display: '5Ba3' },
-                { value: '5Ba4', display: '5Ba4' },
-                { value: '5Ba5', display: '5Ba5' },
-                { value: '5Ba6', display: '5Ba6' },
-                { value: '5Ba7', display: '5Ba7' }
-            ],
-            '6': [
-                { value: '6Ba1', display: '6Ba1' },
-                { value: '6Ba2', display: '6Ba2' },
-                { value: '6Ba3', display: '6Ba3' },
-                { value: '6Ba4', display: '6Ba4' },
-                { value: '6Ba5', display: '6Ba5' },
-                { value: '6Ba6', display: '6Ba6' },
-                { value: '6Ba7', display: '6Ba7' }
-            ],
-            '7': [
-                { value: '7Ba1', display: '7Ba1' },
-                { value: '7Ba2', display: '7Ba2' },
-                { value: '7Ba3', display: '7Ba3' },
-                { value: '7Ba4', display: '7Ba4' },
-                { value: '7Ba5', display: '7Ba5' },
-                { value: '7Ba6', display: '7Ba6' },
-                { value: '7Ba7', display: '7Ba7' },
-                { value: '7Ba8', display: '7Ba8' }
-            ],
-            '8': [
-                { value: '8Ba1', display: '8Ba1' },
-                { value: '8Ba2', display: '8Ba2' },
-                { value: '8Ba3', display: '8Ba3' },
-                { value: '8Ba4', display: '8Ba4' },
-                { value: '8Ba5', display: '8Ba5' },
-                { value: '8Ba6', display: '8Ba6' },
-                { value: '8Ba7', display: '8Ba7' },
-                { value: '8Ba8', display: '8Ba8' }
-            ],
-            '9': [
-                { value: '9AM1', display: '9AM1' },
-                { value: '9AM2', display: '9AM2' },
-                { value: '9AM3', display: '9AM3' },
-                { value: '9AM4', display: '9AM4' },
-                { value: '9AM5', display: '9AM5' },
-                { value: '9BR1', display: '9BR1' },
-                { value: '9BR2', display: '9BR2' },
-                { value: '9BR3', display: '9BR3' },
-                { value: '9BR4', display: '9BR4' }
-            ],
-            '10': [
-                { value: '10AM1', display: '10AM1' },
-                { value: '10AM2', display: '10AM2' },
-                { value: '10AM3', display: '10AM3' },
-                { value: '10AM4', display: '10AM4' },
-                { value: '10AM5', display: '10AM5' },
-                { value: '10AM6', display: '10AM6' },
-                { value: '10BR1', display: '10BR1' },
-                { value: '10BR2', display: '10BR2' },
-                { value: '10BR3', display: '10BR3' }
-            ]
-        };
-        
-        // Add class checkboxes for all selected grades
-        selectedGrades.forEach(grade => {
-            const classes = gradeClasses[grade] || [];
-            classes.forEach(classInfo => {
-                const checkboxLabel = document.createElement('label');
-                checkboxLabel.className = 'checkbox-label';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'teacherClasses';
-                checkbox.value = classInfo.value;
-                
-                const span = document.createElement('span');
-                span.textContent = classInfo.display;
-                
-                checkboxLabel.appendChild(checkbox);
-                checkboxLabel.appendChild(span);
-                teacherClassesContainer.appendChild(checkboxLabel);
-            });
-        });
-    }
 
-    async generateId(firstName, lastName, userType, grade = null, className = null, subject = null, teacherGrades = null, teacherClasses = null) {
+    async generateId(firstName, lastName, userType, grade = null, className = null, subject = null) {
         // Handle Arabic characters properly
         const firstLetter = this.getInitial(firstName);
         const lastLetter = this.getInitial(lastName);
@@ -722,41 +502,7 @@ class SignupManager {
         
         let baseId;
         
-        if (userType === 'teacher') {
-            if (grade === 'Teacher') {
-                // Multi-grade teacher: T + initials + grade count + class count
-                const gradeCount = teacherGrades ? teacherGrades.length : 0;
-                const classCount = teacherClasses ? teacherClasses.length : 0;
-                baseId = `T${firstLetter}${lastLetter}${gradeCount}${classCount}`;
-            } else {
-                // Single grade teacher: T + initials + grade + section + class number (like students)
-                let gradeNum, section, classNum;
-                
-                if (className && className.includes('CF') || className && className.includes('HK')) {
-                    // Format: 9CF1, 10HK2, etc.
-                    gradeNum = className.match(/^(\d+)/)[1];
-                    section = className.includes('CF') ? 'CF' : 'HK';
-                    classNum = className.match(/\d+$/)[0];
-                } else if (className) {
-                    // Format: 7CF1, 8CF2, etc.
-                    gradeNum = className.match(/^(\d+)/)[1];
-                    section = className.match(/[A-Z]+/)[0];
-                    classNum = className.match(/\d+$/)[0];
-                } else {
-                    // Default for teachers without specific class
-                    gradeNum = grade || '00';
-                    section = 'GN';
-                    classNum = '1';
-                }
-                
-                // Handle missing section for grades 7-8
-                if (!section) {
-                    section = 'CF'; // Default section for grades 7-8
-                }
-                
-                baseId = `T${firstLetter}${lastLetter}${gradeNum}${section}${classNum}`;
-            }
-        } else {
+        if (userType === 'student') {
             // Student ID format: S + initials + grade + section + class number
             let gradeNum, section, classNum;
             
@@ -881,15 +627,12 @@ class SignupManager {
         try {
             // Load from localStorage
             const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
-            const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
             
             // Update local objects
             this.students = localStudents;
-            this.teachers = localTeachers;
             
             console.log('Local data refreshed:', {
-                students: Object.keys(this.students).length,
-                teachers: Object.keys(this.teachers).length
+                students: Object.keys(this.students).length
             });
         } catch (error) {
             console.error('Error refreshing local data:', error);
@@ -911,12 +654,11 @@ class SignupManager {
         }
         
         // Check local storage
-        existsInLocal = this.students.hasOwnProperty(id) || this.teachers.hasOwnProperty(id);
+        existsInLocal = this.students.hasOwnProperty(id);
         
         // Also check localStorage directly as backup
         const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
-        const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
-        const existsInLocalStorage = localStudents.hasOwnProperty(id) || localTeachers.hasOwnProperty(id);
+        const existsInLocalStorage = localStudents.hasOwnProperty(id);
         
         const exists = existsInFirebase || existsInLocal || existsInLocalStorage;
         console.log(`ID ${id} exists check:`, {
@@ -955,30 +697,6 @@ class SignupManager {
             }
         }
         
-        if (formData.userType === 'teacher') {
-            if (!formData.grade) {
-                errors.push(this.getTranslation('validation.required') + ': ' + this.getTranslation('signup.grade'));
-            }
-            
-            if (formData.grade === 'Teacher') {
-                // Multi-grade teacher validation
-                const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
-                const teacherClassesCheckboxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
-                
-                if (teacherGradesCheckboxes.length === 0) {
-                    errors.push(this.getTranslation('validation.required') + ': ' + this.getTranslation('signup.teacher_grades'));
-                }
-                
-                if (teacherClassesCheckboxes.length === 0) {
-                    errors.push(this.getTranslation('validation.required') + ': ' + this.getTranslation('signup.teacher_classes'));
-                }
-            } else {
-                // Single grade teacher validation
-                if (!formData.className) {
-                    errors.push(this.getTranslation('validation.required') + ': ' + this.getTranslation('signup.class'));
-                }
-            }
-        }
         
         // Email and phone validation removed - no longer required fields
         
@@ -999,14 +717,12 @@ class SignupManager {
     }
 
     emailExists(email) {
-        return Object.values(this.students).some(student => student.email === email) ||
-               Object.values(this.teachers).some(teacher => teacher.email === email);
+        return Object.values(this.students).some(student => student.email === email);
     }
 
     phoneExists(phone) {
         const cleanPhone = phone.replace(/[\s-]/g, '');
-        return Object.values(this.students).some(student => student.phone && student.phone.replace(/[\s-]/g, '') === cleanPhone) ||
-               Object.values(this.teachers).some(teacher => teacher.phone && teacher.phone.replace(/[\s-]/g, '') === cleanPhone);
+        return Object.values(this.students).some(student => student.phone && student.phone.replace(/[\s-]/g, '') === cleanPhone);
     }
 
     async handleSignup(e) {
@@ -1069,17 +785,6 @@ class SignupManager {
                 return;
             }
             
-            // Get teacher-specific data if applicable
-            let teacherGrades = null;
-            let teacherClasses = null;
-            
-            if (formData.userType === 'teacher' && formData.grade === 'Teacher') {
-                const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
-                const teacherClassesCheckboxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
-                
-                teacherGrades = Array.from(teacherGradesCheckboxes).map(checkbox => checkbox.value);
-                teacherClasses = Array.from(teacherClassesCheckboxes).map(checkbox => checkbox.value);
-            }
             
             // Generate ID based on user type
             console.log('Generating ID with data:', {
@@ -1087,9 +792,7 @@ class SignupManager {
                 lastName: formData.lastName,
                 userType: formData.userType,
                 grade: formData.grade,
-                className: formData.className,
-                teacherGrades,
-                teacherClasses
+                className: formData.className
             });
             
             const userId = await this.generateId(
@@ -1098,9 +801,7 @@ class SignupManager {
                 formData.userType,
                 formData.grade,
                 formData.className,
-                null, // No subject field anymore
-                teacherGrades,
-                teacherClasses
+                null // No subject field anymore
             );
             
             console.log('Generated user ID:', userId);
@@ -1287,85 +988,6 @@ class SignupManager {
         }
     }
 
-    handleLogin(e) {
-        e.preventDefault();
-        console.log('Signup.js handleLogin called');
-        
-        const userCode = document.getElementById('userCode').value.trim().toUpperCase();
-        console.log('User code entered:', userCode);
-        
-        if (!userCode) {
-            console.log('No user code entered');
-            return;
-        }
-        
-        console.log('User code found, proceeding with login...');
-        
-        // Show loading state
-        const submitBtn = document.querySelector('#loginForm .submit-btn');
-        if (submitBtn) {
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Logging in...';
-            submitBtn.disabled = true;
-            
-            // Reset button after 3 seconds if no redirect happens
-            setTimeout(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }, 3000);
-        }
-        
-        // Prevent any error popups from showing
-        console.log('Login process started, no error popups should appear');
-        
-        // Load existing data from localStorage to check against
-        this.loadExistingData();
-        
-        // Check if it's admin login - use correct admin code
-        if (userCode === 'ADMINYNG9') {
-            console.log('Admin login detected, setting session and redirecting');
-            localStorage.setItem('quranUser', userCode);
-            localStorage.setItem('quranUserType', 'admin');
-            // Clear the form to prevent resubmission
-            document.getElementById('userCode').value = '';
-            // Redirect to main dashboard instead of index.html
-            window.location.href = 'index.html';
-            return;
-        }
-        
-        // Check students and teachers data from both localStorage and sampleData
-        let foundUser = null;
-        let userType = null;
-        
-        console.log('Checking students:', Object.keys(this.students));
-        console.log('Checking teachers:', Object.keys(this.teachers));
-        console.log('Looking for user code:', userCode);
-        
-        // Check in students
-        if (this.students[userCode]) {
-            foundUser = this.students[userCode];
-            userType = 'student';
-            console.log('Found student:', foundUser);
-        }
-        // Check in teachers
-        else if (this.teachers[userCode]) {
-            foundUser = this.teachers[userCode];
-            userType = 'teacher';
-            console.log('Found teacher:', foundUser);
-        }
-        
-        if (foundUser) {
-            console.log(`${userType} login successful`);
-            localStorage.setItem('quranUser', userCode);
-            localStorage.setItem('quranUserType', userType);
-            // Clear the form to prevent resubmission
-            document.getElementById('userCode').value = '';
-            window.location.href = 'index.html';
-            return;
-        }
-        
-        console.log('Login failed - invalid code');
-    }
 }
 
 // Initialize when DOM is loaded
@@ -1386,8 +1008,3 @@ window.updateClassOptions = function() {
     }
 };
 
-window.updateTeacherClassOptions = function() {
-    if (window.signupManager) {
-        window.signupManager.updateTeacherClassOptions();
-    }
-};

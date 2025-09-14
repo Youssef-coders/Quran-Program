@@ -566,7 +566,7 @@ body[dir="rtl"] h6 {
 .delete-btn {
     position: absolute;
     top: 50%;
-    right: 15px;
+    left: 15px;
     transform: translateY(-50%);
     width: 30px;
     height: 30px;
@@ -585,6 +585,39 @@ body[dir="rtl"] h6 {
 /* Teacher delete buttons are always visible */
 .teacher-delete-btn {
     opacity: 1 !important;
+}
+
+/* Move button for content items */
+.move-btn {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--success-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+/* Teacher move buttons are always visible */
+.teacher-move-btn {
+    opacity: 1 !important;
+}
+
+.move-btn:hover {
+    background: #2e7d32;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
 }
 
 /* Only show delete button on hover for regular users */

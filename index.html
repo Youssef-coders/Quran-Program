@@ -70,7 +70,7 @@
             <div class="top-cards">
                 <!-- Next Session's Hifz Card -->
                 <div class="content-card hifz-card">
-                    <h3 data-translate="content.next_hifz">Next Session's Hifz</h3>
+                    <h3 data-translate="content.next_content">Next Session's Content</h3>
                     <div class="content-items" id="hifzContent">
                         <!-- Content items will be added here -->
                     </div>
@@ -79,7 +79,7 @@
 
                 <!-- Next Session's Revision Card -->
                 <div class="content-card revision-card">
-                    <h3 data-translate="content.next_revision">Next Session's Revision</h3>
+                    <h3 data-translate="content.next_recitation">Recitation and Reading</h3>
                     <div class="content-items" id="revisionContent">
                         <!-- Content items will be added here -->
                     </div>
@@ -393,7 +393,7 @@
                     <label data-translate="session.hifz_surahs">Hifz Surah(s) & Ayah Numbers:</label>
                     <div id="hifzItemsContainer">
                         <div class="session-item-row">
-                            <select class="session-hifz-surah" required onchange="toggleHifzAddButton(this)">
+                            <select class="session-hifz-surah" onchange="toggleHifzAddButton(this)">
                                 <option value="">Select Hifz Item</option>
                             </select>
                             <button type="button" class="btn btn-small btn-secondary" onclick="addHifzItem()" style="display: none;">+</button>
@@ -404,7 +404,7 @@
                     <label data-translate="session.revision_surahs">Revision Surah(s) & Ayah Numbers:</label>
                     <div id="revisionItemsContainer">
                         <div class="session-item-row">
-                            <select class="session-revision-surah" required onchange="toggleRevisionAddButton(this)">
+                            <select class="session-revision-surah" onchange="toggleRevisionAddButton(this)">
                                 <option value="">Select Revision Item</option>
                             </select>
                             <button type="button" class="btn btn-small btn-secondary" onclick="addRevisionItem()" style="display: none;">+</button>
