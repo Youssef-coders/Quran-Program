@@ -826,6 +826,32 @@ const translations = {
         'admin.delete_all_teachers': 'Delete All Teachers',
         'admin.delete_all_students': 'Delete All Students',
         
+        // Account Creation
+        'account.create_title': 'Create New Account',
+        'account.account_type': 'Account Type',
+        'account.select_type': 'Select Account Type',
+        'account.student': 'Student',
+        'account.teacher': 'Teacher',
+        'account.first_name': 'First Name',
+        'account.last_name': 'Last Name',
+        'account.email': 'Email Address (Optional)',
+        'account.phone': 'Phone Number (Optional)',
+        'account.grade': 'Grade',
+        'account.select_grade': 'Select Grade',
+        'account.grade_5': 'Grade 5',
+        'account.grade_6': 'Grade 6',
+        'account.grade_7': 'Grade 7',
+        'account.grade_8': 'Grade 8',
+        'account.grade_9': 'Grade 9',
+        'account.grade_10': 'Grade 10',
+        'account.class': 'Class',
+        'account.select_grade_first': 'Select Grade First',
+        'account.teacher_name': 'Teacher Name (Optional)',
+        'account.leave_unassigned': 'Leave unassigned',
+        'account.teacher_grades': 'What grades do you teach?',
+        'account.teacher_classes': 'What classes do you teach?',
+        'account.select_grades_first': 'Select grades first',
+        
         // Options button
         'options.title': 'Options',
         
@@ -1048,6 +1074,32 @@ const translations = {
         'admin.impact': 'التأثير',
         'admin.delete_all_teachers': 'حذف جميع المعلمين',
         'admin.delete_all_students': 'حذف جميع الطلاب',
+        
+        // Account Creation
+        'account.create_title': 'إنشاء حساب جديد',
+        'account.account_type': 'نوع الحساب',
+        'account.select_type': 'اختر نوع الحساب',
+        'account.student': 'طالب',
+        'account.teacher': 'معلم',
+        'account.first_name': 'الاسم الأول',
+        'account.last_name': 'الاسم الأخير',
+        'account.email': 'البريد الإلكتروني (اختياري)',
+        'account.phone': 'رقم الهاتف (اختياري)',
+        'account.grade': 'الصف',
+        'account.select_grade': 'اختر الصف',
+        'account.grade_5': 'الصف الخامس',
+        'account.grade_6': 'الصف السادس',
+        'account.grade_7': 'الصف السابع',
+        'account.grade_8': 'الصف الثامن',
+        'account.grade_9': 'الصف التاسع',
+        'account.grade_10': 'الصف العاشر',
+        'account.class': 'الفصل',
+        'account.select_grade_first': 'اختر الصف أولاً',
+        'account.teacher_name': 'اسم المعلم (اختياري)',
+        'account.leave_unassigned': 'اترك غير معين',
+        'account.teacher_grades': 'ما هي الصفوف التي تدرسها؟',
+        'account.teacher_classes': 'ما هي الفصول التي تدرسها؟',
+        'account.select_grades_first': 'اختر الصفوف أولاً',
         
         // Options button
         'options.title': 'خيارات',
@@ -6476,6 +6528,51 @@ function confirmDeleteTeacher() {
     });
 }
 
+// Handle account type change in create account modal
+function handleAccountTypeChange() {
+    const accountType = document.getElementById('accountType').value;
+    const gradeGroup = document.getElementById('grade').parentElement;
+    const classGroup = document.getElementById('className').parentElement;
+    const teacherNameGroup = document.getElementById('teacherNameGroup');
+    const teacherGradesGroup = document.getElementById('teacherGradesGroup');
+    const teacherClassesGroup = document.getElementById('teacherClassesGroup');
+    
+    if (accountType === 'student') {
+        // Show grade and class for students
+        gradeGroup.style.display = 'block';
+        classGroup.style.display = 'block';
+        teacherNameGroup.style.display = 'block';
+        teacherGradesGroup.style.display = 'none';
+        teacherClassesGroup.style.display = 'none';
+        
+        // Make grade and class required
+        document.getElementById('grade').required = true;
+        document.getElementById('className').required = true;
+    } else if (accountType === 'teacher') {
+        // Show grade and class for teachers
+        gradeGroup.style.display = 'block';
+        classGroup.style.display = 'block';
+        teacherNameGroup.style.display = 'none';
+        teacherGradesGroup.style.display = 'none';
+        teacherClassesGroup.style.display = 'none';
+        
+        // Make grade and class required
+        document.getElementById('grade').required = true;
+        document.getElementById('className').required = true;
+    } else {
+        // Hide all for no selection
+        gradeGroup.style.display = 'none';
+        classGroup.style.display = 'none';
+        teacherNameGroup.style.display = 'none';
+        teacherGradesGroup.style.display = 'none';
+        teacherClassesGroup.style.display = 'none';
+        
+        // Make fields not required
+        document.getElementById('grade').required = false;
+        document.getElementById('className').required = false;
+    }
+}
+
 // Handle create account
 function handleCreateAccount(event) {
     event.preventDefault();
@@ -6483,6 +6580,8 @@ function handleCreateAccount(event) {
     const accountType = document.getElementById('accountType').value;
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
     const className = document.getElementById('className').value;
     const teacherName = document.getElementById('teacherName').value.trim();
     
@@ -6522,7 +6621,9 @@ function handleCreateAccount(event) {
         sampleData.students[newId] = {
             name: `${firstName} ${lastName}`,
             class: className,
-            teacher: teacherName || 'Unassigned'
+            teacher: teacherName || 'Unassigned',
+            email: email || '',
+            phone: phone || ''
         };
         
         // Add content entry
@@ -6574,7 +6675,9 @@ function handleCreateAccount(event) {
         // Add teacher
         sampleData.teachers[newId] = {
             name: `${firstName} ${lastName}`,
-            students: []
+            students: [],
+            email: email || '',
+            phone: phone || ''
         };
         
         // Initialize empty students array
@@ -6655,6 +6758,8 @@ function updateClassOptions() {
     
     // Define class options for each grade
     const gradeClasses = {
+        '5': ['5Ba1', '5Ba2', '5Ba3', '5Ba4', '5Ba5', '5Ba6', '5Ba7'],
+        '6': ['6Ba1', '6Ba2', '6Ba3', '6Ba4', '6Ba5', '6Ba6', '6Ba7'],
         '7': ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8'],
         '8': ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9'],
         '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4'],
@@ -6671,6 +6776,116 @@ function updateClassOptions() {
     });
     
     console.log(`Updated class options for Grade ${selectedGrade}:`, classes);
+}
+
+// Add teacher grades change listener for checkboxes
+document.addEventListener('change', (e) => {
+    if (e.target.name === 'teacherGrades') {
+        updateTeacherClassOptions();
+    }
+});
+
+// Update teacher class options based on selected grades
+function updateTeacherClassOptions() {
+    const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
+    const teacherClassesContainer = document.getElementById('teacherClassesCheckboxes');
+    
+    if (!teacherClassesContainer) return;
+    
+    const selectedGrades = Array.from(teacherGradesCheckboxes).map(checkbox => checkbox.value);
+    
+    // Clear existing options
+    teacherClassesContainer.innerHTML = '';
+    
+    if (selectedGrades.length === 0) {
+        teacherClassesContainer.innerHTML = '<p data-translate="account.select_grades_first">Select grades first</p>';
+        return;
+    }
+    
+    // Grade-specific class options
+    const gradeClasses = {
+        '5': [
+            { value: '5Ba1', display: '5Ba1' },
+            { value: '5Ba2', display: '5Ba2' },
+            { value: '5Ba3', display: '5Ba3' },
+            { value: '5Ba4', display: '5Ba4' },
+            { value: '5Ba5', display: '5Ba5' },
+            { value: '5Ba6', display: '5Ba6' },
+            { value: '5Ba7', display: '5Ba7' }
+        ],
+        '6': [
+            { value: '6Ba1', display: '6Ba1' },
+            { value: '6Ba2', display: '6Ba2' },
+            { value: '6Ba3', display: '6Ba3' },
+            { value: '6Ba4', display: '6Ba4' },
+            { value: '6Ba5', display: '6Ba5' },
+            { value: '6Ba6', display: '6Ba6' },
+            { value: '6Ba7', display: '6Ba7' }
+        ],
+        '7': [
+            { value: '7-1', display: '7-1' },
+            { value: '7-2', display: '7-2' },
+            { value: '7-3', display: '7-3' },
+            { value: '7-4', display: '7-4' },
+            { value: '7-5', display: '7-5' },
+            { value: '7-6', display: '7-6' },
+            { value: '7-7', display: '7-7' },
+            { value: '7-8', display: '7-8' }
+        ],
+        '8': [
+            { value: '8-1', display: '8-1' },
+            { value: '8-2', display: '8-2' },
+            { value: '8-3', display: '8-3' },
+            { value: '8-4', display: '8-4' },
+            { value: '8-5', display: '8-5' },
+            { value: '8-6', display: '8-6' },
+            { value: '8-7', display: '8-7' },
+            { value: '8-8', display: '8-8' },
+            { value: '8-9', display: '8-9' }
+        ],
+        '9': [
+            { value: '9AM1', display: '9AM1' },
+            { value: '9AM2', display: '9AM2' },
+            { value: '9AM3', display: '9AM3' },
+            { value: '9AM4', display: '9AM4' },
+            { value: '9AM5', display: '9AM5' },
+            { value: '9BR1', display: '9BR1' },
+            { value: '9BR2', display: '9BR2' },
+            { value: '9BR3', display: '9BR3' },
+            { value: '9BR4', display: '9BR4' }
+        ],
+        '10': [
+            { value: '10AM1', display: '10AM1' },
+            { value: '10AM2', display: '10AM2' },
+            { value: '10AM3', display: '10AM3' },
+            { value: '10AM4', display: '10AM4' },
+            { value: '10AM5', display: '10AM5' },
+            { value: '10BR1', display: '10BR1' },
+            { value: '10BR2', display: '10BR2' },
+            { value: '10BR3', display: '10BR3' }
+        ]
+    };
+    
+    // Add class checkboxes for all selected grades
+    selectedGrades.forEach(grade => {
+        const classes = gradeClasses[grade] || [];
+        classes.forEach(classInfo => {
+            const checkboxLabel = document.createElement('label');
+            checkboxLabel.className = 'checkbox-label';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'teacherClasses';
+            checkbox.value = classInfo.value;
+            
+            const span = document.createElement('span');
+            span.textContent = classInfo.display;
+            
+            checkboxLabel.appendChild(checkbox);
+            checkboxLabel.appendChild(span);
+            teacherClassesContainer.appendChild(checkboxLabel);
+        });
+    });
 }
 
 // Populate teacher dropdown

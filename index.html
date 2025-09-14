@@ -438,13 +438,13 @@
 
     <!-- Create Account Modal (for admin) -->
     <div id="createAccountModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
             <span class="modal-close" onclick="closeModal('createAccountModal')">&times;</span>
             <h3 data-translate="account.create_title">Create New Account</h3>
             <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
                 <div class="form-group">
                     <label for="accountType" data-translate="account.account_type">Account Type</label>
-                    <select id="accountType" required>
+                    <select id="accountType" required onchange="handleAccountTypeChange()">
                         <option value="" data-translate="account.select_type">Select Account Type</option>
                         <option value="student" data-translate="account.student">Student</option>
                         <option value="teacher" data-translate="account.teacher">Teacher</option>
@@ -459,12 +459,23 @@
                     <input type="text" id="lastName" required>
                 </div>
                 <div class="form-group">
+                    <label for="email" data-translate="account.email">Email Address (Optional)</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="phone" data-translate="account.phone">Phone Number (Optional)</label>
+                    <input type="tel" id="phone" placeholder="+966XXXXXXXXX">
+                </div>
+                <div class="form-group">
                     <label for="grade" data-translate="account.grade">Grade</label>
                     <select id="grade" required onchange="updateClassOptions()">
                         <option value="" data-translate="account.select_grade">Select Grade</option>
+                        <option value="5" data-translate="account.grade_5">Grade 5</option>
+                        <option value="6" data-translate="account.grade_6">Grade 6</option>
                         <option value="7" data-translate="account.grade_7">Grade 7</option>
                         <option value="8" data-translate="account.grade_8">Grade 8</option>
                         <option value="9" data-translate="account.grade_9">Grade 9</option>
+                        <option value="10" data-translate="account.grade_10">Grade 10</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -478,6 +489,41 @@
                     <select id="teacherName">
                         <option value="" data-translate="account.leave_unassigned">Leave unassigned</option>
                     </select>
+                </div>
+                <div class="form-group" id="teacherGradesGroup" style="display: none;">
+                    <label data-translate="account.teacher_grades">What grades do you teach?</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="5">
+                            <span>Grade 5</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="6">
+                            <span>Grade 6</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="7">
+                            <span>Grade 7</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="8">
+                            <span>Grade 8</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="9">
+                            <span>Grade 9</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="teacherGrades" value="10">
+                            <span>Grade 10</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="teacherClassesGroup" style="display: none;">
+                    <label data-translate="account.teacher_classes">What classes do you teach?</label>
+                    <div class="checkbox-group" id="teacherClassesCheckboxes">
+                        <p data-translate="account.select_grades_first">Select grades first</p>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('createAccountModal')" data-translate="modal.cancel">Cancel</button>

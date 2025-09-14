@@ -2078,6 +2078,46 @@ body[dir="rtl"] h6 {
     .btn {
         width: 100%;
     }
+}
+
+/* Checkbox group styles */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.checkbox-label:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+.checkbox-label input[type="checkbox"]:checked + span {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.checkbox-label:has(input[type="checkbox"]:checked) {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
     
     .content-card,
     .past-sessions-card {
