@@ -999,7 +999,13 @@ const translations = {
         // Time
         'time.morning': 'morning',
         'time.afternoon': 'afternoon',
-        'time.evening': 'evening'
+        'time.evening': 'evening',
+        
+        // Signature
+        'signature.made_by': 'Made by Youssef Ahmed',
+        'signature.made_by_ar': 'اعداد الطالب: يوسف احمد',
+        'signature.supervision': 'Under Supervision of the Islamic Department',
+        'signature.supervision_ar': 'تحت اشراف قسم الاسلاميات'
     },
     ar: {
         // Login
@@ -1366,7 +1372,13 @@ const translations = {
         'surah.al_masad': 'المسد',
         'surah.al_ikhlas': 'الإخلاص',
         'surah.al_falaq': 'الفلق',
-        'surah.an_nas': 'الناس'
+        'surah.an_nas': 'الناس',
+        
+        // Signature
+        'signature.made_by': 'Made by Youssef Ahmed',
+        'signature.made_by_ar': 'اعداد الطالب: يوسف احمد',
+        'signature.supervision': 'Under Supervision of the Islamic Department',
+        'signature.supervision_ar': 'تحت اشراف قسم الاسلاميات'
     }
 };
 
