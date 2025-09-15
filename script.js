@@ -6574,7 +6574,7 @@ function handleAccountTypeChange() {
 }
 
 // Handle create account
-function handleCreateAccount(event) {
+async function handleCreateAccount(event) {
     event.preventDefault();
     
     const accountType = document.getElementById('accountType').value;
@@ -6604,179 +6604,332 @@ function handleCreateAccount(event) {
     // Show loading screen
     showLoading('Creating account...');
     
-    // Generate ID based on account type
-    let newId;
-    if (accountType === 'student') {
-        const firstLetter = firstName.charAt(0).toUpperCase();
-        const lastLetter = lastName.charAt(0).toUpperCase();
+    // Get submit button and show loading state
+    const submitBtn = document.querySelector('#createAccountForm button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Creating Account...';
+    submitBtn.disabled = true;
+    
+    try {
+        // Use the exact same ID generation process as signup.js
+        const userId = await generateId(firstName, lastName, accountType, className, className, null);
         
-        // Extract grade and section from className
-        let grade, section, classNum;
+        console.log('Generated user ID:', userId);
         
-        if (className.includes('AM') || className.includes('BR')) {
-            // Format: 9AM1, 10BR2, etc.
-            grade = className.match(/^(\d+)/)[1];
-            section = className.includes('AM') ? 'CF' : 'HK';
-            classNum = className.match(/(\d+)$/)[1];
-        } else {
-            // Format: 7-1, 8-3, etc.
-            const parts = className.split('-');
-            grade = parts[0];
-            classNum = parts[1];
-            section = 'CF'; // Default section for grades 7-8
+        // Check if user already exists using the same process as signup.js
+        console.log('Checking if user already exists...');
+        const idExists = await checkIdExists(userId);
+        if (idExists) {
+            hideLoading();
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            console.log('Account with this ID already exists:', userId);
+            return;
         }
+        console.log('User ID is unique, proceeding with account creation...');
         
-        newId = `S${firstLetter}${lastLetter}${grade}${section}${classNum}`;
-        
-        // Add student
-        sampleData.students[newId] = {
+        // Create user record using the same process as signup.js
+        console.log('Creating user data object...');
+        const userData = {
+            id: userId,
             name: `${firstName} ${lastName}`,
-            class: className,
-            teacher: teacherName || 'Unassigned',
             email: email || '',
             phone: phone || ''
         };
         
-        // Add content entry
-        sampleData.content[newId] = {
-            hifz: [],
-            revision: [],
-            sessions: []
-        };
-        
-        // Ensure the content entry is properly initialized
-        if (!sampleData.content[newId]) {
-            sampleData.content[newId] = { hifz: [], revision: [], sessions: [] };
-        }
-        
-        // Assign to teacher if specified
-        if (teacherName) {
-            Object.keys(sampleData.teachers).forEach(teacherId => {
-                if (sampleData.teachers[teacherId].name === teacherName) {
-                    if (!sampleData.teachers[teacherId].students) {
-                        sampleData.teachers[teacherId].students = [];
-                    }
-                    sampleData.teachers[teacherId].students.push(newId);
-                }
-            });
-        }
-        
-    } else if (accountType === 'teacher') {
-        const firstLetter = firstName.charAt(0).toUpperCase();
-        const lastLetter = lastName.charAt(0).toUpperCase();
-        
-        // Check if grade is "Teacher" (multi-grade teacher)
-        if (className === 'Teacher') {
-            // Multi-grade teacher - get selected grades and classes
-            const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
-            const teacherClassesCheckboxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
+        if (accountType === 'student') {
+            userData.class = className;
+            userData.teacher = teacherName || 'Unassigned';
+            userData.grade = className.match(/^(\d+)/) ? className.match(/^(\d+)/)[1] : '00';
             
-            const selectedGrades = Array.from(teacherGradesCheckboxes).map(cb => cb.value);
-            const selectedClasses = Array.from(teacherClassesCheckboxes).map(cb => cb.value);
+            // Add student
+            sampleData.students[userId] = userData;
             
-            // Generate ID for multi-grade teacher
-            newId = `T${firstLetter}${lastLetter}MULTI`;
-            
-            // Add teacher with multi-grade info
-            sampleData.teachers[newId] = {
-                name: `${firstName} ${lastName}`,
-                students: [],
-                email: email || '',
-                phone: phone || '',
-                teacherGrades: selectedGrades,
-                teacherClasses: selectedClasses,
-                grade: 'Teacher'
+            // Add content entry
+            sampleData.content[userId] = {
+                hifz: [],
+                revision: [],
+                sessions: []
             };
-        } else {
-            // Single grade teacher - extract grade and section from className
-            let grade, section, classNum;
             
-            if (className.includes('AM') || className.includes('BR')) {
-                // Format: 9AM1, 10BR2, etc.
-                grade = className.match(/^(\d+)/)[1];
-                section = className.includes('AM') ? 'CF' : 'HK';
-                classNum = className.match(/(\d+)$/)[1];
-            } else {
-                // Format: 7-1, 8-3, etc.
-                const parts = className.split('-');
-                grade = parts[0];
-                classNum = parts[1];
-                section = 'CF'; // Default section for grades 7-8
+            // Assign to teacher if specified
+            if (teacherName) {
+                Object.keys(sampleData.teachers).forEach(teacherId => {
+                    if (sampleData.teachers[teacherId].name === teacherName) {
+                        if (!sampleData.teachers[teacherId].students) {
+                            sampleData.teachers[teacherId].students = [];
+                        }
+                        sampleData.teachers[teacherId].students.push(userId);
+                    }
+                });
             }
             
-            newId = `T${firstLetter}${lastLetter}${grade}${section}${classNum}`;
+        } else if (accountType === 'teacher') {
+            // Check if grade is "Teacher" (multi-grade teacher)
+            if (className === 'Teacher') {
+                // Multi-grade teacher - get selected grades and classes
+                const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
+                const teacherClassesCheckboxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
+                
+                const selectedGrades = Array.from(teacherGradesCheckboxes).map(cb => cb.value);
+                const selectedClasses = Array.from(teacherClassesCheckboxes).map(cb => cb.value);
+                
+                userData.teacherGrades = selectedGrades;
+                userData.teacherClasses = selectedClasses;
+                userData.grade = 'Teacher';
+            } else {
+                // Single grade teacher
+                userData.grade = className.match(/^(\d+)/) ? className.match(/^(\d+)/)[1] : '00';
+                userData.class = className;
+            }
+            
+            userData.students = [];
             
             // Add teacher
-            sampleData.teachers[newId] = {
-                name: `${firstName} ${lastName}`,
-                students: [],
-                email: email || '',
-                phone: phone || '',
-                grade: grade,
-                class: className
-            };
+            sampleData.teachers[userId] = userData;
         }
         
-        // Initialize empty students array
-        if (!sampleData.teachers[newId].students) {
-            sampleData.teachers[newId].students = [];
+        const newId = userId;
+        
+        // Save to localStorage
+        saveAllDataToStorage();
+        
+        // Sync to Firebase
+        if (accountType === 'student') {
+            syncCreateStudentToFirebase(sampleData.students[newId]);
+        } else if (accountType === 'teacher') {
+            syncCreateTeacherToFirebase(sampleData.teachers[newId]);
+        }
+        
+        // Close modal and reset form
+        closeModal('createAccountModal');
+        document.getElementById('createAccountForm').reset();
+        
+        // Show success message with ID in styled modal
+        const accountDetails = `
+            <div class="account-created-container">
+                <div class="success-icon">✅</div>
+                <h4>Account Created Successfully!</h4>
+                
+                <div class="account-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Account Type:</span>
+                        <span class="detail-value">${accountType.charAt(0).toUpperCase() + accountType.slice(1)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">${firstName} ${lastName}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Class:</span>
+                        <span class="detail-value">${className === 'Teacher' ? 'Multi-Grade Teacher' : className}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Unique ID:</span>
+                        <span class="detail-value id-highlight">${newId}</span>
+                    </div>
+                </div>
+                
+                <div class="important-note">
+                    <strong>⚠️ Important:</strong> Please share this ID with the user. They will need it to log in.
+                </div>
+            </div>
+        `;
+        
+        showDetailedModal('Account Created', accountDetails);
+        
+        console.log(`${accountType} account created successfully! ID: ${newId}`, 'success');
+        
+        // Refresh admin dashboard
+        showAdminDashboard();
+        
+        // Hide loading screen
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Account creation error:', error);
+        hideLoading();
+        console.log('Account creation failed');
+    } finally {
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// ID Generation functions (exact same as signup.js)
+async function generateId(firstName, lastName, userType, grade = null, className = null, subject = null) {
+    // Handle Arabic characters properly
+    const firstLetter = getInitial(firstName);
+    const lastLetter = getInitial(lastName);
+    
+    // Check if the name is Arabic to determine ID format
+    const isArabicName = isArabic(firstLetter) || isArabic(lastLetter);
+    
+    let baseId;
+    
+    if (userType === 'student') {
+        // Student ID format: S + initials + grade + section + class number
+        let gradeNum, section, classNum;
+        
+        if (className && className.includes('AM') || className && className.includes('BR')) {
+            // Format: 9AM1, 10BR2, etc.
+            gradeNum = className.match(/^(\d+)/)[1];
+            section = className.includes('AM') ? 'AM' : 'BR';
+            classNum = className.match(/\d+$/)[0];
+        } else if (className) {
+            // Format: 7CF1, 8CF2, etc.
+            gradeNum = className.match(/^(\d+)/)[1];
+            section = className.match(/[A-Z]+/)[0];
+            classNum = className.match(/\d+$/)[0];
+        } else {
+            // Default for students without class
+            gradeNum = grade || '00';
+            section = 'GN';
+            classNum = '1';
+        }
+        
+        // Handle missing section for grades 7-8
+        if (!section) {
+            section = 'CF'; // Default section for grades 7-8
+        }
+        
+        baseId = `S${firstLetter}${lastLetter}${gradeNum}${section}${classNum}`;
+    } else if (userType === 'teacher') {
+        // Teacher ID format: T + initials + grade + section + class number
+        let gradeNum, section, classNum;
+        
+        if (className === 'Teacher') {
+            // Multi-grade teacher
+            gradeNum = '00';
+            section = 'MULTI';
+            classNum = '1';
+        } else if (className && className.includes('AM') || className && className.includes('BR')) {
+            // Format: 9AM1, 10BR2, etc.
+            gradeNum = className.match(/^(\d+)/)[1];
+            section = className.includes('AM') ? 'AM' : 'BR';
+            classNum = className.match(/\d+$/)[0];
+        } else if (className) {
+            // Format: 7CF1, 8CF2, etc.
+            gradeNum = className.match(/^(\d+)/)[1];
+            section = className.match(/[A-Z]+/)[0];
+            classNum = className.match(/\d+$/)[0];
+        } else {
+            // Default for teachers without class
+            gradeNum = grade || '00';
+            section = 'GN';
+            classNum = '1';
+        }
+        
+        // Handle missing section for grades 7-8
+        if (!section) {
+            section = 'CF'; // Default section for grades 7-8
+        }
+        
+        baseId = `T${firstLetter}${lastLetter}${gradeNum}${section}${classNum}`;
+    }
+    
+    // Check for collisions and add random digit if needed
+    let finalId = baseId;
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    console.log(`Checking for ID collisions starting with: ${baseId}`);
+    
+    // First check if base ID exists
+    let exists = await checkIdExists(finalId);
+    console.log(`Base ID ${finalId} exists: ${exists}`);
+    
+    while (exists && attempts < maxAttempts) {
+        const randomDigit = Math.floor(Math.random() * 10);
+        finalId = baseId + randomDigit;
+        attempts++;
+        console.log(`Attempt ${attempts}: checking ${finalId}`);
+        exists = await checkIdExists(finalId);
+        console.log(`ID ${finalId} exists: ${exists}`);
+    }
+    
+    // If still collision after max attempts, use timestamp
+    if (exists) {
+        const timestamp = Date.now().toString().slice(-2);
+        finalId = baseId + timestamp;
+        console.log(`Max attempts reached, using timestamp: ${finalId}`);
+    }
+    
+    console.log(`Final generated ID: ${finalId}`);
+    return finalId;
+}
+
+function getInitial(name) {
+    if (!name || name.length === 0) return 'X';
+    
+    // Handle Arabic characters
+    const firstChar = name.charAt(0);
+    
+    // If it's an Arabic character, convert to English equivalent
+    if (isArabic(firstChar)) {
+        return getArabicInitial(firstChar);
+    }
+    
+    // For English characters, use uppercase
+    return firstChar.toUpperCase();
+}
+
+function isArabic(char) {
+    const code = char.charCodeAt(0);
+    return (code >= 0x0600 && code <= 0x06FF) || // Arabic
+           (code >= 0x0750 && code <= 0x077F) || // Arabic Supplement
+           (code >= 0x08A0 && code <= 0x08FF) || // Arabic Extended-A
+           (code >= 0xFB50 && code <= 0xFDFF) || // Arabic Presentation Forms-A
+           (code >= 0xFE70 && code <= 0xFEFF);   // Arabic Presentation Forms-B
+}
+
+function getArabicInitial(char) {
+    // Map common Arabic letters to English equivalents for ID generation
+    const arabicMap = {
+        'ا': 'A', 'أ': 'A', 'إ': 'A', 'آ': 'A',
+        'ب': 'B', 'ت': 'T', 'ث': 'TH', 'ج': 'J',
+        'ح': 'H', 'خ': 'KH', 'د': 'D', 'ذ': 'DH',
+        'ر': 'R', 'ز': 'Z', 'س': 'S', 'ش': 'SH',
+        'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Z',
+        'ع': 'A', 'غ': 'GH', 'ف': 'F', 'ق': 'Q',
+        'ك': 'K', 'ل': 'L', 'م': 'M', 'ن': 'N',
+        'ه': 'H', 'و': 'W', 'ي': 'Y', 'ى': 'Y'
+    };
+    return arabicMap[char] || 'X';
+}
+
+async function checkIdExists(id) {
+    // Check both Firebase and local storage
+    let existsInFirebase = false;
+    let existsInLocal = false;
+    
+    // Check Firebase if available
+    if (window.firebaseService) {
+        try {
+            existsInFirebase = await window.firebaseService.checkIdExists(id);
+        } catch (error) {
+            console.log('Firebase ID check failed, using local check only:', error);
         }
     }
     
-    // Save to localStorage
-    saveAllDataToStorage();
+    // Check local storage
+    existsInLocal = sampleData.students.hasOwnProperty(id) || sampleData.teachers.hasOwnProperty(id);
     
-    // Sync to Firebase
-    if (accountType === 'student') {
-        syncCreateStudentToFirebase(sampleData.students[newId]);
-    } else if (accountType === 'teacher') {
-        syncCreateTeacherToFirebase(sampleData.teachers[newId]);
-    }
+    // Also check localStorage directly as backup
+    const localStudents = JSON.parse(localStorage.getItem('quranStudents') || '{}');
+    const localTeachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
+    const existsInLocalStorage = localStudents.hasOwnProperty(id) || localTeachers.hasOwnProperty(id);
     
-    // Close modal and reset form
-    closeModal('createAccountModal');
-    document.getElementById('createAccountForm').reset();
+    const exists = existsInFirebase || existsInLocal || existsInLocalStorage;
+    console.log(`ID ${id} exists check:`, {
+        firebase: existsInFirebase,
+        local: existsInLocal,
+        localStorage: existsInLocalStorage,
+        final: exists
+    });
     
-    // Show success message with ID in styled modal
-    const accountDetails = `
-        <div class="account-created-container">
-            <div class="success-icon">✅</div>
-            <h4>Account Created Successfully!</h4>
-            
-            <div class="account-details">
-                <div class="detail-row">
-                    <span class="detail-label">Account Type:</span>
-                    <span class="detail-value">${accountType.charAt(0).toUpperCase() + accountType.slice(1)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Name:</span>
-                    <span class="detail-value">${firstName} ${lastName}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Class:</span>
-                    <span class="detail-value">${className === 'Teacher' ? 'Multi-Grade Teacher' : className}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Unique ID:</span>
-                    <span class="detail-value id-highlight">${newId}</span>
-                </div>
-            </div>
-            
-            <div class="important-note">
-                <strong>⚠️ Important:</strong> Please share this ID with the user. They will need it to log in.
-            </div>
-        </div>
-    `;
-    
-    showDetailedModal('Account Created', accountDetails);
-    
-    console.log(`${accountType} account created successfully! ID: ${newId}`, 'success');
-    
-    // Refresh admin dashboard
-    showAdminDashboard();
-    
-    // Hide loading screen
-    hideLoading();
+    return exists;
 }
 
 // Update class options based on selected grade
