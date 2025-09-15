@@ -839,23 +839,6 @@ class SignupManager {
                 userData.grade = formData.grade;
                 userData.teacher = null; // Will be assigned later
                 console.log('Student data configured:', userData);
-            } else {
-                console.log('Setting up teacher data...');
-                userData.subject = 'Quran Studies'; // Default subject for teachers
-                userData.students = []; // Will be assigned later
-                
-                if (formData.grade === 'Teacher') {
-                    // Multi-grade teacher
-                    userData.teacherGrades = teacherGrades;
-                    userData.teacherClasses = teacherClasses;
-                    userData.grade = 'Teacher';
-                    console.log('Multi-grade teacher data configured:', userData);
-                } else {
-                    // Single grade teacher
-                    userData.class = formData.className;
-                    userData.grade = formData.grade;
-                    console.log('Single grade teacher data configured:', userData);
-                }
             }
             
             // Save to Firebase/storage
@@ -863,48 +846,26 @@ class SignupManager {
             if (window.firebaseService) {
                 console.log('Firebase service available, saving to Firebase...');
                 try {
-                    if (formData.userType === 'student') {
-                        console.log('Creating student in Firebase...');
-                        await window.firebaseService.createStudent(userData);
-                        console.log('Student saved to Firebase successfully:', userId);
-                    } else {
-                        console.log('Creating teacher in Firebase...');
-                        await window.firebaseService.createTeacher(userData);
-                        console.log('Teacher saved to Firebase successfully:', userId);
-                    }
+                    console.log('Creating student in Firebase...');
+                    await window.firebaseService.createStudent(userData);
+                    console.log('Student saved to Firebase successfully:', userId);
                 } catch (firebaseError) {
                     console.error('Firebase save failed:', firebaseError);
                     console.log('Falling back to localStorage...');
-                    if (formData.userType === 'student') {
-                        this.students[userId] = userData;
-                        localStorage.setItem('quranStudents', JSON.stringify(this.students));
-                        console.log('Student saved to localStorage:', userId);
-                    } else {
-                        this.teachers[userId] = userData;
-                        localStorage.setItem('quranTeachers', JSON.stringify(this.teachers));
-                        console.log('Teacher saved to localStorage:', userId);
-                    }
+                    this.students[userId] = userData;
+                    localStorage.setItem('quranStudents', JSON.stringify(this.students));
+                    console.log('Student saved to localStorage:', userId);
                 }
             } else {
                 // Fallback to localStorage
                 console.log('Saving to localStorage...');
-                if (formData.userType === 'student') {
-                    this.students[userId] = userData;
-                    localStorage.setItem('quranStudents', JSON.stringify(this.students));
-                    console.log('Student saved to localStorage:', userId);
-                } else {
-                    this.teachers[userId] = userData;
-                    localStorage.setItem('quranTeachers', JSON.stringify(this.teachers));
-                    console.log('Teacher saved to localStorage:', userId);
-                }
+                this.students[userId] = userData;
+                localStorage.setItem('quranStudents', JSON.stringify(this.students));
+                console.log('Student saved to localStorage:', userId);
                 
                 // Also update the main sampleData if available
                 if (typeof sampleData !== 'undefined') {
-                    if (formData.userType === 'student') {
-                        sampleData.students[userId] = userData;
-                    } else {
-                        sampleData.teachers[userId] = userData;
-                    }
+                    sampleData.students[userId] = userData;
                     localStorage.setItem('sampleData', JSON.stringify(sampleData));
                 }
             }

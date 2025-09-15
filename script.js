@@ -843,7 +843,6 @@ const translations = {
         'account.grade_7': 'Grade 7',
         'account.grade_8': 'Grade 8',
         'account.grade_9': 'Grade 9',
-        'account.grade_10': 'Grade 10',
         'account.class': 'Class',
         'account.select_grade_first': 'Select Grade First',
         'account.teacher_name': 'Teacher Name (Optional)',
@@ -1092,7 +1091,6 @@ const translations = {
         'account.grade_7': 'الصف السابع',
         'account.grade_8': 'الصف الثامن',
         'account.grade_9': 'الصف التاسع',
-        'account.grade_10': 'الصف العاشر',
         'account.class': 'الفصل',
         'account.select_grade_first': 'اختر الصف أولاً',
         'account.teacher_name': 'اسم المعلم (اختياري)',
@@ -6762,8 +6760,7 @@ function updateClassOptions() {
         '6': ['6Ba1', '6Ba2', '6Ba3', '6Ba4', '6Ba5', '6Ba6', '6Ba7'],
         '7': ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8'],
         '8': ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9'],
-        '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4'],
-        '10': ['10AM1', '10AM2', '10AM3', '10AM4', '10AM5', '10BR1', '10BR2', '10BR3']
+        '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4']
     };
     
     // Add class options for selected grade
@@ -6854,16 +6851,6 @@ function updateTeacherClassOptions() {
             { value: '9BR3', display: '9BR3' },
             { value: '9BR4', display: '9BR4' }
         ],
-        '10': [
-            { value: '10AM1', display: '10AM1' },
-            { value: '10AM2', display: '10AM2' },
-            { value: '10AM3', display: '10AM3' },
-            { value: '10AM4', display: '10AM4' },
-            { value: '10AM5', display: '10AM5' },
-            { value: '10BR1', display: '10BR1' },
-            { value: '10BR2', display: '10BR2' },
-            { value: '10BR3', display: '10BR3' }
-        ]
     };
     
     // Add class checkboxes for all selected grades
