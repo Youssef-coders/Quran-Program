@@ -35,7 +35,8 @@ class FirebaseService {
                 };
                 
                 console.log('Firebase config:', firebaseConfig);
-                const app = firebase.initializeApp(firebaseConfig);
+                // Use existing Firebase app instead of creating new one
+                const app = firebase.apps.length > 0 ? firebase.app() : firebase.initializeApp(firebaseConfig);
                 this.db = firebase.firestore(app);
                 this.auth = firebase.auth(app);
                 this.initialized = true;

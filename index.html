@@ -78,7 +78,7 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Top Row: Two Cards Side by Side -->
+            <!-- Top Row: Three Cards Side by Side -->
             <div class="top-cards">
                 <!-- Next Session's Hifz Card -->
                 <div class="content-card hifz-card">
@@ -96,6 +96,14 @@
                         <!-- Content items will be added here -->
                     </div>
                     <button class="add-content-btn" id="addRevisionBtn" style="display: none;">+</button>
+                </div>
+
+                <!-- Leaderboard Card -->
+                <div class="content-card leaderboard-card">
+                    <h3 data-translate="leaderboard.title">🏆 Leaderboard</h3>
+                    <div class="leaderboard-content" id="leaderboardContent">
+                        <!-- Leaderboard items will be added here -->
+                    </div>
                 </div>
             </div>
 
@@ -456,7 +464,7 @@
             <form id="createAccountForm" onsubmit="handleCreateAccount(event)">
                 <div class="form-group">
                     <label for="accountType" data-translate="account.account_type">Account Type</label>
-                    <select id="accountType" required onchange="handleAccountTypeChange()">
+                    <select id="accountType" name="accountType" onchange="handleAccountTypeChange()">
                         <option value="" data-translate="account.select_type">Select Account Type</option>
                         <option value="student" data-translate="account.student">Student</option>
                         <option value="teacher" data-translate="account.teacher">Teacher</option>
@@ -464,23 +472,23 @@
                 </div>
                 <div class="form-group">
                     <label for="firstName" data-translate="account.first_name">First Name</label>
-                    <input type="text" id="firstName" required>
+                    <input type="text" id="firstName" name="firstName">
                 </div>
                 <div class="form-group">
                     <label for="lastName" data-translate="account.last_name">Last Name</label>
-                    <input type="text" id="lastName" required>
+                    <input type="text" id="lastName" name="lastName">
                 </div>
                 <div class="form-group">
                     <label for="email" data-translate="account.email">Email Address (Optional)</label>
-                    <input type="email" id="email">
+                    <input type="email" id="email" name="email">
                 </div>
                 <div class="form-group">
                     <label for="phone" data-translate="account.phone">Phone Number (Optional)</label>
-                    <input type="tel" id="phone" placeholder="+966XXXXXXXXX">
+                    <input type="tel" id="phone" name="phone" placeholder="+966XXXXXXXXX">
                 </div>
                 <div class="form-group">
                     <label for="grade" data-translate="account.grade">Grade</label>
-                    <select id="grade" required onchange="updateClassOptions()">
+                    <select id="grade" name="grade" onchange="updateClassOptions()">
                         <option value="" data-translate="account.select_grade">Select Grade</option>
                         <option value="5" data-translate="account.grade_5">Grade 5</option>
                         <option value="6" data-translate="account.grade_6">Grade 6</option>
@@ -492,13 +500,13 @@
                 </div>
                 <div class="form-group">
                     <label for="className" data-translate="account.class">Class</label>
-                    <select id="className" required>
+                    <select id="className" name="className">
                         <option value="" data-translate="account.select_grade_first">Select Grade First</option>
                     </select>
                 </div>
                 <div class="form-group" id="teacherNameGroup" style="display: none;">
                     <label for="teacherName" data-translate="account.teacher_name">Teacher Name (Optional)</label>
-                    <select id="teacherName">
+                    <select id="teacherName" name="teacherName">
                         <option value="" data-translate="account.leave_unassigned">Leave unassigned</option>
                     </select>
                 </div>

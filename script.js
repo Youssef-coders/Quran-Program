@@ -780,6 +780,8 @@ const translations = {
         'content.next_content': 'Next Session\'s Content',
         'content.next_recitation': 'Recitation and Reading',
         'content.past_sessions': 'Past Sessions',
+        'leaderboard.title': 'Leaderboard',
+        'leaderboard.click_to_view': 'Click to view full leaderboard',
         'content.no_content': 'No content assigned',
         'content.no_sessions': 'No sessions recorded',
         'content.select_student': 'Select a student to edit their content',
@@ -1035,6 +1037,8 @@ const translations = {
         'content.next_content': 'مقاطع الجلسة القادمة',
         'content.next_recitation': 'التسميع و التلاوة',
         'content.past_sessions': 'الجلسات السابقة',
+        'leaderboard.title': 'قائمة الأوائل',
+        'leaderboard.click_to_view': 'انقر لعرض القائمة الكاملة',
         'content.no_content': 'لا يوجد محتوى مخصص',
         'content.no_sessions': 'لا توجد جلسات مسجلة',
         'content.select_student': 'اختر طالباً لتعديل محتواه',
@@ -1486,10 +1490,12 @@ function updateUITexts() {
     const hifzCard = document.querySelector('.hifz-card h3');
     const revisionCard = document.querySelector('.revision-card h3');
     const sessionsCard = document.querySelector('.past-sessions-card h3');
+    const leaderboardCard = document.querySelector('.leaderboard-card h3');
     
     if (hifzCard) hifzCard.textContent = getTranslation('content.next_content');
     if (revisionCard) revisionCard.textContent = getTranslation('content.next_recitation');
     if (sessionsCard) sessionsCard.textContent = getTranslation('content.past_sessions');
+    if (leaderboardCard) leaderboardCard.textContent = '🏆 ' + getTranslation('leaderboard.title');
     
     // Update elements with data-translate attributes
     updateDataTranslateElements();
@@ -3684,7 +3690,13 @@ function loadStudentContent() {
     if (currentUserType === 'teacher' && editingStudent) {
         console.log('Teacher editing student - ensuring controls are visible');
         showTeacherControls();
+    } else if (currentUserType === 'student') {
+        // Hide all add buttons for students to prevent self-editing
+        hideTeacherControls();
     }
+    
+    // Update leaderboard
+    updateLeaderboard();
 }
 
 // Load content items (assignment-style)
@@ -4437,6 +4449,16 @@ function handleAddSession(event) {
     // Add to sessions
     sampleData.content[targetUser].sessions.push(newSession);
     
+    // Calculate and add points based on score
+    const points = calculatePointsFromScore(parseInt(score));
+    if (points > 0) {
+        if (!sampleData.students[targetUser].points) {
+            sampleData.students[targetUser].points = 0;
+        }
+        sampleData.students[targetUser].points += points;
+        console.log(`Added ${points} points for score ${score}. Total points: ${sampleData.students[targetUser].points}`);
+    }
+    
     // Add to undo history
     addToHistory({
         type: 'add_session',
@@ -4665,7 +4687,7 @@ function handleLogout() {
     const pastSessionsCard = document.querySelector('.past-sessions-card');
     if (topCards) {
         topCards.style.display = 'grid';
-        topCards.style.gridTemplateColumns = '1fr 1fr';
+        topCards.style.gridTemplateColumns = '1fr 1fr 1fr';
         topCards.style.gap = '40px';
         topCards.style.marginBottom = '50px';
         topCards.style.width = '100%';
@@ -4709,7 +4731,7 @@ function resetCardLayout() {
     const topCards = document.querySelector('.top-cards');
     if (topCards) {
         topCards.style.display = 'grid';
-        topCards.style.gridTemplateColumns = '1fr 1fr';
+        topCards.style.gridTemplateColumns = '1fr 1fr 1fr';
         topCards.style.gap = '40px';
         topCards.style.marginBottom = '50px';
         topCards.style.width = '100%';
@@ -6226,9 +6248,18 @@ function showAdminDashboard() {
 
 // Show create account modal
 function showCreateAccountModal() {
+    console.log('showCreateAccountModal called');
     const modal = document.getElementById('createAccountModal');
+    console.log('Modal element:', modal);
     if (modal) {
         modal.style.display = 'block';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.zIndex = '2000';
+        modal.classList.add('show');
+        console.log('Modal display set to block with forced visibility');
+    } else {
+        console.error('createAccountModal element not found');
     }
 }
 
@@ -6560,6 +6591,9 @@ function handleAccountTypeChange() {
         // Make grade and class required
         document.getElementById('grade').required = true;
         document.getElementById('className').required = true;
+        
+        // Call updateClassOptions to set the correct required attributes
+        updateClassOptions();
     } else if (accountType === 'teacher') {
         // Show grade and class for teachers
         gradeGroup.style.display = 'block';
@@ -6568,9 +6602,12 @@ function handleAccountTypeChange() {
         teacherGradesGroup.style.display = 'none';
         teacherClassesGroup.style.display = 'none';
         
-        // Make grade and class required
+        // Make grade required, class will be handled by updateClassOptions
         document.getElementById('grade').required = true;
-        document.getElementById('className').required = true;
+        // Don't set className required here - let updateClassOptions handle it
+        
+        // Call updateClassOptions to set the correct required attributes
+        updateClassOptions();
     } else {
         // Hide all for no selection
         gradeGroup.style.display = 'none';
@@ -6585,9 +6622,208 @@ function handleAccountTypeChange() {
     }
 }
 
+// Calculate points based on score
+function calculatePointsFromScore(score) {
+    if (score === 10) return 5;
+    if (score === 9) return 2;
+    return 0; // No points for scores below 9
+}
+
+// Generate and display leaderboard
+function updateLeaderboard() {
+    const leaderboardContent = document.getElementById('leaderboardContent');
+    if (!leaderboardContent) return;
+
+    // Get all students with points
+    const studentsWithPoints = Object.values(sampleData.students)
+        .filter(student => student.points && student.points > 0)
+        .sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    if (studentsWithPoints.length === 0) {
+        const noPointsText = currentLanguage === 'ar' ? 'لا توجد نقاط بعد! ابدأ بالحصول على درجات مثالية لكسب النقاط!' : 'No points yet! Start getting perfect scores to earn points!';
+        leaderboardContent.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${noPointsText}</p>`;
+        return;
+    }
+
+    // Show only top 5 in the card
+    const top5Students = studentsWithPoints.slice(0, 5);
+    const pointsText = currentLanguage === 'ar' ? 'نقاط' : 'pts';
+
+    // Generate leaderboard HTML
+    let leaderboardHTML = '';
+    top5Students.forEach((student, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : rank === 3 ? 'third' : '';
+        const isCurrentUser = student.id === currentUser;
+        const className = student.class || 'N/A';
+        
+        leaderboardHTML += `
+            <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}" onclick="showFullLeaderboard()">
+                <span class="leaderboard-rank ${rankClass}">${rank}</span>
+                <span class="leaderboard-name">${student.name} (${className})</span>
+                <span class="leaderboard-points">${student.points || 0} ${pointsText}</span>
+            </div>
+        `;
+    });
+
+    // Add click to expand message
+    const expandText = getTranslation('leaderboard.click_to_view');
+    leaderboardHTML += `<p style="text-align: center; color: #666; margin-top: 15px; font-size: 0.9em; cursor: pointer;" onclick="showFullLeaderboard()">${expandText}</p>`;
+
+    leaderboardContent.innerHTML = leaderboardHTML;
+}
+
+// Show full leaderboard modal
+function showFullLeaderboard() {
+    // Get all students with points
+    const studentsWithPoints = Object.values(sampleData.students)
+        .filter(student => student.points && student.points > 0)
+        .sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    if (studentsWithPoints.length === 0) {
+        const noPointsText = currentLanguage === 'ar' ? 'لا توجد نقاط بعد!' : 'No points yet!';
+        alert(noPointsText);
+        return;
+    }
+
+    const pointsText = currentLanguage === 'ar' ? 'نقاط' : 'pts';
+    const closeText = currentLanguage === 'ar' ? 'إغلاق' : 'Close';
+
+    // Generate full leaderboard HTML
+    let fullLeaderboardHTML = '';
+    studentsWithPoints.forEach((student, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : rank === 3 ? 'third' : '';
+        const isCurrentUser = student.id === currentUser;
+        const className = student.class || 'N/A';
+        
+        fullLeaderboardHTML += `
+            <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}">
+                <span class="leaderboard-rank ${rankClass}">${rank}</span>
+                <span class="leaderboard-name">${student.name} (${className})</span>
+                <span class="leaderboard-points">${student.points || 0} ${pointsText}</span>
+            </div>
+        `;
+    });
+
+    const modalContent = `
+        <div class="full-leaderboard-modal">
+            <div class="full-leaderboard-content">
+                <div class="full-leaderboard-header">
+                    <h2>🏆 ${currentLanguage === 'ar' ? 'قائمة المتصدرين الكاملة' : 'Full Leaderboard'}</h2>
+                    <button class="close-full-leaderboard" onclick="closeFullLeaderboard()">${closeText}</button>
+                </div>
+                <div class="full-leaderboard-list">
+                    ${fullLeaderboardHTML}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Create and show modal
+    const modal = document.createElement('div');
+    modal.id = 'fullLeaderboardModal';
+    modal.innerHTML = modalContent;
+    document.body.appendChild(modal);
+
+    // Add CSS for the modal
+    const style = document.createElement('style');
+    style.textContent = `
+        .full-leaderboard-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .full-leaderboard-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .full-leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--border-color);
+        }
+        
+        .full-leaderboard-header h2 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .close-full-leaderboard {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .close-full-leaderboard:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        .full-leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .full-leaderboard-list .leaderboard-item {
+            margin-bottom: 12px;
+            padding: 15px 20px;
+            font-size: 1.1em;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Close full leaderboard modal
+function closeFullLeaderboard() {
+    const modal = document.getElementById('fullLeaderboardModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 // Handle create account
 async function handleCreateAccount(event) {
+    console.log('handleCreateAccount called!', event);
     event.preventDefault();
+    
+    // Add a simple test to see if the function is working
+    console.log('Form submission started');
     
     const accountType = document.getElementById('accountType').value;
     const firstName = document.getElementById('firstName').value.trim();
@@ -6597,20 +6833,42 @@ async function handleCreateAccount(event) {
     const className = document.getElementById('className').value;
     const teacherName = document.getElementById('teacherName').value.trim();
     
-    // Check if grade is "Teacher" - different validation
-    if (className === 'Teacher') {
+    console.log('Form data:', { accountType, firstName, lastName, email, phone, className, teacherName });
+    
+    // Debug: Check what fields are required
+    const gradeField = document.getElementById('grade');
+    const classField = document.getElementById('className');
+    console.log('Grade field required:', gradeField.required);
+    console.log('Class field required:', classField.required);
+    console.log('Class field display:', classField.parentElement.style.display);
+    
+    // Check validation based on account type and grade
+    if (accountType === 'teacher' && className === 'Teacher') {
         // For Teacher grade, check if teacher grades are selected
         const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
+        console.log('Teacher grades checkboxes found:', teacherGradesCheckboxes.length);
+        console.log('Selected grades:', Array.from(teacherGradesCheckboxes).map(cb => cb.value));
+        
         if (!firstName || !lastName || teacherGradesCheckboxes.length === 0) {
             console.log('Please fill in all required fields and select at least one grade', 'error');
             return;
         }
-    } else {
-        // For regular grades, check normal validation
+    } else if (accountType === 'teacher' && className && className !== 'Teacher') {
+        // For regular teacher grades, check normal validation
         if (!firstName || !lastName || !className) {
             console.log('Please fill in all required fields', 'error');
             return;
         }
+    } else if (accountType === 'student') {
+        // For students, check normal validation
+        if (!firstName || !lastName || !className) {
+            console.log('Please fill in all required fields', 'error');
+            return;
+        }
+    } else if (!accountType) {
+        // No account type selected
+        console.log('Please select an account type', 'error');
+        return;
     }
     
     // Get submit button and show loading state
@@ -6626,6 +6884,7 @@ async function handleCreateAccount(event) {
     await new Promise(resolve => setTimeout(resolve, 100));
     
     try {
+        console.log('Starting ID generation...');
         // Use the exact same ID generation process as signup.js
         const userId = await generateId(firstName, lastName, accountType, className, className, null);
         
@@ -6638,7 +6897,7 @@ async function handleCreateAccount(event) {
             hideLoading();
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
-            console.log('Account with this ID already exists:', userId);
+            console.log('Account with this ID already exists: ' + userId, 'error');
             return;
         }
         console.log('User ID is unique, proceeding with account creation...');
@@ -6764,7 +7023,7 @@ async function handleCreateAccount(event) {
     } catch (error) {
         console.error('Account creation error:', error);
         hideLoading();
-        console.log('Account creation failed');
+        console.log('Account creation failed: ' + error.message, 'error');
     } finally {
         // Reset button state
         submitBtn.textContent = originalText;
@@ -6984,12 +7243,14 @@ function updateClassOptions() {
     if (selectedGrade === 'Teacher') {
         // Hide class dropdown and show teacher groups
         classSelect.parentElement.style.display = 'none';
+        classSelect.required = false; // Remove required validation for Teacher grade
         if (teacherGradesGroup) teacherGradesGroup.style.display = 'block';
         if (teacherClassesGroup) teacherClassesGroup.style.display = 'block';
         return;
     } else {
         // Show class dropdown and hide teacher groups
         classSelect.parentElement.style.display = 'block';
+        classSelect.required = true; // Make required for regular grades
         if (teacherGradesGroup) teacherGradesGroup.style.display = 'none';
         if (teacherClassesGroup) teacherClassesGroup.style.display = 'none';
     }
@@ -7455,6 +7716,7 @@ window.skipToDashboard = skipToDashboard;
 window.confirmLogout = confirmLogout;
 window.updateClassOptions = updateClassOptions;
 window.clearFirebaseDatabase = clearFirebaseDatabase;
+window.handleAccountTypeChange = handleAccountTypeChange;
 
 // Load all data from storage
 // Firebase-only data loading - localStorage removed
