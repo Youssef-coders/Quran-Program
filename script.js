@@ -6601,14 +6601,17 @@ async function handleCreateAccount(event) {
         }
     }
     
-    // Show loading screen
-    showLoading('Creating account...');
-    
     // Get submit button and show loading state
     const submitBtn = document.querySelector('#createAccountForm button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Creating Account...';
     submitBtn.disabled = true;
+    
+    // Show loading screen
+    showLoading('Creating account...');
+    
+    // Add a small delay to ensure loading screen is visible
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     try {
         // Use the exact same ID generation process as signup.js
@@ -6774,14 +6777,21 @@ async function generateId(firstName, lastName, userType, grade = null, className
         
         if (className && className.includes('AM') || className && className.includes('BR')) {
             // Format: 9AM1, 10BR2, etc.
-            gradeNum = className.match(/^(\d+)/)[1];
+            const gradeMatch = className.match(/^(\d+)/);
+            const classMatch = className.match(/\d+$/);
+            
+            gradeNum = gradeMatch ? gradeMatch[1] : '00';
             section = className.includes('AM') ? 'AM' : 'BR';
-            classNum = className.match(/\d+$/)[0];
+            classNum = classMatch ? classMatch[0] : '1';
         } else if (className) {
             // Format: 7CF1, 8CF2, etc.
-            gradeNum = className.match(/^(\d+)/)[1];
-            section = className.match(/[A-Z]+/)[0];
-            classNum = className.match(/\d+$/)[0];
+            const gradeMatch = className.match(/^(\d+)/);
+            const sectionMatch = className.match(/[A-Z]+/);
+            const classMatch = className.match(/\d+$/);
+            
+            gradeNum = gradeMatch ? gradeMatch[1] : '00';
+            section = sectionMatch ? sectionMatch[0] : 'CF';
+            classNum = classMatch ? classMatch[0] : '1';
         } else {
             // Default for students without class
             gradeNum = grade || '00';
@@ -6806,14 +6816,21 @@ async function generateId(firstName, lastName, userType, grade = null, className
             classNum = '1';
         } else if (className && className.includes('AM') || className && className.includes('BR')) {
             // Format: 9AM1, 10BR2, etc.
-            gradeNum = className.match(/^(\d+)/)[1];
+            const gradeMatch = className.match(/^(\d+)/);
+            const classMatch = className.match(/\d+$/);
+            
+            gradeNum = gradeMatch ? gradeMatch[1] : '00';
             section = className.includes('AM') ? 'AM' : 'BR';
-            classNum = className.match(/\d+$/)[0];
+            classNum = classMatch ? classMatch[0] : '1';
         } else if (className) {
             // Format: 7CF1, 8CF2, etc.
-            gradeNum = className.match(/^(\d+)/)[1];
-            section = className.match(/[A-Z]+/)[0];
-            classNum = className.match(/\d+$/)[0];
+            const gradeMatch = className.match(/^(\d+)/);
+            const sectionMatch = className.match(/[A-Z]+/);
+            const classMatch = className.match(/\d+$/);
+            
+            gradeNum = gradeMatch ? gradeMatch[1] : '00';
+            section = sectionMatch ? sectionMatch[0] : 'CF';
+            classNum = classMatch ? classMatch[0] : '1';
         } else {
             // Default for teachers without class
             gradeNum = grade || '00';
