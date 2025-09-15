@@ -843,6 +843,7 @@ const translations = {
         'account.grade_7': 'Grade 7',
         'account.grade_8': 'Grade 8',
         'account.grade_9': 'Grade 9',
+        'account.grade_teacher': 'Teacher',
         'account.class': 'Class',
         'account.select_grade_first': 'Select Grade First',
         'account.teacher_name': 'Teacher Name (Optional)',
@@ -1091,6 +1092,7 @@ const translations = {
         'account.grade_7': 'الصف السابع',
         'account.grade_8': 'الصف الثامن',
         'account.grade_9': 'الصف التاسع',
+        'account.grade_teacher': 'معلم',
         'account.class': 'الفصل',
         'account.select_grade_first': 'اختر الصف أولاً',
         'account.teacher_name': 'اسم المعلم (اختياري)',
@@ -6583,9 +6585,20 @@ function handleCreateAccount(event) {
     const className = document.getElementById('className').value;
     const teacherName = document.getElementById('teacherName').value.trim();
     
-    if (!firstName || !lastName || !className) {
-        console.log('Please fill in all required fields', 'error');
-        return;
+    // Check if grade is "Teacher" - different validation
+    if (className === 'Teacher') {
+        // For Teacher grade, check if teacher grades are selected
+        const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
+        if (!firstName || !lastName || teacherGradesCheckboxes.length === 0) {
+            console.log('Please fill in all required fields and select at least one grade', 'error');
+            return;
+        }
+    } else {
+        // For regular grades, check normal validation
+        if (!firstName || !lastName || !className) {
+            console.log('Please fill in all required fields', 'error');
+            return;
+        }
     }
     
     // Show loading screen
@@ -6652,31 +6665,57 @@ function handleCreateAccount(event) {
         const firstLetter = firstName.charAt(0).toUpperCase();
         const lastLetter = lastName.charAt(0).toUpperCase();
         
-        // Extract grade and section from className
-        let grade, section, classNum;
-        
-        if (className.includes('AM') || className.includes('BR')) {
-            // Format: 9AM1, 10BR2, etc.
-            grade = className.match(/^(\d+)/)[1];
-            section = className.includes('AM') ? 'CF' : 'HK';
-            classNum = className.match(/(\d+)$/)[1];
+        // Check if grade is "Teacher" (multi-grade teacher)
+        if (className === 'Teacher') {
+            // Multi-grade teacher - get selected grades and classes
+            const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
+            const teacherClassesCheckboxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
+            
+            const selectedGrades = Array.from(teacherGradesCheckboxes).map(cb => cb.value);
+            const selectedClasses = Array.from(teacherClassesCheckboxes).map(cb => cb.value);
+            
+            // Generate ID for multi-grade teacher
+            newId = `T${firstLetter}${lastLetter}MULTI`;
+            
+            // Add teacher with multi-grade info
+            sampleData.teachers[newId] = {
+                name: `${firstName} ${lastName}`,
+                students: [],
+                email: email || '',
+                phone: phone || '',
+                teacherGrades: selectedGrades,
+                teacherClasses: selectedClasses,
+                grade: 'Teacher'
+            };
         } else {
-            // Format: 7-1, 8-3, etc.
-            const parts = className.split('-');
-            grade = parts[0];
-            classNum = parts[1];
-            section = 'CF'; // Default section for grades 7-8
+            // Single grade teacher - extract grade and section from className
+            let grade, section, classNum;
+            
+            if (className.includes('AM') || className.includes('BR')) {
+                // Format: 9AM1, 10BR2, etc.
+                grade = className.match(/^(\d+)/)[1];
+                section = className.includes('AM') ? 'CF' : 'HK';
+                classNum = className.match(/(\d+)$/)[1];
+            } else {
+                // Format: 7-1, 8-3, etc.
+                const parts = className.split('-');
+                grade = parts[0];
+                classNum = parts[1];
+                section = 'CF'; // Default section for grades 7-8
+            }
+            
+            newId = `T${firstLetter}${lastLetter}${grade}${section}${classNum}`;
+            
+            // Add teacher
+            sampleData.teachers[newId] = {
+                name: `${firstName} ${lastName}`,
+                students: [],
+                email: email || '',
+                phone: phone || '',
+                grade: grade,
+                class: className
+            };
         }
-        
-        newId = `T${firstLetter}${lastLetter}${grade}${section}${classNum}`;
-        
-        // Add teacher
-        sampleData.teachers[newId] = {
-            name: `${firstName} ${lastName}`,
-            students: [],
-            email: email || '',
-            phone: phone || ''
-        };
         
         // Initialize empty students array
         if (!sampleData.teachers[newId].students) {
@@ -6715,7 +6754,7 @@ function handleCreateAccount(event) {
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Class:</span>
-                    <span class="detail-value">${className}</span>
+                    <span class="detail-value">${className === 'Teacher' ? 'Multi-Grade Teacher' : className}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Unique ID:</span>
@@ -6744,6 +6783,8 @@ function handleCreateAccount(event) {
 function updateClassOptions() {
     const gradeSelect = document.getElementById('grade');
     const classSelect = document.getElementById('className');
+    const teacherGradesGroup = document.getElementById('teacherGradesGroup');
+    const teacherClassesGroup = document.getElementById('teacherClassesGroup');
     const selectedGrade = gradeSelect.value;
     
     // Clear current options
@@ -6751,7 +6792,24 @@ function updateClassOptions() {
     
     if (!selectedGrade) {
         classSelect.innerHTML = `<option value="">${getTranslation('signup.select_grade_first')}</option>`;
+        // Hide teacher groups
+        if (teacherGradesGroup) teacherGradesGroup.style.display = 'none';
+        if (teacherClassesGroup) teacherClassesGroup.style.display = 'none';
         return;
+    }
+    
+    // Handle Teacher grade selection
+    if (selectedGrade === 'Teacher') {
+        // Hide class dropdown and show teacher groups
+        classSelect.parentElement.style.display = 'none';
+        if (teacherGradesGroup) teacherGradesGroup.style.display = 'block';
+        if (teacherClassesGroup) teacherClassesGroup.style.display = 'block';
+        return;
+    } else {
+        // Show class dropdown and hide teacher groups
+        classSelect.parentElement.style.display = 'block';
+        if (teacherGradesGroup) teacherGradesGroup.style.display = 'none';
+        if (teacherClassesGroup) teacherClassesGroup.style.display = 'none';
     }
     
     // Define class options for each grade
