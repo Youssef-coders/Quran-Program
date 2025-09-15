@@ -6799,9 +6799,9 @@ async function generateId(firstName, lastName, userType, grade = null, className
             classNum = '1';
         }
         
-        // Handle missing section for grades 7-8
+        // Handle missing section - let it be extracted from className
         if (!section) {
-            section = 'CF'; // Default section for grades 7-8
+            section = 'GN'; // Default section if not found
         }
         
         baseId = `S${firstLetter}${lastLetter}${gradeNum}${section}${classNum}`;
@@ -6838,9 +6838,9 @@ async function generateId(firstName, lastName, userType, grade = null, className
             classNum = '1';
         }
         
-        // Handle missing section for grades 7-8
+        // Handle missing section - let it be extracted from className
         if (!section) {
-            section = 'CF'; // Default section for grades 7-8
+            section = 'GN'; // Default section if not found
         }
         
         baseId = `T${firstLetter}${lastLetter}${gradeNum}${section}${classNum}`;
@@ -6982,12 +6982,12 @@ function updateClassOptions() {
         if (teacherClassesGroup) teacherClassesGroup.style.display = 'none';
     }
     
-    // Define class options for each grade
+    // Define class options for each grade (exact same as signup.js)
     const gradeClasses = {
         '5': ['5Ba1', '5Ba2', '5Ba3', '5Ba4', '5Ba5', '5Ba6', '5Ba7'],
         '6': ['6Ba1', '6Ba2', '6Ba3', '6Ba4', '6Ba5', '6Ba6', '6Ba7'],
-        '7': ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8'],
-        '8': ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9'],
+        '7': ['7Ba1', '7Ba2', '7Ba3', '7Ba4', '7Ba5', '7Ba6', '7Ba7', '7Ba8'],
+        '8': ['8Ba1', '8Ba2', '8Ba3', '8Ba4', '8Ba5', '8Ba6', '8Ba7', '8Ba8'],
         '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4']
     };
     
@@ -7048,25 +7048,24 @@ function updateTeacherClassOptions() {
             { value: '6Ba7', display: '6Ba7' }
         ],
         '7': [
-            { value: '7-1', display: '7-1' },
-            { value: '7-2', display: '7-2' },
-            { value: '7-3', display: '7-3' },
-            { value: '7-4', display: '7-4' },
-            { value: '7-5', display: '7-5' },
-            { value: '7-6', display: '7-6' },
-            { value: '7-7', display: '7-7' },
-            { value: '7-8', display: '7-8' }
+            { value: '7Ba1', display: '7Ba1' },
+            { value: '7Ba2', display: '7Ba2' },
+            { value: '7Ba3', display: '7Ba3' },
+            { value: '7Ba4', display: '7Ba4' },
+            { value: '7Ba5', display: '7Ba5' },
+            { value: '7Ba6', display: '7Ba6' },
+            { value: '7Ba7', display: '7Ba7' },
+            { value: '7Ba8', display: '7Ba8' }
         ],
         '8': [
-            { value: '8-1', display: '8-1' },
-            { value: '8-2', display: '8-2' },
-            { value: '8-3', display: '8-3' },
-            { value: '8-4', display: '8-4' },
-            { value: '8-5', display: '8-5' },
-            { value: '8-6', display: '8-6' },
-            { value: '8-7', display: '8-7' },
-            { value: '8-8', display: '8-8' },
-            { value: '8-9', display: '8-9' }
+            { value: '8Ba1', display: '8Ba1' },
+            { value: '8Ba2', display: '8Ba2' },
+            { value: '8Ba3', display: '8Ba3' },
+            { value: '8Ba4', display: '8Ba4' },
+            { value: '8Ba5', display: '8Ba5' },
+            { value: '8Ba6', display: '8Ba6' },
+            { value: '8Ba7', display: '8Ba7' },
+            { value: '8Ba8', display: '8Ba8' }
         ],
         '9': [
             { value: '9AM1', display: '9AM1' },
