@@ -9,8 +9,7 @@ class FirebaseService {
 
     async init() {
         try {
-            console.log('=== FIREBASE SERVICE INITIALIZATION ===');
-            console.log('Firebase global exists:', typeof firebase !== 'undefined');
+            // Firebase service initialization
             
             // Wait for Firebase to be available
             let attempts = 0;
@@ -19,11 +18,10 @@ class FirebaseService {
                 attempts++;
             }
             
-            console.log('Firebase check after waiting:', typeof firebase !== 'undefined');
-            console.log('Attempts made:', attempts);
+            // Firebase availability checked
             
             if (typeof firebase !== 'undefined') {
-                console.log('Firebase is available, initializing...');
+                // Firebase is available, initializing
                 // Initialize Firebase with your config
                 const firebaseConfig = {
                     apiKey: "AIzaSyBSOZYCUMqO9KEr9a93GaanxuIelJIIIGM",
@@ -34,15 +32,13 @@ class FirebaseService {
                     appId: "1:988749694504:web:91af1972179d797409171d"
                 };
                 
-                console.log('Firebase config:', firebaseConfig);
+                // Firebase config loaded
                 // Use existing Firebase app instead of creating new one
                 const app = firebase.apps.length > 0 ? firebase.app() : firebase.initializeApp(firebaseConfig);
                 this.db = firebase.firestore(app);
                 this.auth = firebase.auth(app);
                 this.initialized = true;
-                console.log('✅ Firebase initialized successfully');
-                console.log('Database instance:', this.db);
-                console.log('Auth instance:', this.auth);
+                // Firebase initialized successfully
             } else {
                 console.warn('⚠️ Firebase not loaded, falling back to localStorage');
                 this.initialized = false;
@@ -66,7 +62,7 @@ class FirebaseService {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            console.log('✅ Student created in Firebase:', studentData.id);
+            // Student created in Firebase
             return studentData;
         } catch (error) {
             console.error('❌ Error creating student in Firebase:', error);
@@ -119,7 +115,7 @@ class FirebaseService {
                 ...updateData,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('✅ Student updated in Firebase:', studentId);
+            // Student updated in Firebase
             return true;
         } catch (error) {
             console.error('❌ Error updating student in Firebase:', error);
@@ -134,7 +130,7 @@ class FirebaseService {
 
         try {
             await this.db.collection('students').doc(studentId).delete();
-            console.log('✅ Student deleted from Firebase:', studentId);
+            // Student deleted from Firebase
             return true;
         } catch (error) {
             console.error('❌ Error deleting student from Firebase:', error);
@@ -149,7 +145,7 @@ class FirebaseService {
 
         try {
             await this.db.collection('content').doc(studentId).delete();
-            console.log('✅ Student content deleted from Firebase:', studentId);
+            // Student content deleted from Firebase
             return true;
         } catch (error) {
             console.error('❌ Error deleting student content from Firebase:', error);
@@ -170,7 +166,7 @@ class FirebaseService {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            console.log('✅ Teacher created in Firebase:', teacherData.id);
+            // Teacher created in Firebase
             return teacherData;
         } catch (error) {
             console.error('❌ Error creating teacher in Firebase:', error);
@@ -225,7 +221,7 @@ class FirebaseService {
             snapshot.forEach(doc => {
                 content[doc.id] = { id: doc.id, ...doc.data() };
             });
-            console.log('✅ Content loaded from Firebase:', Object.keys(content).length);
+            // Content loaded from Firebase
             return content;
         } catch (error) {
             console.error('❌ Error loading content from Firebase:', error);
@@ -240,7 +236,7 @@ class FirebaseService {
 
         try {
             await this.db.collection('content').doc(studentId).set(contentData);
-            console.log('✅ Content saved to Firebase for student:', studentId);
+            // Content saved to Firebase
             return true;
         } catch (error) {
             console.error('❌ Error saving content to Firebase:', error);
@@ -255,7 +251,7 @@ class FirebaseService {
 
         try {
             await this.db.collection('teachers').doc(teacherId).delete();
-            console.log('✅ Teacher deleted from Firebase:', teacherId);
+            // Teacher deleted from Firebase
             return true;
         } catch (error) {
             console.error('❌ Error deleting teacher from Firebase:', error);
@@ -274,7 +270,7 @@ class FirebaseService {
                 ...emailData,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('✅ Email logged in Firebase');
+            // Email logged in Firebase
         } catch (error) {
             console.error('❌ Error logging email in Firebase:', error);
             this.fallbackLogEmail(emailData);
@@ -291,7 +287,7 @@ class FirebaseService {
                 ...smsData,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            console.log('✅ SMS logged in Firebase');
+            // SMS logged in Firebase
         } catch (error) {
             console.error('❌ Error logging SMS in Firebase:', error);
             this.fallbackLogSMS(smsData);
@@ -322,7 +318,7 @@ class FirebaseService {
         const students = JSON.parse(localStorage.getItem('quranStudents') || '{}');
         students[studentData.id] = studentData;
         localStorage.setItem('quranStudents', JSON.stringify(students));
-        console.log('📦 Student saved to localStorage:', studentData.id);
+        // Student saved to localStorage
         return studentData;
     }
 
@@ -369,7 +365,7 @@ class FirebaseService {
         const teachers = JSON.parse(localStorage.getItem('quranTeachers') || '{}');
         teachers[teacherData.id] = teacherData;
         localStorage.setItem('quranTeachers', JSON.stringify(teachers));
-        console.log('📦 Teacher saved to localStorage:', teacherData.id);
+        // Teacher saved to localStorage
         return teacherData;
     }
 
@@ -390,7 +386,7 @@ class FirebaseService {
         const content = JSON.parse(localStorage.getItem('quranContent') || '{}');
         content[studentId] = contentData;
         localStorage.setItem('quranContent', JSON.stringify(content));
-        console.log('✅ Content saved to localStorage for student:', studentId);
+        // Content saved to localStorage
         return true;
     }
 
@@ -430,7 +426,7 @@ class FirebaseService {
         }
         
         try {
-            console.log('🗑️ Clearing all data from Firebase...');
+            // Clearing all data from Firebase
             
             // Get all collections and delete them
             const collections = ['students', 'teachers', 'content', 'emailLogs', 'smsLogs'];
@@ -445,13 +441,13 @@ class FirebaseService {
                         batch.delete(doc.ref);
                     });
                     await batch.commit();
-                    console.log(`✅ Cleared ${collectionName} collection (${snapshot.docs.length} documents)`);
+                    // Collection cleared
                 } else {
-                    console.log(`ℹ️ ${collectionName} collection is already empty`);
+                    // Collection already empty
                 }
             }
             
-            console.log('✅ All Firebase data cleared successfully');
+            // All Firebase data cleared successfully
             return true;
         } catch (error) {
             console.error('❌ Error clearing Firebase data:', error);
@@ -479,7 +475,7 @@ class FirebaseService {
                 await this.createTeacher(teacherData);
             }
 
-            console.log('✅ localStorage data synced to Firebase');
+            // localStorage data synced to Firebase
         } catch (error) {
             console.error('❌ Error syncing to Firebase:', error);
         }

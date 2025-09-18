@@ -708,29 +708,10 @@ function createTestDataWithRanges() {
     console.log('Test data created with proper ayah ranges. Data will be loaded from Firebase.');
 }
 
-// Debug function to check current data structure
+// Debug function disabled for security
 function debugDataStructure() {
-    console.log('=== DEBUGGING DATA STRUCTURE ===');
-    Object.keys(sampleData.content).forEach(userId => {
-        const userContent = sampleData.content[userId];
-        console.log(`User: ${userId}`);
-        console.log('Hifz:', userContent.hifz);
-        console.log('Revision:', userContent.revision);
-        console.log('Sessions:', userContent.sessions);
-        
-        if (userContent.sessions && userContent.sessions.length > 0) {
-            userContent.sessions.forEach((session, index) => {
-                console.log(`Session ${index}:`, {
-                    hifz: session.hifz,
-                    revision: session.revision,
-                    hifzType: typeof session.hifz,
-                    revisionType: typeof session.revision
-                });
-            });
-        }
-        console.log('---');
-    });
-    console.log('=== END DEBUG ===');
+    // Debug function disabled to prevent sensitive data exposure
+    return;
 }
 
 // Sample data for demonstration with new ID system
@@ -1386,6 +1367,84 @@ const translations = {
     }
 };
 
+// Production mode - set to true to disable debug logs and hide sensitive data
+const PRODUCTION_MODE = true;
+
+// Secure console logging - only logs in development mode
+function secureLog(message, ...args) {
+    if (!PRODUCTION_MODE) {
+        console.log(message, ...args);
+    }
+}
+
+// Security function to hide sensitive data from students
+function hideSensitiveData() {
+    if (PRODUCTION_MODE && currentUserType === 'student') {
+        // Override console.log to prevent students from seeing sensitive data
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            // Only allow safe messages for students
+            const safeMessages = [
+                'Please fill in all required fields',
+                'Account created successfully',
+                'Session added successfully',
+                'Content added successfully',
+                'Content deleted successfully',
+                'Please select an account type',
+                'No points yet',
+                'Please fill in all required fields and select at least one grade'
+            ];
+            
+            const message = args[0];
+            if (typeof message === 'string' && safeMessages.some(safe => message.includes(safe))) {
+                originalConsoleLog.apply(console, args);
+            }
+            // Block all other console.log calls for students
+        };
+        
+        // Hide sensitive global variables from students
+        Object.defineProperty(window, 'currentUser', {
+            get: function() { return currentUser; },
+            set: function(value) { currentUser = value; },
+            configurable: false
+        });
+        
+        Object.defineProperty(window, 'currentUserType', {
+            get: function() { return currentUserType; },
+            set: function(value) { currentUserType = value; },
+            configurable: false
+        });
+        
+        Object.defineProperty(window, 'sampleData', {
+            get: function() { return {}; }, // Return empty object for students
+            configurable: false
+        });
+        
+        // Disable right-click context menu for students (can be bypassed but adds security)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U for students
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Clear console periodically for students
+        setInterval(function() {
+            if (console.clear) {
+                console.clear();
+            }
+        }, 1000);
+    }
+}
+
 // Global variables
 let currentUser = null;
 let currentUserType = null;
@@ -1642,8 +1701,7 @@ function updateSurahOptions(selectElement) {
     console.log('=== UPDATE SURAH OPTIONS ===');
     console.log('Select element:', selectElement);
     console.log('Classes:', selectElement.className);
-    console.log('Sample data content:', sampleData.content);
-    console.log('Content keys:', Object.keys(sampleData.content));
+    // Sample data content loaded
     
     // If this is a session form select, populate it with actual content from cards
     if (selectElement.classList.contains('session-hifz-surah') || selectElement.classList.contains('session-revision-surah')) {
@@ -1703,9 +1761,7 @@ function populateSessionContentOptions(selectElement) {
     
     console.log('=== POPULATING SESSION CONTENT OPTIONS ===');
     console.log('Select element:', selectElement);
-    console.log('Current user type:', currentUserType);
-    console.log('Current user:', currentUser);
-    console.log('Editing student:', editingStudent);
+    // Loading content for current user
     
     // Store the current value to restore it
     const currentValue = selectElement.value;
@@ -1713,7 +1769,7 @@ function populateSessionContentOptions(selectElement) {
     
     // Get the current student's content
     const targetUser = getCurrentStudentId();
-    console.log('Target user:', targetUser);
+    // Target user identified
     
     // Get content from the actual dashboard cards instead of sample data
     const realContent = getRealDashboardContent(targetUser);
@@ -1794,7 +1850,7 @@ function populateSessionContentOptions(selectElement) {
 
 function getRealDashboardContent(studentId) {
     console.log('=== GETTING REAL DASHBOARD CONTENT ===');
-    console.log('Student ID:', studentId);
+    // Processing student request
     
     if (!studentId) {
         console.log('No student ID provided');
@@ -1811,7 +1867,7 @@ function getRealDashboardContent(studentId) {
         };
     }
     
-    console.log('No content found for student:', studentId);
+    // No content found for student
     return {
         hifz: [],
         revision: []
@@ -2048,8 +2104,7 @@ function populateSessionDropdowns() {
     
     console.log('Found hifz selects:', hifzSelects.length);
     console.log('Found revision selects:', revisionSelects.length);
-    console.log('Sample data content:', sampleData.content);
-    console.log('Content keys:', Object.keys(sampleData.content));
+    // Sample data content loaded
     
     hifzSelects.forEach(select => {
         console.log('Populating hifz select:', select);
@@ -2166,8 +2221,7 @@ function setupAutomaticDropdownPopulation() {
 
 // Individual student deletion (not entire database)
 async function deleteIndividualStudent(studentId) {
-    console.log('=== DELETING INDIVIDUAL STUDENT ===');
-    console.log('Student ID:', studentId);
+    // Deleting individual student
     
     if (!studentId) {
         console.error('No student ID provided for deletion');
@@ -2179,7 +2233,7 @@ async function deleteIndividualStudent(studentId) {
         
         // Delete from Firebase
         if (window.firebaseService && window.firebaseService.initialized) {
-            console.log('Deleting student from Firebase:', studentId);
+            // Deleting student from Firebase
             await window.firebaseService.deleteStudent(studentId);
             await window.firebaseService.deleteStudentContent(studentId);
         }
@@ -2187,12 +2241,12 @@ async function deleteIndividualStudent(studentId) {
         // Delete from local data
         if (sampleData.students && sampleData.students[studentId]) {
             delete sampleData.students[studentId];
-            console.log('Deleted student from sampleData.students');
+            // Student deleted from local data
         }
         
         if (sampleData.content && sampleData.content[studentId]) {
             delete sampleData.content[studentId];
-            console.log('Deleted student content from sampleData.content');
+            // Student content deleted from local data
         }
         
         // Remove from teacher assignments
@@ -2201,7 +2255,7 @@ async function deleteIndividualStudent(studentId) {
                 const teacher = sampleData.teachers[teacherId];
                 if (teacher.students && teacher.students.includes(studentId)) {
                     teacher.students = teacher.students.filter(id => id !== studentId);
-                    console.log(`Removed student ${studentId} from teacher ${teacherId}`);
+                    // Student removed from teacher assignment
                 }
             });
         }
@@ -2212,7 +2266,7 @@ async function deleteIndividualStudent(studentId) {
         localStorage.setItem('quranTeachers', JSON.stringify(sampleData.teachers || {}));
         
         hideLoading();
-        console.log('✅ Individual student deleted successfully:', studentId);
+        // Individual student deleted successfully
         return true;
         
     } catch (error) {
@@ -2912,7 +2966,7 @@ window.setLanguage = setLanguage;
 window.getTranslation = getTranslation;
 window.forceResetData = forceResetData;
 window.clearCompleteDatabase = clearCompleteDatabase;
-window.debugDataStructure = debugDataStructure;
+// Debug function disabled - window.debugDataStructure = debugDataStructure;
 window.fixAyahRanges = fixAyahRanges;
 window.forceFixAllData = forceFixAllData;
 window.forceConvertSampleData = forceConvertSampleData;
@@ -2942,7 +2996,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Ensure admin user exists
     if (!sampleData.admin || Object.keys(sampleData.admin).length === 0) {
-        console.log('No admin users found, creating admin...');
+        // Creating default admin user
         sampleData.admin = {
             'ADMINYNG9': {
                 name: 'System Administrator',
@@ -2952,12 +3006,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 email: 'admin@mris.com'
             }
         };
-        console.log('Admin created:', sampleData.admin);
+        // Default admin user created
     }
     
     // Create teacher account for TYA9BR1 (real teacher)
     if (!sampleData.teachers || !sampleData.teachers['TYA9BR1']) {
-        console.log('Creating teacher account TYA9BR1...');
+        // Creating default teacher account
         if (!sampleData.teachers) {
             sampleData.teachers = {};
         }
@@ -2969,7 +3023,7 @@ document.addEventListener('DOMContentLoaded', function() {
             email: 'teacher@mris.com',
             students: []
         };
-        console.log('Teacher created:', sampleData.teachers['TYA9BR1']);
+        // Default teacher account created
     }
     
     // Initialize dropdown functionality
@@ -2998,11 +3052,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addRevisionBtn = document.getElementById('addRevisionBtn');
     window.addSessionBtn = document.getElementById('addSessionBtn');
     
-    console.log('Add buttons found:', { 
-        addHifzBtn: window.addHifzBtn, 
-        addRevisionBtn: window.addRevisionBtn, 
-        addSessionBtn: window.addSessionBtn 
-    });
+    // Add buttons found and configured
     
     // Verify buttons exist before setting up event listeners
     if (!window.addHifzBtn || !window.addRevisionBtn || !window.addSessionBtn) {
@@ -3016,11 +3066,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.addHifzBtn = document.getElementById('addHifzBtn');
             window.addRevisionBtn = document.getElementById('addRevisionBtn');
             window.addSessionBtn = document.getElementById('addSessionBtn');
-            console.log('Retry - Add buttons found:', { 
-                addHifzBtn: window.addHifzBtn, 
-                addRevisionBtn: window.addRevisionBtn, 
-                addSessionBtn: window.addSessionBtn 
-            });
+            // Retry - Add buttons found and configured
         }, 100);
     }
     
@@ -3032,8 +3078,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Now load from Firebase (this will overwrite any local data)
     loadDataFromStorage().then(() => {
-        console.log('Data loaded from Firebase, now checking for existing session');
-        console.log('Admin data available:', sampleData.admin);
+        // Data loaded from Firebase, checking session
+        // Admin data loaded
         // Small delay to ensure DOM is fully ready
         setTimeout(() => {
             checkExistingSession();
@@ -3103,17 +3149,17 @@ function setupEventListeners() {
     
     // Enter key on user code input
     const userCodeInput = document.getElementById('userCode');
-    console.log('User code input element:', userCodeInput);
+    // User code input element found
     if (userCodeInput) {
-        console.log('User code input found, adding keypress event listener');
+        // Adding keypress event listener
         userCodeInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                console.log('Enter key pressed on user code input');
+                // Enter key pressed
                 handleLogin(e);
             }
         });
-        console.log('User code input event listener added');
+        // Event listener added
     } else {
         console.error('User code input not found');
     }
@@ -3127,10 +3173,10 @@ function setupEventListeners() {
             e.preventDefault();
             console.log('Ctrl+Z pressed - attempting undo');
             undoLastAction();
-        }
-    });
-}
-
+            }
+        });
+    }
+    
 // Setup dashboard-specific event listeners
 function setupDashboardButtons() {
     // Add Hifz button
@@ -3324,7 +3370,7 @@ function handleLogin(event) {
     const savedUser = localStorage.getItem('quranUser');
     const savedUserType = localStorage.getItem('quranUserType');
     if (savedUser && savedUserType) {
-        console.log('User already logged in, showing dashboard');
+        // User already logged in
         // Don't redirect - just show the dashboard
         const loginSection = document.getElementById('loginSection');
         const dashboardSection = document.getElementById('dashboardSection');
@@ -3342,7 +3388,7 @@ function handleLogin(event) {
     }
     
     const userCode = userCodeInput.value.trim().toUpperCase();
-    console.log('User code entered:', userCode);
+    // Processing login attempt
     
     if (!userCode) {
         // Reset button state
@@ -3364,18 +3410,11 @@ function handleLogin(event) {
     
     try {
         // Check if user exists
-        console.log('Checking admin users:', Object.keys(sampleData.admin));
-        console.log('Admin user details:', sampleData.admin);
-        console.log('Looking for user code:', userCode);
-        console.log('Admin user keys:', Object.keys(sampleData.admin));
-        Object.keys(sampleData.admin).forEach(key => {
-            console.log('Admin key:', key, 'matches?', key === userCode);
-        });
-        console.log('Checking students:', Object.keys(sampleData.students));
-        console.log('Checking teachers:', Object.keys(sampleData.teachers));
+        // Checking admin users
+        // Checking all user types
         
         if (sampleData.admin[userCode]) {
-            console.log('Admin user found:', userCode);
+            // Admin user found
             // Verify admin still exists in Firebase
             verifyUserExistsInFirebase(userCode, 'admin').then(exists => {
                 if (exists) {
@@ -3383,7 +3422,7 @@ function handleLogin(event) {
                     currentUserType = 'admin';
                     loginSuccess(sampleData.admin[userCode]);
                 } else {
-                    console.log('This admin account has been deleted and cannot log in.', 'error');
+                    // Admin account deleted
                     hideLoading();
                     // Reset button state
                     if (loginBtn) {
@@ -3401,7 +3440,7 @@ function handleLogin(event) {
                 }
             });
         } else if (sampleData.students[userCode]) {
-            console.log('Student user found:', userCode);
+            // Student user found
             // Verify student still exists in Firebase
             verifyUserExistsInFirebase(userCode, 'student').then(exists => {
                 if (exists) {
@@ -3427,15 +3466,15 @@ function handleLogin(event) {
                 }
             });
         } else if (sampleData.teachers[userCode]) {
-            console.log('Teacher user found:', userCode);
+            // Teacher user found
             // For now, skip Firebase verification for teachers to allow login
             // TODO: Implement proper teacher verification when teachers are created in Firebase
             currentUser = userCode;
             currentUserType = 'teacher';
-            console.log('About to call loginSuccess for teacher:', userCode);
+            // About to call loginSuccess for teacher
             loginSuccess(sampleData.teachers[userCode]);
         } else {
-            console.log('User not found:', userCode);
+            // User not found
             hideLoading();
             // Reset button state
             if (loginBtn) {
@@ -3456,7 +3495,10 @@ function handleLogin(event) {
 
 // Handle successful login
 function loginSuccess(user) {
-    console.log('Login successful for user:', user.name, 'Type:', currentUserType);
+    secureLog('Login successful for user:', user.name, 'Type:', currentUserType);
+    
+    // Apply security measures for students
+    hideSensitiveData();
     
     // Set flag to prevent checkExistingSession from interfering
     window.justLoggedIn = true;
@@ -3569,7 +3611,7 @@ function loginSuccess(user) {
     if (userCodeInput) userCodeInput.value = '';
     
     // Show welcome notification
-    console.log(`${getTranslation('notification.welcome')}, ${user.name}!`, 'success');
+    // Welcome message displayed
 }
 
 // Load student content
@@ -3582,8 +3624,7 @@ function loadStudentContent() {
     
     console.log('=== loadStudentContent called ===');
     console.log('Call count:', window.loadStudentContentCallCount);
-    console.log('Current user type:', currentUserType);
-    console.log('Current user:', currentUser);
+    // Loading content for current user
     
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
@@ -3594,23 +3635,14 @@ function loadStudentContent() {
         return;
     }
     
-    console.log('Loading content for targetUser:', targetUser);
-    console.log('Current user type:', currentUserType);
-    console.log('Editing student:', editingStudent);
+    // Loading content for target user
     
     // Check if dashboard containers exist
-    console.log('Dashboard containers found:', {
-        hifzContent: !!hifzContent,
-        revisionContent: !!revisionContent,
-        sessionsList: !!sessionsList
-    });
+    // Dashboard containers found and verified
     
     // For teachers without a selected student, show teacher options
     if (currentUserType === 'teacher' && !targetUser) {
-        console.log('Teacher logged in but no student selected - showing teacher options');
-        console.log('currentUserType:', currentUserType);
-        console.log('targetUser:', targetUser);
-        console.log('currentUser:', currentUser);
+        // Teacher logged in but no student selected - showing teacher options
         
         // Remove editing header if it exists
         const editingHeader = document.getElementById('editingStudentHeader');
@@ -3622,9 +3654,9 @@ function loadStudentContent() {
         showPickStudentMessage();
         
         // Show teacher options modal
-        console.log('About to call showTeacherOptions in 500ms');
+        // About to show teacher options
         setTimeout(() => {
-            console.log('Calling showTeacherOptions now');
+            // Calling showTeacherOptions
             showTeacherOptions(true); // Pass true to indicate this is from login
         }, 500); // Small delay to ensure UI is ready
         
@@ -3641,21 +3673,14 @@ function loadStudentContent() {
     }
     
     const userData = sampleData.content[targetUser];
-    console.log('User data loaded for', targetUser, ':', userData);
-    console.log('Hifz entries:', userData.hifz);
-    console.log('Revision entries:', userData.revision);
-    console.log('Sessions entries:', userData.sessions);
+    // User data loaded successfully
     
     // Get container references dynamically (in case global variables are null)
     const hifzContentElement = document.getElementById('hifzContent');
     const revisionContentElement = document.getElementById('revisionContent');
     const sessionsListElement = document.getElementById('sessionsList');
     
-    console.log('Container references:', {
-        hifzContent: hifzContentElement,
-        revisionContent: revisionContentElement,
-        sessionsList: sessionsListElement
-    });
+    // Container references obtained
     
     // Clear all containers first to prevent mixing
     if (hifzContentElement) hifzContentElement.innerHTML = '';
@@ -3681,7 +3706,7 @@ function loadStudentContent() {
     // Load Past Sessions
     console.log('Loading sessions content, container:', sessionsListElement);
     if (sessionsListElement) {
-        loadSessionsList(userData.sessions);
+    loadSessionsList(userData.sessions);
     } else {
         console.error('sessionsList container not found!');
     }
@@ -3730,21 +3755,21 @@ function loadContentItems(container, items, type) {
         if (currentUserType === 'teacher') {
             if (type === 'hifz') {
                 // For hifz content, show arrow button to move to revision
-                contentItem.innerHTML = `
+            contentItem.innerHTML = `
                     <button class="move-btn teacher-move-btn" onclick="moveContentToRevision('${type}', ${index})" style="opacity: 1 !important;">→</button>
-                    <h4>${ayahRange}</h4>
+                <h4>${ayahRange}</h4>
                 `;
             } else {
                 // For revision content, show delete button
                 contentItem.innerHTML = `
-                    <button class="delete-btn teacher-delete-btn" onclick="deleteContentItem('${type}', ${index})" style="opacity: 1 !important;">−</button>
+                <button class="delete-btn teacher-delete-btn" onclick="deleteContentItem('${type}', ${index})" style="opacity: 1 !important;">−</button>
                     <h4>${ayahRange}</h4>
-                `;
-                
-                // Add double-click event for deletion (teachers only)
-                contentItem.addEventListener('dblclick', () => {
-                    showDeleteButton(contentItem);
-                });
+            `;
+            
+            // Add double-click event for deletion (teachers only)
+            contentItem.addEventListener('dblclick', () => {
+                showDeleteButton(contentItem);
+            });
             }
         } else {
             contentItem.innerHTML = `
@@ -4053,19 +4078,18 @@ function selectStudent(studentCode) {
 
 // Show teacher controls
 function showTeacherControls() {
-    console.log('showTeacherControls called - currentUserType:', currentUserType);
-    console.log('editingStudent:', editingStudent);
+    // Showing teacher controls
     
     // Only show controls for teachers
     if (currentUserType !== 'teacher') {
-        console.log('Not a teacher, hiding controls');
+        // Not a teacher, hiding controls
         hideTeacherControls();
         return;
     }
     
     // Only show add buttons if a student is selected for editing
     if (!editingStudent) {
-        console.log('No student selected for editing, hiding add buttons');
+        // No student selected for editing, hiding add buttons
         hideTeacherControls();
         return;
     }
@@ -4208,9 +4232,7 @@ function handleAddHifz(event) {
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
     
-    console.log('Adding hifz entry for target user:', targetUser);
-    console.log('Current user type:', currentUserType);
-    console.log('Editing student:', editingStudent);
+    // Adding hifz entry for target user
     
     if (!targetUser) {
         console.log(getTranslation('notification.no_student_selected'), 'error');
@@ -4248,10 +4270,7 @@ function handleAddHifz(event) {
     console.log('Data saved to storage');
     
     // Reload content
-    console.log('Reloading student content...');
-    console.log('Current editingStudent:', editingStudent);
-    console.log('Current targetUser:', targetUser);
-    console.log('Content after adding:', sampleData.content[targetUser]);
+    // Reloading student content after adding hifz
     loadStudentContent();
     
     // Close modal and reset form
@@ -4283,9 +4302,7 @@ function handleAddRevision(event) {
     // Get the current student ID using the utility function
     const targetUser = getCurrentStudentId();
     
-    console.log('Adding revision entry for target user:', targetUser);
-    console.log('Current user type:', currentUserType);
-    console.log('Editing student:', editingStudent);
+    // Adding revision entry for target user
     
     if (!targetUser) {
         console.log(getTranslation('notification.no_student_selected'), 'error');
@@ -4319,7 +4336,7 @@ function handleAddRevision(event) {
     });
     
     console.log('Added revision entry:', newEntry);
-    console.log('Total revision entries for', targetUser, ':', sampleData.content[targetUser].revision.length);
+    // Total revision entries updated
     
     // Save data
     saveAllDataToStorage();
@@ -4456,7 +4473,7 @@ function handleAddSession(event) {
             sampleData.students[targetUser].points = 0;
         }
         sampleData.students[targetUser].points += points;
-        console.log(`Added ${points} points for score ${score}. Total points: ${sampleData.students[targetUser].points}`);
+        // Points added successfully
     }
     
     // Add to undo history
@@ -4495,9 +4512,7 @@ function handleAddSession(event) {
         }
     });
     
-    console.log('Updated content for student:', targetUser);
-    console.log('Hifz items:', sampleData.content[targetUser].hifz);
-    console.log('Revision items:', sampleData.content[targetUser].revision);
+    // Updated content for student
     
     // Reload content
     console.log('About to reload content after adding session');
@@ -4930,14 +4945,13 @@ function populateStudentsList(className) {
     // Get students in this class
     const studentsInClass = Object.entries(sampleData.students).filter(([id, student]) => student.class === className);
     
-    console.log('Students in class', className, ':', studentsInClass);
-    console.log('All students:', Object.keys(sampleData.students));
+    // Loading students in class
     
     studentsList.innerHTML = '';
     
     if (studentsInClass.length === 0) {
         studentsList.innerHTML = '<p style="text-align: center; color: #666;">No students in this class</p>';
-        console.log('No students found in class:', className);
+        // No students found in class
         return;
     }
     
@@ -4952,8 +4966,8 @@ function populateStudentsList(className) {
                           sampleData.teachers[currentUser].students && 
                           sampleData.teachers[currentUser].students.includes(studentId);
         
-        console.log('Checking assignment for student:', studentId);
-        console.log('Teacher students array:', sampleData.teachers[currentUser]?.students);
+        // Checking student assignment
+        // Checking teacher assignments
         console.log('Is assigned:', isAssigned);
         
         if (isAssigned) {
@@ -5010,8 +5024,7 @@ function addSelectedStudents() {
     let addedCount = 0;
     
     console.log('Found checkboxes:', checkboxes.length);
-    console.log('Current user:', currentUser);
-    console.log('Teacher data:', sampleData.teachers[currentUser]);
+    // Processing teacher data
     
     // Don't reset the teacher's students array - this was causing the issue!
     // if (sampleData.teachers[currentUser]) {
@@ -5036,10 +5049,10 @@ function addSelectedStudents() {
     });
     
     console.log('Total added:', addedCount);
-    console.log('Teacher students after:', sampleData.teachers[currentUser]?.students);
+    // Teacher assignments updated
     
     if (addedCount > 0) {
-        console.log(`Added ${addedCount} students to teacher ${currentUser}`);
+        // Students added to teacher
         alert(`${addedCount} student(s) added successfully! You can now manage them in "Edit Students".`);
         
         // Close the modal
@@ -5057,12 +5070,11 @@ function addSelectedStudents() {
 }
 
 function addStudentToTeacher(studentId) {
-    console.log('assignStudentToTeacher called with:', studentId);
-    console.log('Current user:', currentUser);
-    console.log('Teacher exists:', !!sampleData.teachers[currentUser]);
+    // Processing student assignment
+    // Assigning student to teacher
     
     if (!sampleData.teachers[currentUser]) {
-        console.log('Current teacher not found');
+        // Teacher not found
         return false;
     }
     
@@ -5072,9 +5084,7 @@ function addStudentToTeacher(studentId) {
         console.log('Initialized students array for teacher');
     }
     
-    console.log('Current students before check:', sampleData.teachers[currentUser].students);
-    console.log('Looking for student:', studentId);
-    console.log('Array includes check:', sampleData.teachers[currentUser].students.includes(studentId));
+    // Checking current student assignments
     
     // Check if student is already assigned
     if (sampleData.teachers[currentUser].students.includes(studentId)) {
@@ -5084,12 +5094,12 @@ function addStudentToTeacher(studentId) {
     
     // Add student to teacher
     sampleData.teachers[currentUser].students.push(studentId);
-    console.log('Added student to array. New students:', sampleData.teachers[currentUser].students);
+    // Student added to teacher
     
     // Save data
     saveAllDataToStorage();
     
-    console.log(`Student ${studentId} assigned to teacher ${currentUser}`);
+    // Student assignment completed
     return true;
 }
 
@@ -5103,8 +5113,7 @@ function showAssignedStudents() {
     closeModal('teacherOptionsModal');
     
     // Debug logging
-    console.log('showAssignedStudents - currentUser:', currentUser);
-    console.log('showAssignedStudents - students length:', sampleData.teachers[currentUser]?.students?.length);
+    // Showing assigned students
     
     if (!sampleData.teachers[currentUser] || !sampleData.teachers[currentUser].students || sampleData.teachers[currentUser].students.length === 0) {
         console.log('Showing empty state for edit students');
@@ -5188,12 +5197,11 @@ function showAssignedStudents() {
     
     // Group students by class
     const studentsByClass = {};
-    console.log('Teacher students array:', sampleData.teachers[currentUser].students);
-    console.log('Total students assigned to teacher:', sampleData.teachers[currentUser].students.length);
+    // Processing assigned students
     
     sampleData.teachers[currentUser].students.forEach((studentId, index) => {
         const student = sampleData.students[studentId];
-        console.log(`Processing student ${index + 1}/${sampleData.teachers[currentUser].students.length}:`, studentId, student);
+        // Processing student
         if (student) {
             if (!studentsByClass[student.class]) {
                 studentsByClass[student.class] = [];
@@ -5292,7 +5300,7 @@ function toggleClassStudents(className) {
 }
 
 function selectStudentForEditing(studentId) {
-    console.log('Selecting student for editing:', studentId);
+    // Selecting student for editing
     editingStudent = studentId;
     
     // Close the assigned students modal
@@ -5325,7 +5333,7 @@ function selectStudentForEditing(studentId) {
     // Populate past sessions dropdowns for this student
     populatePastSessionsDropdowns();
     
-    console.log('Student editing mode activated for:', studentId);
+    // Student editing mode activated
 }
 
 function showEditingStudentHeader(studentId) {
@@ -5382,7 +5390,7 @@ function removeStudentFromTeacher(studentId) {
     // Save data
     saveAllDataToStorage();
     
-    console.log(`Student ${studentId} removed from teacher ${currentUser}`);
+    // Student removed from teacher
     
     // Refresh the assigned students list
     showAssignedStudents();
@@ -5679,27 +5687,25 @@ function generateAyahRangeDropdown(surahName, startId, endId) {
 // Helper function to populate past sessions dropdowns
 function populatePastSessionsDropdowns() {
     const targetUser = getCurrentStudentId();
-    console.log('Populating past sessions dropdowns for user:', targetUser);
+    // Populating session dropdowns
     
     if (!targetUser) {
-        console.log('No target user found');
+        // No target user found
         return;
     }
     
     if (!sampleData.content[targetUser]) {
-        console.log('No content data found for user:', targetUser);
+        // No content data found
         return;
     }
     
     const userData = sampleData.content[targetUser];
-    console.log('User data:', userData);
-    console.log('Hifz items:', userData.hifz);
-    console.log('Revision items:', userData.revision);
+    // User data loaded for session dropdowns
     
     // Populate hifz dropdown
     const hifzDropdown = document.getElementById('sessionHifzSurah');
     if (hifzDropdown) {
-        console.log('Found hifz dropdown, populating with', userData.hifz.length, 'items');
+        // Populating hifz dropdown
         hifzDropdown.innerHTML = '<option value="">Select Hifz Item</option>';
         userData.hifz.forEach((item, index) => {
             const option = document.createElement('option');
@@ -5715,7 +5721,7 @@ function populatePastSessionsDropdowns() {
     // Populate revision dropdown
     const revisionDropdown = document.getElementById('sessionRevisionSurah');
     if (revisionDropdown) {
-        console.log('Found revision dropdown, populating with', userData.revision.length, 'items');
+        // Populating revision dropdown
         revisionDropdown.innerHTML = '<option value="">Select Revision Item</option>';
         userData.revision.forEach((item, index) => {
             const option = document.createElement('option');
@@ -5768,43 +5774,41 @@ function initializeDropdowns() {
 
 // Firebase sync functions
 async function syncDeleteStudentToFirebase(studentId) {
-    console.log('=== SYNC DELETE TO FIREBASE ===');
-    console.log('Firebase service exists:', !!window.firebaseService);
-    console.log('Firebase service initialized:', window.firebaseService?.initialized);
+    // Syncing delete to Firebase
+    // Checking Firebase service availability
     
     if (window.firebaseService && window.firebaseService.initialized) {
         try {
-            console.log('Attempting to delete student from Firebase:', studentId);
+            // Attempting to delete student from Firebase
             await window.firebaseService.deleteStudent(studentId);
-            console.log('Student deleted from Firebase:', studentId);
+            // Student deleted from Firebase
         } catch (error) {
             console.error('Error deleting student from Firebase:', error);
         }
     } else {
-        console.log('Firebase service not available for deletion');
+        // Firebase service not available for deletion
     }
 }
 
 async function deleteStudentContentFromFirebase(studentId) {
-    console.log('=== DELETING STUDENT CONTENT FROM FIREBASE ===');
-    console.log('Student ID:', studentId);
+    // Deleting student content from Firebase
+    // Processing student request
     
     if (window.firebaseService && window.firebaseService.initialized) {
         try {
             // Delete content from Firebase
             await window.firebaseService.deleteStudentContent(studentId);
-            console.log('Student content deleted from Firebase:', studentId);
+            // Student content deleted from Firebase
         } catch (error) {
             console.error('Error deleting student content from Firebase:', error);
         }
     } else {
-        console.log('Firebase service not available for content deletion');
+        // Firebase service not available for content deletion
     }
 }
 
 async function verifyUserExistsInFirebase(userId, userType) {
-    console.log('=== VERIFYING USER EXISTS IN FIREBASE ===');
-    console.log('User ID:', userId, 'Type:', userType);
+    // Verifying user exists in Firebase
     
     if (window.firebaseService && window.firebaseService.initialized) {
         try {
@@ -6056,29 +6060,28 @@ async function saveAllDataToStorage() {
         // Save to Firebase if available
         if (window.firebaseService && window.firebaseService.initialized) {
             try {
-                console.log('=== SAVING TO FIREBASE ===');
-                console.log('Students to save:', Object.keys(sampleData.students));
-                console.log('Teachers to save:', Object.keys(sampleData.teachers));
+                // Saving to Firebase
+                // Saving data to Firebase
                 
                 // Save students
                 for (const [id, studentData] of Object.entries(sampleData.students)) {
-                    console.log('Saving student to Firebase:', id, studentData);
+                    // Saving student to Firebase
                     await window.firebaseService.createStudent(studentData);
                 }
                 
                 // Save teachers
                 for (const [id, teacherData] of Object.entries(sampleData.teachers)) {
-                    console.log('Saving teacher to Firebase:', id, teacherData);
+                    // Saving teacher to Firebase
                     await window.firebaseService.createTeacher(teacherData);
                 }
                 
                 // Save content
                 for (const [id, contentData] of Object.entries(sampleData.content)) {
-                    console.log('Saving content to Firebase:', id, contentData);
+                    // Saving content to Firebase
                     await window.firebaseService.saveContent(id, contentData);
                 }
         
-        console.log('All data saved to Firebase:', sampleData);
+        // All data saved to Firebase
         
         // Show a subtle notification that data was saved (only for admin users)
         if (currentUserType === 'admin') {
@@ -6090,7 +6093,7 @@ async function saveAllDataToStorage() {
             }
         } else {
             console.log('Firebase not available, data not saved');
-            console.log('Firebase service:', window.firebaseService);
+            // Firebase service not available
         }
     } catch (e) {
         console.error('Error saving data:', e);
@@ -6103,9 +6106,7 @@ async function saveAllDataToStorage() {
 // Load data from Firebase
 async function loadDataFromStorage() {
     try {
-        console.log('=== LOADING DATA FROM STORAGE ===');
-        console.log('Firebase service exists:', !!window.firebaseService);
-        console.log('Firebase service initialized:', window.firebaseService?.initialized);
+        // Loading data from storage
         
         // Clear any existing data to ensure clean state
         sampleData.students = {};
@@ -6115,46 +6116,48 @@ async function loadDataFromStorage() {
         // Load from Firebase only (unless data was just cleared)
         if (!dataJustCleared && window.firebaseService && window.firebaseService.initialized) {
             try {
-                console.log('Loading data from Firebase...');
+                // Loading data from Firebase
                 const students = await window.firebaseService.getAllStudents();
                 const teachers = await window.firebaseService.getAllTeachers();
                 const content = await window.firebaseService.getAllContent();
                 
-                console.log('Raw students from Firebase:', students);
-                console.log('Raw teachers from Firebase:', teachers);
-                console.log('Raw content from Firebase:', content);
+                // Raw data received from Firebase
                 
+                // Silently process data without any logging
                 if (students && Object.keys(students).length > 0) {
-                    console.log('Loading students from Firebase:', Object.keys(students).length);
-                    sampleData.students = students;
+                    sampleData.students = {};
+                    Object.keys(students).forEach(id => {
+                        sampleData.students[id] = { ...students[id] };
+                    });
                 }
                 if (teachers && Object.keys(teachers).length > 0) {
-                    console.log('Loading teachers from Firebase:', Object.keys(teachers).length);
-                    sampleData.teachers = teachers;
+                    sampleData.teachers = {};
+                    Object.keys(teachers).forEach(id => {
+                        sampleData.teachers[id] = { ...teachers[id] };
+                    });
                 }
                 if (content && Object.keys(content).length > 0) {
-                    console.log('Loading content from Firebase:', Object.keys(content).length);
-                    sampleData.content = content;
+                    sampleData.content = {};
+                    Object.keys(content).forEach(id => {
+                        sampleData.content[id] = { ...content[id] };
+                    });
                 }
             
-            console.log('Data loaded from Firebase:', sampleData);
-            console.log('Students after Firebase load:', Object.keys(sampleData.students));
-            console.log('Teachers after Firebase load:', Object.keys(sampleData.teachers));
-            console.log('Content after Firebase load:', Object.keys(sampleData.content));
+            // Firebase data loading completed
+            // Data loaded from Firebase successfully
             } catch (firebaseError) {
                 console.error('Error loading from Firebase:', firebaseError);
-                console.log('Firebase error, using empty data');
+                // Firebase error, using empty data
             }
         } else if (dataJustCleared) {
-            console.log('Data was just cleared, skipping Firebase reload');
+            // Data was just cleared, skipping Firebase reload
             dataJustCleared = false; // Reset flag
         } else {
-            console.log('Firebase not available, using empty data');
-            console.log('Firebase service:', window.firebaseService);
+            // Firebase not available, using empty data
         }
     } catch (e) {
         console.error('Error loading data:', e);
-        console.log('Firebase error, using empty data');
+        // Firebase error, using empty data
     }
 }
 
@@ -6383,9 +6386,9 @@ function confirmDeleteStudent() {
     `;
     
     showConfirmationModal('Delete Student', confirmContent, async () => {
-        console.log('=== DELETING STUDENT FROM FIREBASE ===');
-        console.log('Student ID to delete:', studentId);
-        console.log('Firebase service initialized:', window.firebaseService?.initialized);
+        // Deleting student from Firebase
+        // Processing student deletion
+        // Checking Firebase service status
         
         // Show loading screen
         showLoading('Deleting student...');
@@ -6400,7 +6403,7 @@ function confirmDeleteStudent() {
                 const adminData = sampleData.admin;
                 sampleData.admin = adminData;
                 localStorage.setItem('sampleData', JSON.stringify(sampleData));
-                console.log('Admin account restored after clear');
+                // Admin account restored
             }
             
             // Close modals
@@ -6548,8 +6551,8 @@ function confirmDeleteTeacher() {
         });
         
         // Clear entire Firebase database when deleting teacher
-        console.log('=== DELETING TEACHER AND CLEARING FIREBASE ===');
-        console.log('Teacher ID to delete:', teacherId);
+        // Deleting teacher and clearing Firebase
+        // Processing teacher deletion
         
         // Clear entire Firebase database
         await clearFirebaseDatabase();
@@ -6819,11 +6822,7 @@ function closeFullLeaderboard() {
 
 // Handle create account
 async function handleCreateAccount(event) {
-    console.log('handleCreateAccount called!', event);
     event.preventDefault();
-    
-    // Add a simple test to see if the function is working
-    console.log('Form submission started');
     
     const accountType = document.getElementById('accountType').value;
     const firstName = document.getElementById('firstName').value.trim();
@@ -6833,21 +6832,13 @@ async function handleCreateAccount(event) {
     const className = document.getElementById('className').value;
     const teacherName = document.getElementById('teacherName').value.trim();
     
-    console.log('Form data:', { accountType, firstName, lastName, email, phone, className, teacherName });
-    
-    // Debug: Check what fields are required
-    const gradeField = document.getElementById('grade');
-    const classField = document.getElementById('className');
-    console.log('Grade field required:', gradeField.required);
-    console.log('Class field required:', classField.required);
-    console.log('Class field display:', classField.parentElement.style.display);
+    // Form validation in progress
     
     // Check validation based on account type and grade
     if (accountType === 'teacher' && className === 'Teacher') {
         // For Teacher grade, check if teacher grades are selected
         const teacherGradesCheckboxes = document.querySelectorAll('input[name="teacherGrades"]:checked');
-        console.log('Teacher grades checkboxes found:', teacherGradesCheckboxes.length);
-        console.log('Selected grades:', Array.from(teacherGradesCheckboxes).map(cb => cb.value));
+        // Validating teacher grade selection
         
         if (!firstName || !lastName || teacherGradesCheckboxes.length === 0) {
             console.log('Please fill in all required fields and select at least one grade', 'error');
@@ -6855,8 +6846,8 @@ async function handleCreateAccount(event) {
         }
     } else if (accountType === 'teacher' && className && className !== 'Teacher') {
         // For regular teacher grades, check normal validation
-        if (!firstName || !lastName || !className) {
-            console.log('Please fill in all required fields', 'error');
+    if (!firstName || !lastName || !className) {
+        console.log('Please fill in all required fields', 'error');
             return;
         }
     } else if (accountType === 'student') {
@@ -6888,22 +6879,22 @@ async function handleCreateAccount(event) {
         // Use the exact same ID generation process as signup.js
         const userId = await generateId(firstName, lastName, accountType, className, className, null);
         
-        console.log('Generated user ID:', userId);
+        // ID generated successfully
         
         // Check if user already exists using the same process as signup.js
-        console.log('Checking if user already exists...');
+        // Checking if user already exists
         const idExists = await checkIdExists(userId);
         if (idExists) {
             hideLoading();
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
-            console.log('Account with this ID already exists: ' + userId, 'error');
+            console.log('Account with this ID already exists', 'error');
             return;
         }
-        console.log('User ID is unique, proceeding with account creation...');
+        // User ID is unique, proceeding
         
         // Create user record using the same process as signup.js
-        console.log('Creating user data object...');
+        // Creating user data object
         const userData = {
             id: userId,
             name: `${firstName} ${lastName}`,
@@ -6918,27 +6909,27 @@ async function handleCreateAccount(event) {
             
             // Add student
             sampleData.students[userId] = userData;
-            
-            // Add content entry
+        
+        // Add content entry
             sampleData.content[userId] = {
-                hifz: [],
-                revision: [],
-                sessions: []
-            };
-            
-            // Assign to teacher if specified
-            if (teacherName) {
-                Object.keys(sampleData.teachers).forEach(teacherId => {
-                    if (sampleData.teachers[teacherId].name === teacherName) {
-                        if (!sampleData.teachers[teacherId].students) {
-                            sampleData.teachers[teacherId].students = [];
-                        }
-                        sampleData.teachers[teacherId].students.push(userId);
+            hifz: [],
+            revision: [],
+            sessions: []
+        };
+        
+        // Assign to teacher if specified
+        if (teacherName) {
+            Object.keys(sampleData.teachers).forEach(teacherId => {
+                if (sampleData.teachers[teacherId].name === teacherName) {
+                    if (!sampleData.teachers[teacherId].students) {
+                        sampleData.teachers[teacherId].students = [];
                     }
-                });
-            }
-            
-        } else if (accountType === 'teacher') {
+                        sampleData.teachers[teacherId].students.push(userId);
+                }
+            });
+        }
+        
+    } else if (accountType === 'teacher') {
             // Check if grade is "Teacher" (multi-grade teacher)
             if (className === 'Teacher') {
                 // Multi-grade teacher - get selected grades and classes
@@ -6951,74 +6942,89 @@ async function handleCreateAccount(event) {
                 userData.teacherGrades = selectedGrades;
                 userData.teacherClasses = selectedClasses;
                 userData.grade = 'Teacher';
-            } else {
+        } else {
                 // Single grade teacher
                 userData.grade = className.match(/^(\d+)/) ? className.match(/^(\d+)/)[1] : '00';
                 userData.class = className;
             }
             
             userData.students = [];
-            
-            // Add teacher
+        
+        // Add teacher
             sampleData.teachers[userId] = userData;
         }
         
         const newId = userId;
+    
+    // Save to localStorage
+    saveAllDataToStorage();
+    
+    // Sync to Firebase
+    if (accountType === 'student') {
+        syncCreateStudentToFirebase(sampleData.students[newId]);
+    } else if (accountType === 'teacher') {
+        syncCreateTeacherToFirebase(sampleData.teachers[newId]);
+    }
+    
+    // If current user is a teacher and we just created a student, set them for editing
+    if (currentUserType === 'teacher' && accountType === 'student') {
+        // Setting newly created student for editing
+        editingStudent = newId;
         
-        // Save to localStorage
-        saveAllDataToStorage();
+        // Load the student's content immediately
+        loadStudentContent();
         
-        // Sync to Firebase
-        if (accountType === 'student') {
-            syncCreateStudentToFirebase(sampleData.students[newId]);
-        } else if (accountType === 'teacher') {
-            syncCreateTeacherToFirebase(sampleData.teachers[newId]);
-        }
+        // Ensure add buttons are properly set up
+        ensureAddButtonsSetup();
         
-        // Close modal and reset form
-        closeModal('createAccountModal');
-        document.getElementById('createAccountForm').reset();
-        
-        // Show success message with ID in styled modal
-        const accountDetails = `
-            <div class="account-created-container">
-                <div class="success-icon">✅</div>
-                <h4>Account Created Successfully!</h4>
-                
-                <div class="account-details">
-                    <div class="detail-row">
-                        <span class="detail-label">Account Type:</span>
-                        <span class="detail-value">${accountType.charAt(0).toUpperCase() + accountType.slice(1)}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Name:</span>
-                        <span class="detail-value">${firstName} ${lastName}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Class:</span>
-                        <span class="detail-value">${className === 'Teacher' ? 'Multi-Grade Teacher' : className}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Unique ID:</span>
-                        <span class="detail-value id-highlight">${newId}</span>
-                    </div>
+        // Show teacher controls for the new student
+        showTeacherControls();
+    }
+
+    // Close modal and reset form
+    closeModal('createAccountModal');
+    document.getElementById('createAccountForm').reset();
+    
+    // Show success message with ID in styled modal
+    const accountDetails = `
+        <div class="account-created-container">
+            <div class="success-icon">✅</div>
+            <h4>Account Created Successfully!</h4>
+            
+            <div class="account-details">
+                <div class="detail-row">
+                    <span class="detail-label">Account Type:</span>
+                    <span class="detail-value">${accountType.charAt(0).toUpperCase() + accountType.slice(1)}</span>
                 </div>
-                
-                <div class="important-note">
-                    <strong>⚠️ Important:</strong> Please share this ID with the user. They will need it to log in.
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">${firstName} ${lastName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Class:</span>
+                        <span class="detail-value">${className === 'Teacher' ? 'Multi-Grade Teacher' : className}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Unique ID:</span>
+                    <span class="detail-value id-highlight">${newId}</span>
                 </div>
             </div>
-        `;
-        
-        showDetailedModal('Account Created', accountDetails);
-        
-        console.log(`${accountType} account created successfully! ID: ${newId}`, 'success');
-        
-        // Refresh admin dashboard
-        showAdminDashboard();
-        
-        // Hide loading screen
-        hideLoading();
+            
+            <div class="important-note">
+                <strong>⚠️ Important:</strong> Please share this ID with the user. They will need it to log in.
+            </div>
+        </div>
+    `;
+    
+    showDetailedModal('Account Created', accountDetails);
+    
+        console.log(`${accountType} account created successfully!`, 'success');
+    
+    // Refresh admin dashboard
+    showAdminDashboard();
+    
+    // Hide loading screen
+    hideLoading();
         
     } catch (error) {
         console.error('Account creation error:', error);
@@ -7141,10 +7147,10 @@ async function generateId(firstName, lastName, userType, grade = null, className
     if (exists) {
         const timestamp = Date.now().toString().slice(-2);
         finalId = baseId + timestamp;
-        console.log(`Max attempts reached, using timestamp: ${finalId}`);
+        // Max attempts reached, using timestamp
     }
     
-    console.log(`Final generated ID: ${finalId}`);
+    // Final ID generated
     return finalId;
 }
 
@@ -7210,12 +7216,7 @@ async function checkIdExists(id) {
     const existsInLocalStorage = localStudents.hasOwnProperty(id) || localTeachers.hasOwnProperty(id);
     
     const exists = existsInFirebase || existsInLocal || existsInLocalStorage;
-    console.log(`ID ${id} exists check:`, {
-        firebase: existsInFirebase,
-        local: existsInLocal,
-        localStorage: existsInLocalStorage,
-        final: exists
-    });
+    // ID existence check completed
     
     return exists;
 }
@@ -7532,7 +7533,7 @@ function deleteAllTeachers() {
     
     showConfirmationModal('Delete All Teachers', confirmContent, async () => {
         try {
-            console.log('=== DELETING ALL TEACHERS ===');
+            // Deleting all teachers
             
             // Show loading screen
             showLoading('Deleting all teachers...');
@@ -7546,7 +7547,7 @@ function deleteAllTeachers() {
                 const adminData = sampleData.admin;
                 sampleData.admin = adminData;
                 localStorage.setItem('sampleData', JSON.stringify(sampleData));
-                console.log('Admin account restored after clear');
+                // Admin account restored
             }
             
             // Refresh admin dashboard
@@ -7588,7 +7589,7 @@ function deleteAllStudents() {
     
     showConfirmationModal('Delete All Students', confirmContent, async () => {
         try {
-            console.log('=== DELETING ALL STUDENTS ===');
+            // Deleting all students
             
             // Show loading screen
             showLoading('Deleting all students...');
@@ -7602,7 +7603,7 @@ function deleteAllStudents() {
                 const adminData = sampleData.admin;
                 sampleData.admin = adminData;
                 localStorage.setItem('sampleData', JSON.stringify(sampleData));
-                console.log('Admin account restored after clear');
+                // Admin account restored
             }
             
             // Refresh admin dashboard
@@ -7809,7 +7810,7 @@ function checkExistingSession() {
     const savedUserType = localStorage.getItem('quranUserType');
     
     if (savedUser && savedUserType) {
-        console.log('Found existing session:', savedUser, savedUserType);
+        // Found existing session
         
         currentUser = savedUser;
         currentUserType = savedUserType;
@@ -7817,7 +7818,7 @@ function checkExistingSession() {
         let userData;
         if (currentUserType === 'admin') {
             userData = sampleData.admin[savedUser];
-            console.log('Admin user data lookup:', savedUser, userData);
+            // Admin user data lookup
         } else if (currentUserType === 'student') {
             userData = sampleData.students[savedUser];
         } else if (currentUserType === 'teacher') {
@@ -7828,7 +7829,7 @@ function checkExistingSession() {
             loginSuccess(userData);
         } else if (currentUserType === 'admin' && savedUser === 'ADMINYNG9') {
             // Fallback for ADMINYNG9 if not found in sampleData
-            console.log('Creating fallback admin data for ADMINYNG9');
+            // Creating fallback admin data
             const fallbackAdminData = {
                 name: 'System Administrator',
                 role: 'admin',
@@ -7838,7 +7839,7 @@ function checkExistingSession() {
             loginSuccess(fallbackAdminData);
         } else {
             // Clear invalid session
-            console.log('No user data found, clearing session');
+            // No user data found, clearing session
             localStorage.removeItem('quranUser');
             localStorage.removeItem('quranUserType');
         }

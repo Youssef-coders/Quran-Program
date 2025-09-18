@@ -35,7 +35,7 @@ class AuthManager {
         const userCode = document.getElementById('userCode').value.trim();
         
         if (!userCode) {
-            console.log('No user code entered');
+            // No user code entered
             return;
         }
 
@@ -50,11 +50,10 @@ class AuthManager {
             if (user) {
                 this.loginSuccess(user);
             } else {
-                console.log('Invalid code');
+                // Invalid code
             }
         } catch (error) {
-            console.log('Login failed');
-            console.error('Login error:', error);
+            // Login failed
         } finally {
             // Reset button state
             loginBtn.textContent = originalText;
@@ -178,12 +177,12 @@ class AuthManager {
 
     loadTeacherDashboard() {
         // Load students list and other teacher-specific data
-        console.log('Loading teacher dashboard...');
+        // Loading teacher dashboard
     }
 
     loadStudentDashboard() {
         // Load student-specific data
-        console.log('Loading student dashboard...');
+        // Loading student dashboard
     }
 
     handleLogout() {
@@ -231,3 +230,4 @@ class AuthManager {
 document.addEventListener('DOMContentLoaded', () => {
     window.authManager = new AuthManager();
 });
+
