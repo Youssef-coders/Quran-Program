@@ -22,6 +22,8 @@ class SignupManager {
                 'signup.grade_8': 'Grade 8',
                 'signup.grade_9': 'Grade 9',
                 'signup.grade_10': 'Grade 10',
+                'signup.grade_11': 'Grade 11',
+                'signup.grade_12': 'Grade 12',
                 'signup.class': 'Class',
                 'signup.select_class': 'Select Class',
                 'signup.select_grade_first': 'Select Grade First',
@@ -79,6 +81,8 @@ class SignupManager {
                 'signup.grade_8': 'الصف الثامن',
                 'signup.grade_9': 'الصف التاسع',
                 'signup.grade_10': 'الصف العاشر',
+                'signup.grade_11': 'الصف الحادي عشر',
+                'signup.grade_12': 'الصف الثاني عشر',
                 'signup.class': 'الفصل',
                 'signup.select_class': 'اختر الفصل',
                 'signup.select_grade_first': 'اختر الصف أولاً',
@@ -478,6 +482,23 @@ class SignupManager {
                 { value: '10BR1', display: '10BR1' },
                 { value: '10BR2', display: '10BR2' },
                 { value: '10BR3', display: '10BR3' }
+            ],
+            '11': [
+                { value: '11AM1', display: '11AM1' },
+                { value: '11AM2', display: '11AM2' },
+                { value: '11AM3', display: '11AM3' },
+                { value: '11AM4', display: '11AM4' },
+                { value: '11AM5', display: '11AM5' },
+                { value: '11BR1', display: '11BR1' },
+                { value: '11BR2', display: '11BR2' }
+            ],
+            '12': [
+                { value: '12AM1', display: '12AM1' },
+                { value: '12AM2', display: '12AM2' },
+                { value: '12AM3', display: '12AM3' },
+                { value: '12AM4', display: '12AM4' },
+                { value: '12BR1', display: '12BR1' },
+                { value: '12BR2', display: '12BR2' }
             ]
         };
         

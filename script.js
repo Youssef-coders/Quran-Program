@@ -826,6 +826,9 @@ const translations = {
         'account.grade_7': 'Grade 7',
         'account.grade_8': 'Grade 8',
         'account.grade_9': 'Grade 9',
+        'account.grade_10': 'Grade 10',
+        'account.grade_11': 'Grade 11',
+        'account.grade_12': 'Grade 12',
         'account.grade_teacher': 'Teacher',
         'account.class': 'Class',
         'account.select_grade_first': 'Select Grade First',
@@ -1083,6 +1086,9 @@ const translations = {
         'account.grade_7': 'الصف السابع',
         'account.grade_8': 'الصف الثامن',
         'account.grade_9': 'الصف التاسع',
+        'account.grade_10': 'الصف العاشر',
+        'account.grade_11': 'الصف الحادي عشر',
+        'account.grade_12': 'الصف الثاني عشر',
         'account.grade_teacher': 'معلم',
         'account.class': 'الفصل',
         'account.select_grade_first': 'اختر الصف أولاً',
@@ -1207,6 +1213,8 @@ const translations = {
         'account.grade_8': 'الصف الثامن',
         'account.grade_9': 'الصف التاسع',
         'account.grade_10': 'الصف العاشر',
+        'account.grade_11': 'الصف الحادي عشر',
+        'account.grade_12': 'الصف الثاني عشر',
         
         // Account created success
         'account.created_success': 'تم إنشاء الحساب بنجاح!',
@@ -2221,10 +2229,17 @@ function setupAutomaticDropdownPopulation() {
 
 // Individual student deletion (not entire database)
 async function deleteIndividualStudent(studentId) {
-    // Deleting individual student
+    console.log('deleteIndividualStudent called with ID:', studentId);
+    console.log('Type of studentId:', typeof studentId);
+    console.log('Student exists in sampleData:', !!sampleData.students[studentId]);
     
     if (!studentId) {
         console.error('No student ID provided for deletion');
+        return false;
+    }
+    
+    if (typeof studentId !== 'string' || studentId.trim() === '') {
+        console.error('Invalid student ID provided:', studentId);
         return false;
     }
     
@@ -2276,12 +2291,169 @@ async function deleteIndividualStudent(studentId) {
     }
 }
 
+// Individual teacher deletion (not entire database)
+async function deleteIndividualTeacher(teacherId) {
+    // Deleting individual teacher
+    
+    if (!teacherId) {
+        console.error('No teacher ID provided for deletion');
+        return false;
+    }
+
+    try {
+        showLoading('Deleting teacher...');
+        
+        // Get teacher data before deletion
+        const teacher = sampleData.teachers[teacherId];
+        const students = teacher?.students || [];
+        
+        // Delete from Firebase
+        if (window.firebaseService && window.firebaseService.initialized) {
+            // Attempting to delete teacher from Firebase
+            await window.firebaseService.deleteTeacher(teacherId);
+        }
+        
+        // Delete from local data
+        if (sampleData.teachers && sampleData.teachers[teacherId]) {
+            delete sampleData.teachers[teacherId];
+            // Teacher deleted from local data
+        }
+        
+        // Update all students assigned to this teacher
+        students.forEach(studentId => {
+            if (sampleData.students && sampleData.students[studentId]) {
+                sampleData.students[studentId].teacher = 'Unassigned';
+                // Student assignment updated
+            }
+        });
+        
+        // Update localStorage
+        localStorage.setItem('quranStudents', JSON.stringify(sampleData.students || {}));
+        localStorage.setItem('quranTeachers', JSON.stringify(sampleData.teachers || {}));
+        
+        hideLoading();
+        // Individual teacher deleted successfully
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error deleting individual teacher:', error);
+        hideLoading();
+        return false;
+    }
+}
+
 // Make it globally accessible
 window.deleteIndividualStudent = deleteIndividualStudent;
+window.deleteIndividualTeacher = deleteIndividualTeacher;
+
+// DEBUG FUNCTION - Test dropdown functionality
+window.testStudentDropdown = function() {
+    console.log('=== TESTING STUDENT DROPDOWN ===');
+    
+    const dropdown = document.getElementById('deleteStudentSelect');
+    console.log('1. Dropdown element exists:', !!dropdown);
+    
+    if (dropdown) {
+        console.log('2. Dropdown innerHTML:', dropdown.innerHTML);
+        console.log('3. Number of options:', dropdown.options.length);
+        console.log('4. Current value:', dropdown.value);
+        console.log('5. Selected index:', dropdown.selectedIndex);
+        
+        // List all options
+        for (let i = 0; i < dropdown.options.length; i++) {
+            console.log(`   Option ${i}: value="${dropdown.options[i].value}", text="${dropdown.options[i].text}"`);
+        }
+    }
+    
+    console.log('6. Students in sampleData:', Object.keys(sampleData.students));
+    console.log('7. Number of students:', Object.keys(sampleData.students).length);
+    
+    return {
+        dropdownExists: !!dropdown,
+        dropdownValue: dropdown?.value,
+        studentsCount: Object.keys(sampleData.students).length,
+        optionsCount: dropdown?.options.length
+    };
+};
+
+// DIRECT TEST FUNCTION - Test deletion with a specific student ID
+window.testDeleteStudent = function(studentId) {
+    console.log('=== TESTING DIRECT STUDENT DELETION ===');
+    console.log('Input studentId:', studentId);
+    
+    if (!studentId) {
+        // Try to get first available student
+        const firstStudentId = Object.keys(sampleData.students)[0];
+        console.log('No studentId provided, using first student:', firstStudentId);
+        studentId = firstStudentId;
+    }
+    
+    if (!studentId) {
+        console.error('No students available to test with');
+        return;
+    }
+    
+    console.log('Testing deletion of student:', studentId);
+    console.log('Student exists:', !!sampleData.students[studentId]);
+    console.log('Student data:', sampleData.students[studentId]);
+    
+    // Call the deletion function directly
+    deleteIndividualStudent(studentId).then(success => {
+        console.log('Deletion result:', success);
+    }).catch(error => {
+        console.error('Deletion error:', error);
+    });
+};
+
+// FUNCTION TO IDENTIFY TEST ACCOUNTS - Use this to find accounts to remove
+window.findTestAccounts = function() {
+    console.log('🔍 Searching for potential test accounts...');
+    
+    const testStudents = [];
+    const testTeachers = [];
+    
+    // Look for students with test-like names or IDs
+    Object.keys(sampleData.students).forEach(id => {
+        const student = sampleData.students[id];
+        const name = student.name?.toLowerCase() || '';
+        const email = student.email?.toLowerCase() || '';
+        
+        if (name.includes('test') || 
+            name.includes('dummy') || 
+            name.includes('sample') ||
+            email.includes('test') ||
+            id.includes('TEST') ||
+            id.includes('DUMMY')) {
+            testStudents.push({id, name: student.name, email: student.email});
+        }
+    });
+    
+    // Look for teachers with test-like names or IDs
+    Object.keys(sampleData.teachers).forEach(id => {
+        const teacher = sampleData.teachers[id];
+        const name = teacher.name?.toLowerCase() || '';
+        
+        if (name.includes('test') || 
+            name.includes('dummy') || 
+            name.includes('sample') ||
+            id.includes('TEST') ||
+            id.includes('DUMMY')) {
+            testTeachers.push({id, name: teacher.name});
+        }
+    });
+    
+    console.log('📊 Found potential test accounts:');
+    console.log('Test Students:', testStudents);
+    console.log('Test Teachers:', testTeachers);
+    console.log('📝 Total real students:', Object.keys(sampleData.students).length - testStudents.length);
+    console.log('📝 Total real teachers:', Object.keys(sampleData.teachers).length - testTeachers.length);
+    
+    return { testStudents, testTeachers };
+};
 
 // Override any existing problematic deletion functions
 function overrideProblematicDeletionFunctions() {
-    console.log('=== OVERRIDING PROBLEMATIC DELETION FUNCTIONS ===');
+    // Overriding problematic deletion functions
     
     // Override common deletion function names that might be calling complete database clear
     const commonDeletionNames = [
@@ -3711,12 +3883,16 @@ function loadStudentContent() {
         console.error('sessionsList container not found!');
     }
     
-    // Ensure teacher controls are visible if teacher is editing
+    // Show appropriate controls based on user type
     if (currentUserType === 'teacher' && editingStudent) {
-        console.log('Teacher editing student - ensuring controls are visible');
+        console.log('Teacher editing student - showing all teacher controls');
         showTeacherControls();
     } else if (currentUserType === 'student') {
-        // Hide all add buttons for students to prevent self-editing
+        // Show only Hifz button for students (they can add their own upcoming content)
+        console.log('Student logged in - showing student controls (Hifz only)');
+        showStudentControls();
+    } else {
+        // Hide all buttons for other cases
         hideTeacherControls();
     }
     
@@ -4071,7 +4247,9 @@ function selectStudent(studentCode) {
     console.log('About to call loadStudentContent for student');
     loadStudentContent();
     
-    // Note: showTeacherControls() is called from loadStudentContent() when appropriate
+    // Show student controls (only Hifz button for adding their own content)
+    showStudentControls();
+    
     // Ensure buttons are properly set up
     ensureAddButtonsSetup();
 }
@@ -4138,6 +4316,28 @@ function hideTeacherControls() {
     if (window.addHifzBtn) window.addHifzBtn.style.display = 'none';
     if (window.addRevisionBtn) window.addRevisionBtn.style.display = 'none';
     if (window.addSessionBtn) window.addSessionBtn.style.display = 'none';
+}
+
+// Show student controls (only Hifz button for adding their own content)
+function showStudentControls() {
+    console.log('Showing student controls - only Hifz button');
+    
+    // Show only the Hifz (Next Session Content) button for students
+    if (window.addHifzBtn) {
+        window.addHifzBtn.style.setProperty('display', 'block', 'important');
+        window.addHifzBtn.style.setProperty('visibility', 'visible', 'important');
+        window.addHifzBtn.style.setProperty('opacity', '1', 'important');
+    }
+    
+    // Hide Revision and Session buttons for students (they can't add grades/past sessions)
+    if (window.addRevisionBtn) {
+        window.addRevisionBtn.style.display = 'none';
+    }
+    if (window.addSessionBtn) {
+        window.addSessionBtn.style.display = 'none';
+    }
+    
+    console.log('Student controls set - only Hifz button visible');
 }
 
 // Ensure add buttons are properly set up
@@ -6304,14 +6504,27 @@ function showDeleteStudentModal() {
 // Populate delete student dropdown
 function populateDeleteStudentDropdown() {
     const studentSelect = document.getElementById('deleteStudentSelect');
+    if (!studentSelect) {
+        console.error('Delete student dropdown not found!');
+        return;
+    }
+    
     studentSelect.innerHTML = `<option value="">${getTranslation('admin.choose_student')}</option>`;
+    
+    console.log('Populating student dropdown with', Object.keys(sampleData.students).length, 'students');
     
     Object.keys(sampleData.students).forEach(studentId => {
         const student = sampleData.students[studentId];
+        if (!student) {
+            console.warn('Student data missing for ID:', studentId);
+            return;
+        }
+        
         const option = document.createElement('option');
         option.value = studentId;
         option.textContent = `${student.name} (${studentId}) - ${student.class}`;
         studentSelect.appendChild(option);
+        console.log('Added student option:', studentId, student.name);
     });
     
     // Add change event listener
@@ -6357,10 +6570,29 @@ function showStudentPreview(studentId) {
 
 // Confirm delete student
 function confirmDeleteStudent() {
-    const studentId = document.getElementById('deleteStudentSelect').value;
-    if (!studentId) return;
+    const dropdown = document.getElementById('deleteStudentSelect');
+    const studentId = dropdown?.value;
+    console.log('confirmDeleteStudent called');
+    console.log('Dropdown element:', !!dropdown);
+    console.log('Dropdown value:', studentId);
+    console.log('Dropdown selectedIndex:', dropdown?.selectedIndex);
+    
+    if (!studentId || studentId === '') {
+        console.error('No student selected in confirmDeleteStudent');
+        alert('Please select a student first.');
+        return;
+    }
     
     const student = sampleData.students[studentId];
+    if (!student) {
+        console.error('Student not found in data:', studentId);
+        console.error('Available students:', Object.keys(sampleData.students));
+        alert('Student not found. Please refresh and try again.');
+        return;
+    }
+    
+    console.log('Student found:', student.name);
+    console.log('About to create modal with studentId:', studentId);
     
     // Show confirmation modal
     const confirmContent = `
@@ -6385,35 +6617,57 @@ function confirmDeleteStudent() {
         </div>
     `;
     
+    // Store studentId in a way that won't get lost
+    const studentIdToDelete = studentId;
+    console.log('Stored studentIdToDelete:', studentIdToDelete);
+    
     showConfirmationModal('Delete Student', confirmContent, async () => {
-        // Deleting student from Firebase
-        // Processing student deletion
-        // Checking Firebase service status
+        console.log('=== INSIDE MODAL CALLBACK ===');
+        console.log('studentIdToDelete:', studentIdToDelete);
+        console.log('original studentId:', studentId);
+        console.log('student object:', student);
+        
+        const finalStudentId = studentIdToDelete || studentId;
+        console.log('finalStudentId to use:', finalStudentId);
+        
+        if (!finalStudentId) {
+            console.error('No student ID available in modal callback');
+            console.error('studentIdToDelete was:', studentIdToDelete);
+            console.error('original studentId was:', studentId);
+            alert('Error: Student ID lost. Please try again.');
+            return;
+        }
         
         // Show loading screen
         showLoading('Deleting student...');
         
         try {
-            // Use complete database clear for thorough deletion
-            console.log('Using complete database clear for student deletion...');
-            await clearCompleteDatabase();
+            // Delete individual student only (not entire database)
+            const success = await deleteIndividualStudent(finalStudentId);
             
-            // Recreate admin account if it existed
-            if (sampleData.admin) {
-                const adminData = sampleData.admin;
-                sampleData.admin = adminData;
-                localStorage.setItem('sampleData', JSON.stringify(sampleData));
-                // Admin account restored
+            if (success) {
+                console.log(`Student ${student.name} deleted successfully!`, 'success');
+                
+                // Close modals
+                closeModal('deleteStudentModal');
+                closeModal('confirmationModal');
+                
+                // Refresh the delete dropdown
+                populateDeleteStudentDropdown();
+                
+                // Refresh admin dashboard if admin user
+                if (currentUserType === 'admin') {
+                    showAdminDashboard();
+                }
+                
+                // If current user is teacher, refresh their view
+                if (currentUserType === 'teacher') {
+                    loadStudentContent();
+                }
+            } else {
+                alert('Error deleting student. Please try again.');
             }
             
-            // Close modals
-            closeModal('deleteStudentModal');
-            closeModal('confirmationModal');
-            
-            // Refresh admin dashboard
-            showAdminDashboard();
-            
-            console.log(`Student ${student.name} deleted successfully!`, 'success');
         } catch (error) {
             console.error('Error deleting student:', error);
             alert('Error deleting student. Please try again.');
@@ -6540,37 +6794,37 @@ function confirmDeleteTeacher() {
     `;
     
     showConfirmationModal('Delete Teacher', confirmContent, async () => {
-        // Remove teacher from data
-        delete sampleData.teachers[teacherId];
-        
-        // Update all students assigned to this teacher
-        students.forEach(studentId => {
-            if (sampleData.students[studentId]) {
-                sampleData.students[studentId].teacher = 'Unassigned';
+        try {
+            // Show loading screen
+            showLoading('Deleting teacher...');
+            
+            // Delete individual teacher only (not entire database)
+            const success = await deleteIndividualTeacher(teacherId);
+            
+            if (success) {
+                console.log(`Teacher ${teacher.name} deleted successfully!`, 'success');
+                
+                // Close modals
+                closeModal('deleteTeacherModal');
+                closeModal('confirmationModal');
+                
+                // Refresh the delete dropdown
+                populateDeleteTeacherDropdown();
+                
+                // Refresh admin dashboard if admin user
+                if (currentUserType === 'admin') {
+                    showAdminDashboard();
+                }
+            } else {
+                alert('Error deleting teacher. Please try again.');
             }
-        });
-        
-        // Clear entire Firebase database when deleting teacher
-        // Deleting teacher and clearing Firebase
-        // Processing teacher deletion
-        
-        // Clear entire Firebase database
-        await clearFirebaseDatabase();
-        
-        // Clear local data completely
-        sampleData.students = {};
-        sampleData.teachers = {};
-        sampleData.content = {};
-        dataJustCleared = true; // Set flag to prevent reloading
-        
-        // Close modals
-        closeModal('deleteTeacherModal');
-        closeModal('confirmationModal');
-        
-        // Refresh admin dashboard
-        showAdminDashboard();
-        
-        console.log(`Teacher ${teacher.name} deleted successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('Error deleting teacher:', error);
+            alert('Error deleting teacher. Please try again.');
+        } finally {
+            hideLoading();
+        }
     });
 }
 
@@ -7262,7 +7516,10 @@ function updateClassOptions() {
         '6': ['6Ba1', '6Ba2', '6Ba3', '6Ba4', '6Ba5', '6Ba6', '6Ba7'],
         '7': ['7Ba1', '7Ba2', '7Ba3', '7Ba4', '7Ba5', '7Ba6', '7Ba7', '7Ba8'],
         '8': ['8Ba1', '8Ba2', '8Ba3', '8Ba4', '8Ba5', '8Ba6', '8Ba7', '8Ba8'],
-        '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4']
+        '9': ['9AM1', '9AM2', '9AM3', '9AM4', '9AM5', '9BR1', '9BR2', '9BR3', '9BR4'],
+        '10': ['10AM1', '10AM2', '10AM3', '10AM4', '10AM5', '10AM6', '10BR1', '10BR2', '10BR3'],
+        '11': ['11AM1', '11AM2', '11AM3', '11AM4', '11AM5', '11BR1', '11BR2'],
+        '12': ['12AM1', '12AM2', '12AM3', '12AM4', '12BR1', '12BR2']
     };
     
     // Add class options for selected grade
@@ -7351,6 +7608,34 @@ function updateTeacherClassOptions() {
             { value: '9BR2', display: '9BR2' },
             { value: '9BR3', display: '9BR3' },
             { value: '9BR4', display: '9BR4' }
+        ],
+        '10': [
+            { value: '10AM1', display: '10AM1' },
+            { value: '10AM2', display: '10AM2' },
+            { value: '10AM3', display: '10AM3' },
+            { value: '10AM4', display: '10AM4' },
+            { value: '10AM5', display: '10AM5' },
+            { value: '10AM6', display: '10AM6' },
+            { value: '10BR1', display: '10BR1' },
+            { value: '10BR2', display: '10BR2' },
+            { value: '10BR3', display: '10BR3' }
+        ],
+        '11': [
+            { value: '11AM1', display: '11AM1' },
+            { value: '11AM2', display: '11AM2' },
+            { value: '11AM3', display: '11AM3' },
+            { value: '11AM4', display: '11AM4' },
+            { value: '11AM5', display: '11AM5' },
+            { value: '11BR1', display: '11BR1' },
+            { value: '11BR2', display: '11BR2' }
+        ],
+        '12': [
+            { value: '12AM1', display: '12AM1' },
+            { value: '12AM2', display: '12AM2' },
+            { value: '12AM3', display: '12AM3' },
+            { value: '12AM4', display: '12AM4' },
+            { value: '12BR1', display: '12BR1' },
+            { value: '12BR2', display: '12BR2' }
         ],
     };
     
