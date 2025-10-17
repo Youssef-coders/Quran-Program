@@ -3142,8 +3142,11 @@ window.clearCompleteDatabase = clearCompleteDatabase;
 window.fixAyahRanges = fixAyahRanges;
 window.forceFixAllData = forceFixAllData;
 window.forceSyncFromFirebase = forceSyncFromFirebase;
+window.forceSyncFromFirebaseDetailed = forceSyncFromFirebaseDetailed;
 window.forceSyncToFirebase = forceSyncToFirebase;
 window.clearFirebaseDatabase = clearFirebaseDatabase;
+window.debugFirebaseData = debugFirebaseData;
+window.forceFirebaseAuthAndSync = forceFirebaseAuthAndSync;
 window.forceConvertSampleData = forceConvertSampleData;
 window.forceAddEndAyah = forceAddEndAyah;
 window.createTestDataWithRanges = createTestDataWithRanges;
@@ -8019,9 +8022,128 @@ function confirmLogout() {
     showLogoutConfirmation();
 }
 
-// Force sync data from Firebase (fix for tablet/computer sync issues)
-async function forceSyncFromFirebase() {
-    console.log('🔄 Force syncing data from Firebase...');
+// Force Firebase authentication and retry sync
+async function forceFirebaseAuthAndSync() {
+    console.log('🔐 Forcing Firebase authentication and sync...');
+    
+    if (!window.firebaseService) {
+        console.error('❌ Firebase service not available');
+        return false;
+    }
+    
+    try {
+        // Force anonymous authentication
+        console.log('🔐 Attempting anonymous authentication...');
+        await window.firebaseService.auth.signInAnonymously();
+        console.log('✅ Anonymous authentication successful');
+        
+        // Wait a moment for auth to propagate
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Now try the detailed sync
+        console.log('🔄 Attempting sync after authentication...');
+        return await forceSyncFromFirebaseDetailed();
+        
+    } catch (error) {
+        console.error('❌ Authentication failed:', error);
+        
+        // Try without authentication (if rules allow)
+        console.log('🔄 Trying sync without authentication...');
+        return await forceSyncFromFirebaseDetailed();
+    }
+}
+
+// Debug Firebase data structure and collections
+async function debugFirebaseData() {
+    console.log('🔍 Debugging Firebase data structure...');
+    
+    if (!window.firebaseService || !window.firebaseService.initialized) {
+        console.error('❌ Firebase service not available');
+        return;
+    }
+    
+    try {
+        console.log('📊 Firebase Debug Report:');
+        console.log('========================');
+        
+        // Check Firebase connection
+        console.log('✅ Firebase initialized:', window.firebaseService.initialized);
+        console.log('✅ Firebase database:', window.firebaseService.db ? 'Connected' : 'Not connected');
+        
+        // Get all collections
+        console.log('\n📁 Checking Firebase collections...');
+        
+        // Check students collection
+        console.log('\n👥 Students Collection:');
+        const studentsSnapshot = await window.firebaseService.db.collection('students').get();
+        console.log('Total students in Firebase:', studentsSnapshot.size);
+        
+        if (studentsSnapshot.size > 0) {
+            console.log('Student IDs found:');
+            studentsSnapshot.forEach(doc => {
+                console.log(`  - ${doc.id}:`, doc.data());
+            });
+        } else {
+            console.log('❌ No students found in Firebase');
+        }
+        
+        // Check teachers collection
+        console.log('\n👨‍🏫 Teachers Collection:');
+        const teachersSnapshot = await window.firebaseService.db.collection('teachers').get();
+        console.log('Total teachers in Firebase:', teachersSnapshot.size);
+        
+        if (teachersSnapshot.size > 0) {
+            console.log('Teacher IDs found:');
+            teachersSnapshot.forEach(doc => {
+                console.log(`  - ${doc.id}:`, doc.data());
+            });
+        } else {
+            console.log('❌ No teachers found in Firebase');
+        }
+        
+        // Check content collection
+        console.log('\n📚 Content Collection:');
+        const contentSnapshot = await window.firebaseService.db.collection('content').get();
+        console.log('Total content items in Firebase:', contentSnapshot.size);
+        
+        if (contentSnapshot.size > 0) {
+            console.log('Content IDs found:');
+            contentSnapshot.forEach(doc => {
+                console.log(`  - ${doc.id}:`, doc.data());
+            });
+        } else {
+            console.log('❌ No content found in Firebase');
+        }
+        
+        // Check if there are any other collections
+        console.log('\n🔍 Checking for other collections...');
+        const collections = ['students', 'teachers', 'content', 'emailLogs', 'smsLogs'];
+        
+        for (const collectionName of collections) {
+            try {
+                const snapshot = await window.firebaseService.db.collection(collectionName).get();
+                console.log(`Collection '${collectionName}': ${snapshot.size} documents`);
+            } catch (error) {
+                console.log(`Collection '${collectionName}': Error - ${error.message}`);
+            }
+        }
+        
+        // Compare with local data
+        console.log('\n💾 Local Data Comparison:');
+        console.log('Local students:', Object.keys(sampleData.students).length);
+        console.log('Local teachers:', Object.keys(sampleData.teachers).length);
+        console.log('Local content:', Object.keys(sampleData.content).length);
+        
+        console.log('\n✅ Firebase debug complete!');
+        
+    } catch (error) {
+        console.error('❌ Error during Firebase debug:', error);
+    }
+}
+
+// Enhanced force sync with detailed logging
+async function forceSyncFromFirebaseDetailed() {
+    console.log('🔄 Force syncing data from Firebase (detailed)...');
     
     if (!window.firebaseService) {
         console.error('❌ Firebase service not available');
@@ -8043,18 +8165,42 @@ async function forceSyncFromFirebase() {
         sampleData.teachers = {};
         sampleData.content = {};
         
-        // Force load from Firebase
+        // Force load from Firebase with detailed logging
         console.log('📥 Loading students from Firebase...');
-        const students = await window.firebaseService.getAllStudents();
-        console.log('📥 Students loaded:', Object.keys(students).length);
+        const studentsSnapshot = await window.firebaseService.db.collection('students').get();
+        console.log('📥 Raw students snapshot size:', studentsSnapshot.size);
+        
+        const students = {};
+        studentsSnapshot.forEach(doc => {
+            students[doc.id] = { id: doc.id, ...doc.data() };
+            console.log('📥 Loaded student:', doc.id, doc.data());
+        });
+        
+        console.log('📥 Processed students:', Object.keys(students).length);
         
         console.log('📥 Loading teachers from Firebase...');
-        const teachers = await window.firebaseService.getAllTeachers();
-        console.log('📥 Teachers loaded:', Object.keys(teachers).length);
+        const teachersSnapshot = await window.firebaseService.db.collection('teachers').get();
+        console.log('📥 Raw teachers snapshot size:', teachersSnapshot.size);
+        
+        const teachers = {};
+        teachersSnapshot.forEach(doc => {
+            teachers[doc.id] = { id: doc.id, ...doc.data() };
+            console.log('📥 Loaded teacher:', doc.id, doc.data());
+        });
+        
+        console.log('📥 Processed teachers:', Object.keys(teachers).length);
         
         console.log('📥 Loading content from Firebase...');
-        const content = await window.firebaseService.getAllContent();
-        console.log('📥 Content loaded:', Object.keys(content).length);
+        const contentSnapshot = await window.firebaseService.db.collection('content').get();
+        console.log('📥 Raw content snapshot size:', contentSnapshot.size);
+        
+        const content = {};
+        contentSnapshot.forEach(doc => {
+            content[doc.id] = { id: doc.id, ...doc.data() };
+            console.log('📥 Loaded content:', doc.id, doc.data());
+        });
+        
+        console.log('📥 Processed content:', Object.keys(content).length);
         
         // Process the data
         if (students && Object.keys(students).length > 0) {
@@ -8085,7 +8231,7 @@ async function forceSyncFromFirebase() {
         const totalStudents = Object.keys(sampleData.students).length;
         const totalTeachers = Object.keys(sampleData.teachers).length;
         
-        alert(`✅ Sync complete!\n\nStudents: ${totalStudents}\nTeachers: ${totalTeachers}\n\nData loaded from Firebase successfully.`);
+        alert(`✅ Detailed sync complete!\n\nStudents: ${totalStudents}\nTeachers: ${totalTeachers}\n\nCheck console for detailed logs.`);
         
         console.log('✅ Force sync completed successfully');
         return true;
