@@ -8304,6 +8304,14 @@ async function forceSyncFromFirebaseDetailed() {
         
         // Process the data
         if (students && Object.keys(students).length > 0) {
+            // Preserve existing points when syncing students
+            Object.keys(students).forEach(studentId => {
+                if (sampleData.students[studentId] && sampleData.students[studentId].points) {
+                    students[studentId].points = sampleData.students[studentId].points;
+                    console.log(`📊 Preserved points for ${studentId}: ${students[studentId].points}`);
+                }
+            });
+            
             sampleData.students = students;
             console.log('✅ Students synced:', Object.keys(students).length);
         }
@@ -8324,6 +8332,9 @@ async function forceSyncFromFirebaseDetailed() {
         } else if (currentUserType === 'teacher') {
             populateTeacherStudents();
         }
+        
+        // Update leaderboard after sync
+        updateLeaderboard();
         
         hideLoading();
         
@@ -8419,6 +8430,26 @@ async function clearFirebaseDatabase() {
     }
 }
 
+// Manual leaderboard sync function
+function syncLeaderboardData() {
+    console.log('🏆 Syncing leaderboard data...');
+    
+    // Get all students with points
+    const studentsWithPoints = Object.values(sampleData.students)
+        .filter(student => student.points && student.points > 0)
+        .sort((a, b) => (b.points || 0) - (a.points || 0));
+    
+    console.log(`📊 Found ${studentsWithPoints.length} students with points:`);
+    studentsWithPoints.forEach((student, index) => {
+        console.log(`  ${index + 1}. ${student.name} (${student.id}): ${student.points} points`);
+    });
+    
+    // Update leaderboard display
+    updateLeaderboard();
+    
+    console.log('✅ Leaderboard synced successfully');
+}
+
 // Assign Firebase functions to window object at the end
 window.forceSyncFromFirebase = forceSyncFromFirebase;
 window.forceSyncFromFirebaseDetailed = forceSyncFromFirebaseDetailed;
@@ -8426,6 +8457,7 @@ window.forceSyncToFirebase = forceSyncToFirebase;
 window.clearFirebaseDatabase = clearFirebaseDatabase;
 window.debugFirebaseData = debugFirebaseData;
 window.forceFirebaseAuthAndSync = forceFirebaseAuthAndSync;
+window.syncLeaderboardData = syncLeaderboardData;
 
 // Helper function to control options button visibility based on user type
 function updateOptionsButtonVisibility() {
