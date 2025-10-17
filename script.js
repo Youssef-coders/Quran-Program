@@ -3141,12 +3141,7 @@ window.clearCompleteDatabase = clearCompleteDatabase;
 // Debug function disabled - window.debugDataStructure = debugDataStructure;
 window.fixAyahRanges = fixAyahRanges;
 window.forceFixAllData = forceFixAllData;
-window.forceSyncFromFirebase = forceSyncFromFirebase;
-window.forceSyncFromFirebaseDetailed = forceSyncFromFirebaseDetailed;
-window.forceSyncToFirebase = forceSyncToFirebase;
-window.clearFirebaseDatabase = clearFirebaseDatabase;
-window.debugFirebaseData = debugFirebaseData;
-window.forceFirebaseAuthAndSync = forceFirebaseAuthAndSync;
+// These will be assigned at the end of the file after functions are defined
 window.forceConvertSampleData = forceConvertSampleData;
 window.forceAddEndAyah = forceAddEndAyah;
 window.createTestDataWithRanges = createTestDataWithRanges;
@@ -8022,6 +8017,85 @@ function confirmLogout() {
     showLogoutConfirmation();
 }
 
+// Force sync data from Firebase (fix for tablet/computer sync issues)
+async function forceSyncFromFirebase() {
+    console.log('🔄 Force syncing data from Firebase...');
+    
+    if (!window.firebaseService) {
+        console.error('❌ Firebase service not available');
+        alert('Firebase service not available. Please refresh the page.');
+        return false;
+    }
+    
+    if (!window.firebaseService.initialized) {
+        console.error('❌ Firebase not initialized');
+        alert('Firebase not initialized. Please refresh the page.');
+        return false;
+    }
+    
+    try {
+        showLoading('Syncing data from Firebase...');
+        
+        // Clear local data first
+        sampleData.students = {};
+        sampleData.teachers = {};
+        sampleData.content = {};
+        
+        // Force load from Firebase
+        console.log('📥 Loading students from Firebase...');
+        const students = await window.firebaseService.getAllStudents();
+        console.log('📥 Students loaded:', Object.keys(students).length);
+        
+        console.log('📥 Loading teachers from Firebase...');
+        const teachers = await window.firebaseService.getAllTeachers();
+        console.log('📥 Teachers loaded:', Object.keys(teachers).length);
+        
+        console.log('📥 Loading content from Firebase...');
+        const content = await window.firebaseService.getAllContent();
+        console.log('📥 Content loaded:', Object.keys(content).length);
+        
+        // Process the data
+        if (students && Object.keys(students).length > 0) {
+            sampleData.students = students;
+            console.log('✅ Students synced:', Object.keys(students).length);
+        }
+        
+        if (teachers && Object.keys(teachers).length > 0) {
+            sampleData.teachers = teachers;
+            console.log('✅ Teachers synced:', Object.keys(teachers).length);
+        }
+        
+        if (content && Object.keys(content).length > 0) {
+            sampleData.content = content;
+            console.log('✅ Content synced:', Object.keys(content).length);
+        }
+        
+        // Update UI
+        if (currentUserType === 'admin') {
+            populateStudentsTable();
+            populateTeachersTable();
+        } else if (currentUserType === 'teacher') {
+            populateTeacherStudents();
+        }
+        
+        hideLoading();
+        
+        const totalStudents = Object.keys(sampleData.students).length;
+        const totalTeachers = Object.keys(sampleData.teachers).length;
+        
+        alert(`✅ Sync complete!\n\nStudents: ${totalStudents}\nTeachers: ${totalTeachers}\n\nData loaded from Firebase successfully.`);
+        
+        console.log('✅ Force sync completed successfully');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error during force sync:', error);
+        hideLoading();
+        alert('❌ Error syncing data from Firebase. Please check console for details.');
+        return false;
+    }
+}
+
 // Force Firebase authentication and retry sync
 async function forceFirebaseAuthAndSync() {
     console.log('🔐 Forcing Firebase authentication and sync...');
@@ -8319,6 +8393,14 @@ async function clearFirebaseDatabase() {
         }
     }
 }
+
+// Assign Firebase functions to window object at the end
+window.forceSyncFromFirebase = forceSyncFromFirebase;
+window.forceSyncFromFirebaseDetailed = forceSyncFromFirebaseDetailed;
+window.forceSyncToFirebase = forceSyncToFirebase;
+window.clearFirebaseDatabase = clearFirebaseDatabase;
+window.debugFirebaseData = debugFirebaseData;
+window.forceFirebaseAuthAndSync = forceFirebaseAuthAndSync;
 
 // Helper function to control options button visibility based on user type
 function updateOptionsButtonVisibility() {

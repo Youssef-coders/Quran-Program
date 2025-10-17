@@ -38,13 +38,8 @@ class FirebaseService {
                 this.db = firebase.firestore(app);
                 this.auth = firebase.auth(app);
                 
-                // Try to authenticate anonymously to bypass permission issues
-                try {
-                    await this.auth.signInAnonymously();
-                    console.log('✅ Firebase authenticated anonymously');
-                } catch (authError) {
-                    console.warn('⚠️ Anonymous auth failed, trying without auth:', authError);
-                }
+                // Skip authentication for now - will rely on Firebase rules
+                console.log('✅ Firebase initialized without authentication');
                 
                 this.initialized = true;
                 // Firebase initialized successfully
