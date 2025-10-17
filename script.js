@@ -8080,8 +8080,7 @@ async function forceSyncFromFirebase() {
         
         // Update UI
         if (currentUserType === 'admin') {
-            populateStudentsTable();
-            populateTeachersTable();
+            showAdminDashboard();
         } else if (currentUserType === 'teacher') {
             populateTeacherStudents();
         }
@@ -8205,6 +8204,25 @@ async function debugFirebaseData() {
             try {
                 const snapshot = await window.firebaseService.db.collection(collectionName).get();
                 console.log(`Collection '${collectionName}': ${snapshot.size} documents`);
+                
+                // If teachers collection is empty, check for alternative names
+                if (collectionName === 'teachers' && snapshot.size === 0) {
+                    console.log('🔍 Checking for alternative teacher collection names...');
+                    const altNames = ['teacher', 'Teacher', 'TEACHERS', 'instructors', 'staff'];
+                    for (const altName of altNames) {
+                        try {
+                            const altSnapshot = await window.firebaseService.db.collection(altName).get();
+                            if (altSnapshot.size > 0) {
+                                console.log(`Found teachers in collection '${altName}': ${altSnapshot.size} documents`);
+                                altSnapshot.forEach(doc => {
+                                    console.log(`  - ${doc.id}:`, doc.data());
+                                });
+                            }
+                        } catch (error) {
+                            // Collection doesn't exist, continue
+                        }
+                    }
+                }
             } catch (error) {
                 console.log(`Collection '${collectionName}': Error - ${error.message}`);
             }
@@ -8302,8 +8320,7 @@ async function forceSyncFromFirebaseDetailed() {
         
         // Update UI
         if (currentUserType === 'admin') {
-            populateStudentsTable();
-            populateTeachersTable();
+            showAdminDashboard();
         } else if (currentUserType === 'teacher') {
             populateTeacherStudents();
         }
