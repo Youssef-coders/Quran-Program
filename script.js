@@ -3265,6 +3265,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     });
     
+    // Initial point recalculation to fix old data
+    setTimeout(() => {
+        recalculateAllPoints();
+    }, 2000);
+    
     setupEventListeners();
     
     // Test: Add a simple click handler to see if events work at all
@@ -4151,6 +4156,21 @@ function deleteSession(index) {
         // Store session for undo before deleting
         const deletedSession = sampleData.content[targetUser].sessions[index];
         
+        // Calculate points to deduct from this session
+        if (deletedSession && deletedSession.score && sampleData.students[targetUser]) {
+            const sessionScore = parseInt(deletedSession.score);
+            const pointsToDeduct = calculatePointsFromScore(sessionScore);
+            
+            // Deduct points from student
+            if (sampleData.students[targetUser].points && sampleData.students[targetUser].points >= pointsToDeduct) {
+                sampleData.students[targetUser].points -= pointsToDeduct;
+                console.log(`Removed ${pointsToDeduct} points from ${targetUser}. New total: ${sampleData.students[targetUser].points}`);
+            } else {
+                console.log(`Points already at 0 for ${targetUser}`);
+                sampleData.students[targetUser].points = 0;
+            }
+        }
+        
         // Add to undo history
         addToHistory({
             type: 'delete_session',
@@ -4161,6 +4181,9 @@ function deleteSession(index) {
         
         sampleData.content[targetUser].sessions.splice(index, 1);
         loadStudentContent();
+        
+        // Update leaderboard
+        updateLeaderboard();
         
         // Update localStorage to persist changes
         saveAllDataToStorage();
@@ -6380,6 +6403,80 @@ function refreshStudentData() {
     }
 }
 
+// Show student list
+function showStudentList() {
+    // Get all students
+    const students = Object.values(sampleData.students);
+    
+    if (students.length === 0) {
+        alert('No students found in the system.');
+        return;
+    }
+    
+    // Sort students by class
+    students.sort((a, b) => {
+        // Sort by class (e.g., "6Ba1" comes before "6Ba2")
+        if (a.class && b.class) {
+            return a.class.localeCompare(b.class);
+        }
+        return a.name.localeCompare(b.name);
+    });
+    
+    // Create list HTML
+    let studentListHTML = '<div class="student-list-container" style="padding: 20px; max-width: 1200px; margin: 0 auto;">';
+    studentListHTML += '<h2 style="margin-bottom: 20px; color: #1976d2;">All Students List</h2>';
+    studentListHTML += '<div style="margin-bottom: 15px;"><strong>Total Students: ' + students.length + '</strong></div>';
+    
+    // Group by class
+    const studentsByClass = {};
+    students.forEach(student => {
+        const className = student.class || 'Unassigned';
+        if (!studentsByClass[className]) {
+            studentsByClass[className] = [];
+        }
+        studentsByClass[className].push(student);
+    });
+    
+    // Create table
+    studentListHTML += '<table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+    studentListHTML += '<thead><tr style="background: #1976d2; color: white;">';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">#</th>';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Student Name</th>';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Class</th>';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Teacher</th>';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Student ID</th>';
+    studentListHTML += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Points</th>';
+    studentListHTML += '</tr></thead><tbody>';
+    
+    let rowNumber = 1;
+    Object.keys(studentsByClass).sort().forEach(className => {
+        studentsByClass[className].forEach(student => {
+            studentListHTML += '<tr style="border-bottom: 1px solid #ddd;">';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd;">' + rowNumber + '</td>';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd;"><strong>' + (student.name || 'N/A') + '</strong></td>';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd;">' + (className || 'N/A') + '</td>';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd;">' + (student.teacher || 'Unassigned') + '</td>';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd; font-family: monospace;">' + student.id + '</td>';
+            studentListHTML += '<td style="padding: 10px; border: 1px solid #ddd;"><strong style="color: #1976d2;">' + (student.points || 0) + '</strong></td>';
+            studentListHTML += '</tr>';
+            rowNumber++;
+        });
+    });
+    
+    studentListHTML += '</tbody></table>';
+    studentListHTML += '<button onclick="showAdminDashboard()" style="margin-top: 20px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer;">Back to Admin Dashboard</button>';
+    studentListHTML += '</div>';
+    
+    // Show in modal or replace content
+    const mainContent = document.querySelector('.admin-dashboard') || document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.innerHTML = studentListHTML;
+    } else {
+        // Fallback: create a modal
+        alert('Student list feature requires admin dashboard to be loaded.');
+    }
+}
+
 // Show admin dashboard
 function showAdminDashboard() {
     // Store original content for restoration
@@ -6429,6 +6526,13 @@ function showAdminDashboard() {
                 <button class="admin-btn" onclick="showDeleteTeacherModal()" style="background: #fff3e0; border-color: #ff9800; color: #e65100;">
                     <span class="icon">👨‍🏫🗑️</span>
                     ${getTranslation('admin.delete_teacher')}
+                </button>
+            </div>
+            
+            <div class="admin-actions" style="margin-top: 20px;">
+                <button class="admin-btn" onclick="showStudentList()" style="background: #e3f2fd; border-color: #2196f3; color: #1976d2;">
+                    <span class="icon">📋</span>
+                    View All Students List
                 </button>
             </div>
             
@@ -6888,11 +6992,70 @@ function handleAccountTypeChange() {
     }
 }
 
-// Calculate points based on score
-function calculatePointsFromScore(score) {
-    if (score === 10) return 5;
-    if (score === 9) return 2;
-    return 0; // No points for scores below 9
+// Recalculate all student points based on their actual sessions
+function recalculateAllPoints() {
+    console.log('🔄 Recalculating all student points...');
+    
+    let totalRecalculated = 0;
+    
+    Object.keys(sampleData.students).forEach(studentId => {
+        const student = sampleData.students[studentId];
+        let calculatedPoints = 0;
+        
+        // Check if student has content and sessions
+        if (sampleData.content[studentId] && sampleData.content[studentId].sessions) {
+            sampleData.content[studentId].sessions.forEach(session => {
+                if (session.score) {
+                    const sessionScore = parseInt(session.score);
+                    const points = calculatePointsFromScore(sessionScore);
+                    calculatedPoints += points;
+                }
+            });
+        }
+        
+        // Update student points
+        const oldPoints = student.points || 0;
+        student.points = calculatedPoints;
+        
+        if (oldPoints !== calculatedPoints) {
+            console.log(`📊 ${student.name}: ${oldPoints} → ${calculatedPoints} points`);
+            totalRecalculated++;
+        }
+    });
+    
+    console.log(`✅ Recalculated points for ${totalRecalculated} students`);
+    
+    // Update leaderboard
+    updateLeaderboard();
+    
+    // Save to storage
+    saveAllDataToStorage();
+}
+
+// Calculate points based on score and maxScore (New system)
+function calculatePointsFromScore(score, maxScore) {
+    // Handle different scoring systems based on maxScore
+    if (maxScore === 6) {
+        // Scoring out of 6: 5-6 = 5pts, 3-4 = 3pts, 1-2 = 1pt
+        if (score >= 5) return 5;
+        if (score >= 3) return 3;
+        return 1;
+    } else if (maxScore === 8) {
+        // Scoring out of 8: 7-8 = 5pts, 5-6 = 3pts, 1-4 = 1pt
+        if (score >= 7) return 5;
+        if (score >= 5) return 3;
+        return 1;
+    } else if (maxScore === 10) {
+        // Scoring out of 10: 9-10 = 5pts, 7-8 = 3pts, 1-6 = 1pt
+        if (score >= 9) return 5;
+        if (score >= 7) return 3;
+        return 1;
+    }
+    
+    // Fallback for old system compatibility
+    if (score >= 9) return 5;
+    if (score >= 7) return 3;
+    return 1;
 }
 
 // Generate and display leaderboard
@@ -7999,6 +8162,7 @@ window.deleteSession = deleteSession;
 window.showCreateAccountModal = showCreateAccountModal;
 window.handleCreateAccount = handleCreateAccount;
 window.showAssignStudentsModal = showAssignStudentsModal;
+window.showStudentList = showStudentList;
 window.loadUnassignedStudents = loadUnassignedStudents;
 window.assignStudentToTeacher = assignStudentToTeacher;
 window.removeStudentAssignment = removeStudentAssignment;
@@ -8450,6 +8614,11 @@ function syncLeaderboardData() {
     console.log('✅ Leaderboard synced successfully');
 }
 
+// Set up automatic point recalculation every 10 seconds
+setInterval(() => {
+    recalculateAllPoints();
+}, 10000); // Recalculate every 10 seconds
+
 // Assign Firebase functions to window object at the end
 window.forceSyncFromFirebase = forceSyncFromFirebase;
 window.forceSyncFromFirebaseDetailed = forceSyncFromFirebaseDetailed;
@@ -8458,6 +8627,7 @@ window.clearFirebaseDatabase = clearFirebaseDatabase;
 window.debugFirebaseData = debugFirebaseData;
 window.forceFirebaseAuthAndSync = forceFirebaseAuthAndSync;
 window.syncLeaderboardData = syncLeaderboardData;
+window.recalculateAllPoints = recalculateAllPoints;
 
 // Helper function to control options button visibility based on user type
 function updateOptionsButtonVisibility() {
